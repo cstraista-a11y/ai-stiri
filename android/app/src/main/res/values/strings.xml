@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">GATA</string>
-    <string name="title_activity_main">GATA</string>
-    <string name="package_name">md.gata.app</string>
-    <string name="custom_url_scheme">md.gata.app</string>
-</resources>
