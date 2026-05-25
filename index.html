@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Ai Știri</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -484,6 +485,36 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
   </div>
 </div>
 
+<!-- ═══════════ AUTH ═══════════ -->
+<div id="auth-screen" style="display:none;min-height:100vh;background:white;max-width:480px;margin:0 auto;display:none;flex-direction:column;">
+  <div style="background:linear-gradient(160deg,#0d1b2a,#1a3a5c);padding:60px 28px 40px;text-align:center;">
+    <div style="font-size:40px;font-weight:800;color:white;letter-spacing:-2px;">Ai <em style='color:#007aff;font-style:normal;'>Știri</em></div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.6);margin-top:8px;">Știri personalizate pentru tine</div>
+  </div>
+  <div style="padding:32px 24px;">
+    <div id="auth-mode-login">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:6px;">Bun venit!</h2>
+      <p style="font-size:14px;color:#8e8e93;margin-bottom:24px;">Intră în cont pentru a-ți salva preferințele pe orice dispozitiv.</p>
+      <input id="auth-email" type="email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:12px;outline:none;">
+      <input id="auth-pass" type="password" placeholder="Parolă" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:16px;outline:none;">
+      <div id="auth-err" style="font-size:13px;color:#ff3b30;margin-bottom:10px;display:none;"></div>
+      <button onclick="doLogin()" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Intră în cont</button>
+      <button onclick="showRegister()" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Creează cont nou</button>
+      <button onclick="skipAuth()" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
+    </div>
+    <div id="auth-mode-register" style="display:none;">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:6px;">Cont nou</h2>
+      <p style="font-size:14px;color:#8e8e93;margin-bottom:24px;">Creează un cont pentru a-ți salva preferințele.</p>
+      <input id="auth-email2" type="email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:12px;outline:none;">
+      <input id="auth-pass2" type="password" placeholder="Parolă (min. 6 caractere)" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:16px;outline:none;">
+      <div id="auth-err2" style="font-size:13px;color:#ff3b30;margin-bottom:10px;display:none;"></div>
+      <button onclick="doRegister()" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Creează cont</button>
+      <button onclick="showLogin()" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Am deja cont</button>
+      <button onclick="skipAuth()" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ APP ═══════════ -->
 <div id="app">
   <div class="app-header">
@@ -627,6 +658,12 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 
 <script>
 const RSS_PROXY = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://ai-stiri.onrender.com';
+
+// Supabase
+const SUPA_URL = 'https://pdjigbowhllyjlehegoa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkamlnYm93aGxseWpsZWhlZ29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MzU0NzksImV4cCI6MjA5NTMxMTQ3OX0.FslDt9ftvAe0a_RwfbKXejMAB647zsk2OZSmqKzwlcA';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
 const EMOJIS = ['❤️','😮','😂','😡','😢'];
 
 const SOURCES = [
@@ -770,6 +807,7 @@ function launch() {
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   renderSources(); renderInts(); renderAlerts();
+  await saveUserProfile(); // Salvăm profilul în Supabase
   startLive();
 }
 
@@ -1404,8 +1442,115 @@ async function startLive() {
   liveTimer = setInterval(livePoll, 3 * 60 * 1000);
 }
 
+// ── AUTH ──────────────────────────────────────────────────
+function showAuthScreen() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+function showLogin() {
+  document.getElementById('auth-mode-login').style.display = 'block';
+  document.getElementById('auth-mode-register').style.display = 'none';
+}
+function showRegister() {
+  document.getElementById('auth-mode-login').style.display = 'none';
+  document.getElementById('auth-mode-register').style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-err');
+  errEl.style.display = 'none';
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+  if (error) { errEl.textContent = 'Email sau parolă incorectă.'; errEl.style.display = 'block'; return; }
+  currentUser = data.user;
+  await loadUserProfile();
+}
+
+async function doRegister() {
+  const email = document.getElementById('auth-email2').value.trim();
+  const pass = document.getElementById('auth-pass2').value;
+  const errEl = document.getElementById('auth-err2');
+  errEl.style.display = 'none';
+  if (pass.length < 6) { errEl.textContent = 'Parola trebuie să aibă cel puțin 6 caractere.'; errEl.style.display = 'block'; return; }
+  const { data, error } = await supa.auth.signUp({ email, password: pass });
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+  currentUser = data.user;
+  // Cont nou — arătăm quiz-ul
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('quiz').style.display = 'flex';
+  loadQuizPreview();
+}
+
+function skipAuth() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('quiz').style.display = 'flex';
+  loadQuizPreview();
+}
+
+async function loadUserProfile() {
+  if (!currentUser) return;
+  const { data } = await supa.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data) {
+    // Utilizator existent — încărcăm profilul și sărim quizul
+    profile = { age: data.age||28, sex: data.sex||'masculin', edu: data.edu||'facultate', zone: data.zone||'Moldova', mood: data.mood||'ok' };
+    if (data.interests) {
+      const ints = data.interests;
+      INTERESTS.forEach(i => { i.on = ints.includes(i.id); });
+    }
+    if (data.api_key) apiKey = data.api_key;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('s-age').value = profile.age;
+    document.getElementById('s-age-v').textContent = profile.age + ' ani';
+    document.getElementById('s-edu').value = profile.edu;
+    document.getElementById('s-zone').value = profile.zone;
+    document.getElementById('s-sex').value = profile.sex;
+    syncChips();
+    document.getElementById('app').style.display = 'block';
+    renderSources(); renderInts(); renderAlerts();
+    startLive();
+  } else {
+    // Utilizator nou — arătăm quizul
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('quiz').style.display = 'flex';
+    loadQuizPreview();
+  }
+}
+
+async function saveUserProfile() {
+  if (!currentUser) return;
+  const activeInts = INTERESTS.filter(i => i.on).map(i => i.id);
+  await supa.from('profiles').upsert({
+    id: currentUser.id,
+    age: profile.age, sex: profile.sex, edu: profile.edu,
+    zone: profile.zone, mood: profile.mood,
+    interests: activeInts, api_key: apiKey
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────
+async function init() {
+  loadQuizPreview();
+  // Verificăm dacă utilizatorul e deja logat
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadUserProfile();
+  } else {
+    showAuthScreen();
+  }
+  // Ascultăm schimbările de auth
+  supa.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+    }
+  });
+}
+
 // Start
-loadQuizPreview();
+init();
 </script>
 </body>
 </html>
