@@ -626,7 +626,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 </div>
 
 <script>
-const RSS_PROXY = 'http://localhost:3000';
+const RSS_PROXY = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://ai-stiri.onrender.com';
 const EMOJIS = ['❤️','😮','😂','😡','😢'];
 
 const SOURCES = [
