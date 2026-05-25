@@ -1503,13 +1503,22 @@ async function loadUserProfile() {
   if (!currentUser) return;
   const { data } = await supa.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) {
-    // Utilizator existent — încărcăm profilul și sărim quizul
     profile = { age: data.age||28, sex: data.sex||'masculin', edu: data.edu||'facultate', zone: data.zone||'Moldova', mood: data.mood||'ok' };
-    if (data.interests) {
-      const ints = data.interests;
-      INTERESTS.forEach(i => { i.on = ints.includes(i.id); });
-    }
+    if (data.interests) INTERESTS.forEach(i => { i.on = data.interests.includes(i.id); });
     if (data.api_key) apiKey = data.api_key;
+
+    // Încărcăm articolele salvate
+    try {
+      const { data: saved } = await supa.from('saved_articles').select('article_id').eq('user_id', currentUser.id);
+      if (saved) saved.forEach(s => favs.add(s.article_id));
+    } catch(e) { console.warn('Load saved error:', e); }
+
+    // Încărcăm like-urile
+    try {
+      const { data: likedData } = await supa.from('reactions').select('article_id').eq('user_id', currentUser.id).eq('emoji', '👍');
+      if (likedData) likedData.forEach(r => likes.add(r.article_id));
+    } catch(e) { console.warn('Load likes error:', e); }
+
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'none';
     document.getElementById('s-age').value = profile.age;
@@ -1522,7 +1531,6 @@ async function loadUserProfile() {
     renderSources(); renderInts(); renderAlerts();
     startLive();
   } else {
-    // Utilizator nou — arătăm quizul
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'flex';
     loadQuizPreview();
