@@ -1,0 +1,11 @@
+{
+  "appId": "md.aistiri.app",
+  "appName": "Ai Știri",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

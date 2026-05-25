@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ai Știri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── QUIZ ─────────────────────────────────── */
+#quiz {
+  min-height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.q-hero {
+  background: linear-gradient(160deg, #0d1b2a, #1a3a5c);
+  padding: 50px 28px 28px;
+}
+.q-logo { font-size: 40px; font-weight: 800; color: white; letter-spacing: -2px; }
+.q-logo em { color: #007aff; font-style: normal; }
+.q-tag { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+.q-bar { height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 20px; }
+.q-fill { height: 100%; background: #007aff; border-radius: 2px; transition: width 0.4s; }
+
+.q-body { flex: 1; padding: 28px 24px 10px; overflow-y: auto; }
+.q-step { display: none; }
+.q-step.on { display: block; }
+.q-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.q-sub { font-size: 14px; color: #8e8e93; margin-bottom: 24px; line-height: 1.5; }
+
+.q-opts { display: flex; flex-direction: column; gap: 10px; }
+.q-opt {
+  padding: 14px 16px;
+  border: 2px solid #e5e5ea;
+  border-radius: 14px;
+  background: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1c1c1e;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: inherit;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+.q-opt:hover { border-color: #007aff; }
+.q-opt.on { border-color: #007aff; background: #e8f0fb; color: #007aff; }
+.q-opt .qi { font-size: 24px; flex-shrink: 0; }
+
+.q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.q-grid .q-opt { flex-direction: column; align-items: flex-start; gap: 6px; }
+.q-grid .q-opt .qi { font-size: 28px; }
+
+.q-range-val { font-size: 52px; font-weight: 800; color: #007aff; text-align: center; margin: 16px 0 8px; }
+.q-range { width: 100%; accent-color: #007aff; margin: 8px 0; height: 6px; }
+
+.q-emojis { display: flex; justify-content: space-around; margin: 24px 0; }
+.q-emoji { font-size: 40px; padding: 10px; border-radius: 16px; border: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+.q-emoji.on { border-color: #007aff; background: #e8f0fb; transform: scale(1.2); }
+
+.q-summary { background: #e8f0fb; border-radius: 14px; padding: 18px; font-size: 14px; color: #48484a; line-height: 2; margin-top: 8px; }
+
+/* Quiz news preview */
+.q-news-section { margin-top: 24px; }
+.q-news-label { font-size: 13px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.q-news-card { background: #f8f8f8; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; border: 1px solid #e5e5ea; }
+.q-news-meta { font-size: 11px; color: #8e8e93; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.q-news-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: #1c1c1e; }
+
+.q-footer { padding: 16px 24px 28px; display: flex; gap: 10px; }
+.q-back {
+  flex: 1; padding: 14px;
+  border: 2px solid #e5e5ea; border-radius: 14px;
+  background: none; font-size: 16px; font-weight: 600;
+  color: #8e8e93; cursor: pointer; font-family: inherit;
+}
+.q-next {
+  flex: 2; padding: 14px;
+  border: none; border-radius: 14px;
+  background: #007aff; font-size: 16px; font-weight: 700;
+  color: white; cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 16px rgba(0,122,255,0.35);
+}
+
+/* ─── APP ───────────────────────────────────── */
+#app {
+  display: none;
+  max-width: 480px;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  background: white;
+  border-bottom: 1px solid #e5e5ea;
+  padding: env(safe-area-inset-top, 16px) 18px 12px;
+  padding-top: max(env(safe-area-inset-top, 0px), 16px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.app-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.app-logo-a { color: #007aff; }
+.app-hbtn {
+  background: #e8f0fb; border: none; border-radius: 50%;
+  width: 34px; height: 34px; cursor: pointer; font-size: 16px; color: #007aff;
+}
+.app-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.app-chips::-webkit-scrollbar { display: none; }
+.app-chip {
+  font-size: 12px; font-weight: 600; padding: 4px 10px;
+  border-radius: 20px; background: #e8f0fb; color: #007aff;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Cats */
+.app-cats {
+  background: white;
+  border-bottom: 1px solid #e5e5ea;
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 80px;
+  z-index: 99;
+}
+.app-cats::-webkit-scrollbar { display: none; }
+.app-cat {
+  font-size: 13px; font-weight: 600;
+  padding: 6px 16px; border-radius: 20px; border: none;
+  background: #f2f2f7; color: #8e8e93;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  transition: all 0.2s;
+}
+.app-cat.on { background: #007aff; color: white; }
+
+/* Status */
+.app-status {
+  padding: 8px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: #8e8e93;
+  background: white;
+  border-bottom: 1px solid #f2f2f7;
+}
+.app-live { color: #34c759; font-weight: 700; display: none; }
+.app-refresh {
+  font-size: 13px; font-weight: 700; color: #007aff;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+}
+
+/* New pill */
+.app-newpill {
+  display: none;
+  margin: 10px auto 0;
+  padding: 8px 20px;
+  background: #007aff; color: white;
+  border: none; border-radius: 20px;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+}
+
+/* Banners */
+.app-banner {
+  margin: 8px 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+.app-banner.info { background: #e8f0fb; color: #007aff; }
+.app-banner.err { background: #ffeaea; color: #ff3b30; }
+.app-banner.warn { background: #fff3e0; color: #ff9500; }
+
+/* Screens */
+.app-screen { display: none; }
+.app-screen.on { display: block; }
+
+/* Feed */
+.app-feed { padding: 12px 16px 90px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ─── CARDS ─────────────────────────────────── */
+.news-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5e5ea;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: visible;
+}
+.news-card.liked { border-left: 4px solid #34c759; }
+.news-card.disliked { opacity: 0.35; }
+
+.nc-top { padding: 14px 14px 12px; }
+.nc-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.nc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.nc-source { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.05em; }
+.nc-time { font-size: 11px; color: #8e8e93; }
+.nc-sep { width: 3px; height: 3px; border-radius: 50%; background: #d1d1d6; }
+.nc-cat {
+  margin-left: auto;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+}
+.nc-cat-act { background: #e8f0fb; color: #007aff; }
+.nc-cat-biz { background: #e6f9ee; color: #1a8a3a; }
+.nc-cat-san { background: #f3eeff; color: #7c3aed; }
+.nc-cat-teh { background: #e0f5ff; color: #0077aa; }
+.nc-cat-spt { background: #fff4e0; color: #c05000; }
+.nc-cat-int { background: #ffeaea; color: #cc2200; }
+.nc-rec { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: linear-gradient(135deg,#ff9500,#ff6000); color: white; }
+
+.nc-title { font-size: 16px; font-weight: 700; line-height: 1.35; color: #1c1c1e; margin-bottom: 8px; letter-spacing: -0.2px; }
+.nc-lead { font-size: 13px; color: #48484a; line-height: 1.65; }
+
+/* Divider */
+.nc-div { height: 1px; background: #f2f2f7; }
+
+/* Actions */
+.nc-actions { padding: 10px 14px; display: flex; align-items: center; gap: 6px; }
+.nc-btn {
+  font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; border: none;
+  background: #f2f2f7; color: #8e8e93;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.15s;
+}
+.nc-btn:hover { background: #e5e5ea; }
+.nc-btn.liked { background: #e6f9ee; color: #1a8a3a; }
+.nc-btn.saved { background: #e8f0fb; color: #007aff; }
+.nc-btn.disliked { background: #ffeaea; color: #cc2200; }
+.nc-btn.cmt-on { background: #e8f0fb; color: #007aff; }
+.nc-share { margin-left: auto; background: none; border: none; font-size: 22px; cursor: pointer; color: #8e8e93; padding: 4px; line-height: 1; }
+
+/* Reactions */
+.nc-reacts { padding: 8px 14px; display: flex; align-items: center; gap: 6px; border-top: 1px solid #f2f2f7; flex-wrap: wrap; }
+.nc-react {
+  font-size: 18px; padding: 5px 10px;
+  border-radius: 20px; border: 1px solid #e5e5ea;
+  background: white; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.15s;
+}
+.nc-react:hover { background: #f2f2f7; }
+.nc-react.on { background: #e8f0fb; border-color: #007aff; }
+.nc-react-cnt { font-size: 12px; font-weight: 700; color: #8e8e93; }
+
+/* Comments */
+.nc-cmts { display: none; padding: 12px 14px; border-top: 1px solid #f2f2f7; }
+.nc-cmts.on { display: block; }
+.nc-cmt-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.nc-cmt-input {
+  flex: 1; font-size: 14px; padding: 9px 14px;
+  border: 1.5px solid #e5e5ea; border-radius: 22px;
+  background: #f8f8f8; font-family: inherit; color: #1c1c1e;
+  outline: none;
+}
+.nc-cmt-input:focus { border-color: #007aff; background: white; }
+.nc-cmt-send {
+  padding: 9px 16px; background: #007aff; color: white;
+  border: none; border-radius: 22px; font-size: 14px;
+  font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.nc-cmt-item { display: flex; gap: 10px; margin-bottom: 10px; }
+.nc-cmt-av {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #e8f0fb; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 700;
+  color: #007aff; flex-shrink: 0;
+}
+.nc-cmt-name { font-size: 13px; font-weight: 700; color: #1c1c1e; }
+.nc-cmt-time { font-size: 11px; color: #8e8e93; margin-left: 5px; }
+.nc-cmt-text { font-size: 13px; color: #48484a; line-height: 1.45; margin-top: 2px; }
+.nc-no-cmts { font-size: 13px; color: #8e8e93; padding: 4px 0; }
+
+/* Expand */
+.nc-expand-btn {
+  width: 100%; padding: 10px 14px;
+  background: none; border: none; border-top: 1px solid #f2f2f7;
+  font-size: 13px; font-weight: 600; color: #007aff;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 5px;
+  text-align: left;
+}
+.nc-expand-body { display: none; padding: 12px 14px; border-top: 1px solid #f2f2f7; background: #fafafa; }
+.nc-expand-body.on { display: block; }
+.nc-full-text { font-size: 13px; color: #48484a; line-height: 1.75; margin-bottom: 12px; }
+.nc-src-link { font-size: 13px; font-weight: 700; color: #007aff; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.nc-read-link { display: block; padding: 10px 14px; border-top: 1px solid #f2f2f7; font-size: 13px; font-weight: 700; color: #007aff; text-decoration: none; }
+
+/* Imaginea articolului */
+.nc-img-wrap { width: 100%; overflow: hidden; border-radius: 14px 14px 0 0; max-height: 200px; background: #f2f2f7; }
+.nc-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; }
+.nc-img:hover { transform: scale(1.02); }
+
+/* Badge tradus din rusă */
+.nc-translated { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: #fff3e0; color: #c07000; border: 1px solid rgba(192,112,0,0.2); }
+
+/* Skeleton */
+.nc-skeleton { background: white; border-radius: 16px; border: 1px solid #e5e5ea; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.sk { border-radius: 6px; background: linear-gradient(90deg, #f0f0f0 25%, #e5e5e5 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Empty */
+.nc-empty { text-align: center; padding: 60px 20px; }
+.nc-empty-icon { font-size: 52px; margin-bottom: 12px; }
+.nc-empty-title { font-size: 18px; font-weight: 700; color: #48484a; margin-bottom: 6px; }
+.nc-empty-sub { font-size: 14px; color: #8e8e93; line-height: 1.5; }
+
+/* ─── SETTINGS ──────────────────────────────── */
+.app-scr-title { font-size: 24px; font-weight: 800; padding: 20px 18px 12px; }
+.app-s-scroll { padding-bottom: 90px; }
+.app-s-label { font-size: 12px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 18px 8px; }
+.app-s-group { margin: 0 14px 18px; background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e5e5ea; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.app-s-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid #f2f2f7; }
+.app-s-row:last-child { border-bottom: none; }
+.app-s-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.app-s-info { flex: 1; }
+.app-s-name { font-size: 15px; font-weight: 600; }
+.app-s-sub { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+.app-toggle { width: 51px; height: 31px; border-radius: 16px; border: none; cursor: pointer; position: relative; transition: background 0.25s; flex-shrink: 0; }
+.app-toggle.on { background: #34c759; }
+.app-toggle.off { background: rgba(120,120,128,0.2); }
+.app-toggle::after { content: ''; position: absolute; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: left 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.app-toggle.on::after { left: 22px; }
+.app-toggle.off::after { left: 2px; }
+select { font-size: 14px; font-weight: 600; color: #007aff; border: none; background: none; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+.app-int-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 18px; }
+.app-int-chip { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 20px; border: 2px solid #e5e5ea; background: white; color: #8e8e93; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+.app-int-chip.on { background: #007aff; color: white; border-color: #007aff; }
+.app-api-box { margin: 0 14px 18px; padding: 16px; background: #fff8e8; border-radius: 16px; border: 1px solid rgba(255,149,0,0.3); }
+.app-api-box p { font-size: 13px; color: #c07000; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
+.app-api-inp { width: 100%; font-size: 14px; padding: 10px 14px; border: 1.5px solid rgba(255,149,0,0.3); border-radius: 10px; background: white; font-family: inherit; margin-bottom: 10px; color: #1c1c1e; }
+.app-api-save { font-size: 14px; font-weight: 700; padding: 10px 18px; background: #ff9500; color: white; border: none; border-radius: 10px; cursor: pointer; font-family: inherit; }
+
+/* ─── BOTTOM NAV ─────────────────────────────── */
+.app-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid #e5e5ea;
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.app-nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px 12px; font-size: 10px; font-weight: 600; color: #8e8e93; border: none; background: transparent; cursor: pointer; font-family: inherit; gap: 3px; transition: color 0.15s; }
+.app-nav-tab .ni { font-size: 24px; }
+.app-nav-tab.on { color: #007aff; }
+
+/* ─── SHARE MODAL ────────────────────────────── */
+.share-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.5); display: none; align-items: flex-end; justify-content: center; }
+.share-overlay.on { display: flex; }
+.share-sheet { background: white; border-radius: 24px 24px 0 0; padding: 16px 20px 32px; width: 100%; max-width: 480px; }
+.share-handle { width: 36px; height: 4px; background: #e5e5ea; border-radius: 2px; margin: 0 auto 16px; }
+.share-label { font-size: 12px; font-weight: 700; color: #8e8e93; text-align: center; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+.share-preview { font-size: 14px; font-weight: 600; color: #1c1c1e; padding: 12px 14px; background: #f8f8f8; border-radius: 12px; margin-bottom: 16px; line-height: 1.4; }
+.share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.share-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.share-item:active { opacity: 0.7; }
+.share-icon { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.share-lbl { font-size: 11px; font-weight: 600; color: #8e8e93; }
+.share-copy { width: 100%; padding: 14px; background: #007aff; color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
+.share-close { width: 100%; padding: 14px; background: #f2f2f7; border: none; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; color: #1c1c1e; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ QUIZ ═══════════ -->
+<div id="quiz">
+  <div class="q-hero">
+    <div class="q-logo">Ai <em>Știri</em></div>
+    <div class="q-tag">Știri personalizate pentru tine.</div>
+    <div class="q-bar"><div class="q-fill" id="qfill" style="width:0%"></div></div>
+  </div>
+
+  <div class="q-body">
+    <!-- Step 0 -->
+    <div class="q-step on" id="qs0">
+      <div class="q-title">Bun venit! 👋</div>
+      <div class="q-sub">Răspunde la câteva întrebări și GATA îți va livra știrile perfect adaptate — titluri și texte rescrise pentru tine.</div>
+      <div class="q-opts"><div class="q-opt on"><span class="qi">🚀</span>Să începem!</div></div>
+      <div class="q-news-section">
+        <div class="q-news-label">📰 Ultimele știri</div>
+        <div id="qpreview"><div style="font-size:13px;color:#8e8e93;padding:8px 0;">Se încarcă...</div></div>
+      </div>
+    </div>
+    <!-- Step 1 -->
+    <div class="q-step" id="qs1">
+      <div class="q-title">Ești...?</div>
+      <div class="q-sub">Adaptăm subiectele și tonul.</div>
+      <div class="q-opts">
+        <div class="q-opt" data-v="masculin"><span class="qi">👨</span>Bărbat</div>
+        <div class="q-opt" data-v="feminin"><span class="qi">👩</span>Femeie</div>
+        <div class="q-opt" data-v="alt"><span class="qi">🧑</span>Prefer să nu specific</div>
+      </div>
+    </div>
+    <!-- Step 2 -->
+    <div class="q-step" id="qs2">
+      <div class="q-title">Câți ani ai?</div>
+      <div class="q-sub">Limbajul și subiectele se adaptează vârstei tale.</div>
+      <div class="q-range-val" id="qage-val">28</div>
+      <input class="q-range" type="range" min="16" max="80" value="28" id="qage" oninput="document.getElementById('qage-val').textContent=this.value">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#8e8e93;margin-top:4px;"><span>16 ani</span><span>80+ ani</span></div>
+    </div>
+    <!-- Step 3 -->
+    <div class="q-step" id="qs3">
+      <div class="q-title">Nivelul tău de studii?</div>
+      <div class="q-sub">Ajustăm complexitatea și vocabularul textelor.</div>
+      <div class="q-opts">
+        <div class="q-opt" data-v="liceu"><span class="qi">📖</span>Liceu sau mai puțin</div>
+        <div class="q-opt" data-v="medii"><span class="qi">🎓</span>Studii medii / profesionale</div>
+        <div class="q-opt" data-v="facultate"><span class="qi">🏛️</span>Facultate / Universitate</div>
+        <div class="q-opt" data-v="master"><span class="qi">🔬</span>Master / Doctorat</div>
+      </div>
+    </div>
+    <!-- Step 4 -->
+    <div class="q-step" id="qs4">
+      <div class="q-title">De unde ești?</div>
+      <div class="q-sub">Prioritizăm știrile locale și regionale pentru tine.</div>
+      <div class="q-opts">
+        <div class="q-opt" data-v="Moldova"><span class="qi">🇲🇩</span>Moldova</div>
+        <div class="q-opt" data-v="România"><span class="qi">🇷🇴</span>România</div>
+        <div class="q-opt" data-v="Europa"><span class="qi">🇪🇺</span>Europa (altă țară)</div>
+        <div class="q-opt" data-v="Global"><span class="qi">🌍</span>Altă parte a lumii</div>
+      </div>
+    </div>
+    <!-- Step 5 -->
+    <div class="q-step" id="qs5">
+      <div class="q-title">Ce te interesează?</div>
+      <div class="q-sub">Alege oricâte categorii vrei. Algoritmul le va pondera automat.</div>
+      <div class="q-grid" id="qints"></div>
+    </div>
+    <!-- Step 6 -->
+    <div class="q-step" id="qs6">
+      <div class="q-title">Cum te simți azi?</div>
+      <div class="q-sub">Calibrăm tonul știrilor pentru starea ta de azi.</div>
+      <div class="q-emojis">
+        <span class="q-emoji" data-v="fericit" onclick="pickMood(this)">😄</span>
+        <span class="q-emoji" data-v="ok" onclick="pickMood(this)">🙂</span>
+        <span class="q-emoji" data-v="neutru" onclick="pickMood(this)">😐</span>
+        <span class="q-emoji" data-v="obosit" onclick="pickMood(this)">😴</span>
+        <span class="q-emoji" data-v="stresat" onclick="pickMood(this)">😤</span>
+      </div>
+      <p style="font-size:13px;color:#8e8e93;text-align:center;line-height:1.5;">Dacă ești stresat, filtrăm automat știrile cu ton negativ.</p>
+    </div>
+    <!-- Step 7 -->
+    <div class="q-step" id="qs7">
+      <div class="q-title">Profilul tău! 🎉</div>
+      <div class="q-sub">GATA va personaliza fiecare știre pentru tine — titluri, texte, și ordinea sunt adaptate profilului tău.</div>
+      <div class="q-summary" id="qsummary"></div>
+    </div>
+  </div>
+
+  <div class="q-footer">
+    <button class="q-back" id="qback" style="display:none" onclick="qPrev()">← Înapoi</button>
+    <button class="q-next" id="qnext" onclick="qNext()">Continuă →</button>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="app">
+  <div class="app-header">
+    <div class="app-header-top">
+      <div class="app-logo">Ai <span class="app-logo-a">Știri</span></div>
+      <button class="app-hbtn" onclick="goTab('alerts')">🔔</button>
+    </div>
+    <div class="app-chips" id="app-chips"></div>
+  </div>
+
+  <!-- FEED -->
+  <div class="app-screen on" id="scr-feed">
+    <div class="app-cats">
+      <button class="app-cat on" data-cat="toate">Toate</button>
+      <button class="app-cat" data-cat="Actualitate">Actualitate</button>
+      <button class="app-cat" data-cat="Business">Business</button>
+      <button class="app-cat" data-cat="Sănătate">Sănătate</button>
+      <button class="app-cat" data-cat="Tehnologie">Tehnologie</button>
+      <button class="app-cat" data-cat="Sport">Sport</button>
+      <button class="app-cat" data-cat="Internațional">Internațional</button>
+    </div>
+    <div class="app-status">
+      <span id="app-status-txt">Se încarcă...</span>
+      <span class="app-live" id="app-live">● LIVE</span>
+    </div>
+    <div style="text-align:center;">
+      <button class="app-newpill" id="app-newpill" onclick="applyPending()">▲ <span id="app-newcnt">0</span> știri noi</button>
+    </div>
+    <div class="app-banner info" id="bn-info"><span id="bn-info-t"></span></div>
+    <div class="app-banner err"  id="bn-err"><span id="bn-err-t"></span></div>
+    <div class="app-banner warn" id="bn-warn"><span id="bn-warn-t"></span></div>
+    <div class="app-feed" id="main-feed">
+      <div class="nc-skeleton"><div class="sk" style="height:11px;width:45%"></div><div class="sk" style="height:18px;width:95%"></div><div class="sk" style="height:18px;width:80%"></div><div class="sk" style="height:14px;width:65%"></div></div>
+      <div class="nc-skeleton"><div class="sk" style="height:11px;width:50%"></div><div class="sk" style="height:18px;width:90%"></div><div class="sk" style="height:18px;width:75%"></div><div class="sk" style="height:14px;width:70%"></div></div>
+      <div class="nc-skeleton"><div class="sk" style="height:11px;width:40%"></div><div class="sk" style="height:18px;width:98%"></div><div class="sk" style="height:18px;width:85%"></div><div class="sk" style="height:14px;width:60%"></div></div>
+    </div>
+  </div>
+
+  <!-- FAV -->
+  <div class="app-screen" id="scr-fav">
+    <div class="app-scr-title">Salvate</div>
+    <div class="app-feed" id="fav-feed">
+      <div class="nc-empty"><div class="nc-empty-icon">🔖</div><div class="nc-empty-title">Nimic salvat</div><div class="nc-empty-sub">Apasă 🔖 pe orice știre.</div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="app-screen" id="scr-settings">
+    <div class="app-scr-title">Setări</div>
+    <div class="app-s-scroll">
+      <div class="app-s-label">Interesele mele</div>
+      <div class="app-int-grid" id="int-grid"></div>
+      <div class="app-s-label">Surse media</div>
+      <div class="app-s-group" id="src-group"></div>
+      <div class="app-s-label" style="margin-top:4px;">Profilul meu</div>
+      <div class="app-s-group">
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#e8f0fb;">👤</div>
+          <div class="app-s-info"><div class="app-s-name">Vârstă</div></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="range" min="16" max="80" id="s-age" step="1" style="width:80px;accent-color:#007aff;" oninput="document.getElementById('s-age-v').textContent=this.value+' ani';syncChips()">
+            <span id="s-age-v" style="font-size:13px;font-weight:700;color:#007aff;min-width:44px;">28 ani</span>
+          </div>
+        </div>
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#f3eeff;">🎓</div>
+          <div class="app-s-info"><div class="app-s-name">Studii</div></div>
+          <select id="s-edu" onchange="syncChips()">
+            <option value="liceu">Liceu</option>
+            <option value="medii">Medii</option>
+            <option value="facultate" selected>Facultate</option>
+            <option value="master">Master</option>
+          </select>
+        </div>
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#e0f5ff;">🌍</div>
+          <div class="app-s-info"><div class="app-s-name">Zonă</div></div>
+          <select id="s-zone" onchange="syncChips()">
+            <option value="Moldova" selected>Moldova</option>
+            <option value="România">România</option>
+            <option value="Europa">Europa</option>
+            <option value="Global">Global</option>
+          </select>
+        </div>
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#fff4e0;">⚧</div>
+          <div class="app-s-info"><div class="app-s-name">Gen</div></div>
+          <select id="s-sex" onchange="syncChips()">
+            <option value="masculin">Bărbat</option>
+            <option value="feminin">Femeie</option>
+            <option value="alt">Nespecificat</option>
+          </select>
+        </div>
+      </div>
+      <div class="app-s-label" style="margin-top:4px;">AI Personalizare</div>
+      <div class="app-api-box">
+        <p>🤖 Adaugă cheia Google Gemini (gratuită!) și AI-ul va rezuma, traduce din rusă și personaliza știrile pentru tine.<br><a href="https://aistudio.google.com" target="_blank" style="color:#c07000;font-weight:700;">→ Obține cheia gratuită la aistudio.google.com</a></p>
+        <input class="app-api-inp" type="password" id="s-apikey" placeholder="AIza...">
+        <button class="app-api-save" onclick="saveKey()">Salvează cheia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="app-screen" id="scr-alerts">
+    <div class="app-scr-title">Alerte</div>
+    <div class="app-s-scroll">
+      <div class="app-s-group" id="alerts-group"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="app-nav">
+    <button class="app-nav-tab on" id="nt-feed"     onclick="goTab('feed')">    <span class="ni">🏠</span>Feed</button>
+    <button class="app-nav-tab"    id="nt-fav"      onclick="goTab('fav')">     <span class="ni">🔖</span>Salvate</button>
+    <button class="app-nav-tab"    id="nt-settings" onclick="goTab('settings')"><span class="ni">⚙️</span>Setări</button>
+    <button class="app-nav-tab"    id="nt-alerts"   onclick="goTab('alerts')">  <span class="ni">🔔</span>Alerte</button>
+  </div>
+</div>
+
+<!-- SHARE -->
+<div class="share-overlay" id="share-overlay" onclick="if(event.target===this)closeShare()">
+  <div class="share-sheet">
+    <div class="share-handle"></div>
+    <div class="share-label">Distribuie știrea</div>
+    <div class="share-preview" id="share-preview-txt"></div>
+    <div class="share-grid">
+      <div class="share-item" onclick="doShare('whatsapp')"><div class="share-icon" style="background:#25D366;">💬</div><div class="share-lbl">WhatsApp</div></div>
+      <div class="share-item" onclick="doShare('telegram')"><div class="share-icon" style="background:#229ED9;">✈️</div><div class="share-lbl">Telegram</div></div>
+      <div class="share-item" onclick="doShare('viber')"><div class="share-icon" style="background:#7360F2;">📳</div><div class="share-lbl">Viber</div></div>
+      <div class="share-item" onclick="doShare('messenger')"><div class="share-icon" style="background:linear-gradient(135deg,#0099FF,#A033FF);">💌</div><div class="share-lbl">Messenger</div></div>
+      <div class="share-item" onclick="doShare('facebook')"><div class="share-icon" style="background:#1877F2;">📘</div><div class="share-lbl">Facebook</div></div>
+      <div class="share-item" onclick="doShare('twitter')"><div class="share-icon" style="background:#000000;">𝕏</div><div class="share-lbl">Twitter/X</div></div>
+      <div class="share-item" onclick="doShare('instagram')"><div class="share-icon" style="background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);">📸</div><div class="share-lbl">Instagram</div></div>
+      <div class="share-item" onclick="doShare('tiktok')"><div class="share-icon" style="background:#000000;">🎵</div><div class="share-lbl">TikTok</div></div>
+    </div>
+    <button class="share-copy" onclick="copyShare()">📋 Copiază linkul și textul</button>
+    <button class="share-close" onclick="closeShare()">Închide</button>
+  </div>
+</div>
+
+<script>
+const RSS_PROXY = 'http://localhost:3000';
+const EMOJIS = ['❤️','😮','😂','😡','😢'];
+
+const SOURCES = [
+  // ── MOLDOVA — surse verificate de CJI (Centrul pt Jurnalism Independent) ──
+  {id:'newsmaker',  name:'NewsMaker',     sub:'🥇 Top credibilitate CJI', color:'#553C9A', on:true,  lang:'ro', geo:'md', rss:'https://newsmaker.md/feed/'},
+  {id:'tv8',        name:'TV8.md',        sub:'🥇 Top credibilitate CJI', color:'#2B6CB0', on:true,  lang:'ro', geo:'md', rss:'https://tv8.md/feed/'},
+  {id:'zdg',        name:'ZdG',           sub:'🥇 Investigații independente', color:'#276749', on:true, lang:'ro', geo:'md', rss:'https://www.zdg.md/feed'},
+  {id:'agora',      name:'Agora.md',      sub:'🥇 Top credibilitate CJI', color:'#8E44AD', on:true,  lang:'ro', geo:'md', rss:'https://agora.md/ro/rss'},
+  {id:'europalib',  name:'Europa Liberă', sub:'Radio Free Europe Moldova', color:'#1A56DB', on:true, lang:'ro', geo:'md', rss:'https://moldova.europalibera.org/api/epiooi_yit'},
+  {id:'moldova1',   name:'Moldova1.md',   sub:'Top 3 credibilitate CJI',  color:'#1A6B9A', on:true,  lang:'ro', geo:'md', rss:'https://moldova1.md/rss'},
+  {id:'nokta',      name:'Nokta.md',      sub:'🥇 Locul 1 CJI credibilitate', color:'#C0392B', on:true, lang:'ro', geo:'md', rss:'https://nokta.md/feed/'},
+  {id:'ipn',        name:'IPN.md',        sub:'Agenție de presă independentă', color:'#117A65', on:true, lang:'ro', geo:'md', rss:'https://www.ipn.md/rss'},
+  {id:'veridica',   name:'Veridica.md',   sub:'Știri echidistante verificate', color:'#1F618D', on:true, lang:'ro', geo:'md', rss:'https://www.protv.md/rss'},
+  {id:'deschide',   name:'Deschide.md',   sub:'Moldova',          color:'#2980B9', on:false, lang:'ro', geo:'md', rss:'https://deschide.md/feed/'},
+  {id:'stiri-md',   name:'Stiri.md',      sub:'Moldova',          color:'#E67E22', on:false, lang:'ro', geo:'md', rss:'https://publika.md/rss'},
+  // ── ROMÂNIA (știri de importanță majoră) ──────────────────
+  {id:'g4media',    name:'G4Media',       sub:'România — Verificat', color:'#2D3748', on:true, lang:'ro', geo:'ro', rss:'https://www.g4media.ro/feed'},
+  {id:'hotnews',    name:'HotNews',       sub:'România',          color:'#DD6B20', on:true,  lang:'ro', geo:'ro', rss:'https://www.hotnews.ro/rss'},
+  {id:'digi24',     name:'Digi24',        sub:'România',          color:'#E53E3E', on:true,  lang:'ro', geo:'ro', rss:'https://www.digi24.ro/rss'},
+  {id:'libertatea', name:'Libertatea',    sub:'România — Investigații', color:'#C05621', on:false, lang:'ro', geo:'ro', rss:'https://www.libertatea.ro/rss'},
+  {id:'dw-ro',      name:'DW Română',     sub:'International',    color:'#1A1A6B', on:false, lang:'ro', geo:'int', rss:'https://www.dw.com/ro/rss'},
+  // ── INTERNATIONAL 🔄 tradus automat ───────────────────────
+  {id:'bbc',        name:'BBC World',     sub:'UK 🔄',            color:'#BB1919', on:false, lang:'en', geo:'int', rss:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+  {id:'reuters',    name:'Reuters',       sub:'Global 🔄',        color:'#FF8000', on:false, lang:'en', geo:'int', rss:'https://feeds.reuters.com/reuters/worldNews'},
+  {id:'guardian',   name:'Guardian',      sub:'UK 🔄',            color:'#052962', on:false, lang:'en', geo:'int', rss:'https://www.theguardian.com/world/rss'},
+  {id:'apnews',     name:'AP News',       sub:'SUA 🔄',           color:'#C8102E', on:false, lang:'en', geo:'int', rss:'https://rsshub.app/apnews/topics/world-news'},
+  {id:'skynews',    name:'Sky News',      sub:'UK 🔄',            color:'#E30613', on:false, lang:'en', geo:'int', rss:'https://feeds.skynews.com/feeds/rss/world.xml'},
+  {id:'npr',        name:'NPR News',      sub:'SUA 🔄',           color:'#1A6B3C', on:false, lang:'en', geo:'int', rss:'https://feeds.npr.org/1001/rss.xml'},
+  {id:'dw-en',      name:'DW English',    sub:'Germania 🔄',      color:'#3D5A99', on:false, lang:'en', geo:'int', rss:'https://rss.dw.com/rdf/rss-en-all'},
+  {id:'politico',   name:'Politico EU',   sub:'Europa 🔄',        color:'#000000', on:false, lang:'en', geo:'int', rss:'https://www.politico.eu/feed/'},
+  {id:'euractiv',   name:'Euractiv',      sub:'Europa 🔄',        color:'#003580', on:false, lang:'en', geo:'int', rss:'https://www.euractiv.com/feed/'},
+  {id:'ft',         name:'Financial Times',sub:'Finance 🔄',      color:'#FCD200', on:false, lang:'en', geo:'int', rss:'https://www.ft.com/rss/home'},
+  {id:'economist',  name:'The Economist', sub:'Analiză 🔄',       color:'#E3120B', on:false, lang:'en', geo:'int', rss:'https://www.economist.com/latest/rss.xml'},
+];
+
+const INTERESTS = [
+  {id:'politica',     label:'Politică',      icon:'🏛️', kw:['politic','alegeri','guvern','parlament','partid','presedinte','lege','ministru','vot'],           on:true},
+  {id:'economie',     label:'Economie',      icon:'💰', kw:['economie','bursă','inflație','leu','euro','buget','bancă','investiție','pib','dobândă','piață'],   on:true},
+  {id:'sanatate',     label:'Sănătate',      icon:'🏥', kw:['sănătate','medical','spital','vaccin','boală','medicamente','doctor','pandemie','cancer'],          on:false},
+  {id:'tech',         label:'Tehnologie',    icon:'💻', kw:['tech','digital','ai','robot','aplicație','internet','software','startup','iphone','android'],        on:false},
+  {id:'sport',        label:'Sport',         icon:'⚽', kw:['fotbal','sport','meci','campionat','olimpic','tenis','nba','formula','atletism','rugby'],            on:false},
+  {id:'cultura',      label:'Cultură',       icon:'🎬', kw:['film','cultură','artă','muzică','festival','carte','teatru','oscar','netflix','expoziție'],          on:false},
+  {id:'mediu',        label:'Mediu',         icon:'🌱', kw:['mediu','climă','poluare','ecologie','verde','energie','solar','deșeuri','inundații'],               on:false},
+  {id:'educatie',     label:'Educație',      icon:'📚', kw:['educație','școală','universitate','student','bacalaureat','cercetare','bursă'],                     on:false},
+  {id:'societate',    label:'Societate',     icon:'👥', kw:['societate','social','drept','justiție','corupție','protest','tribunal','discriminare'],              on:true},
+  {id:'international',label:'Internațional', icon:'🌍', kw:['nato','ue','europa','război','diplomatic','geopolit','rusia','china','ucraina','sancțiun'],         on:true},
+];
+
+const ALERT_TOPICS = [
+  {id:'urgente',   label:'Știri urgente',   words:['urgent','accident','incendiu','cutremur','atac','explozie','dezastru'],       on:true},
+  {id:'politica',  label:'Politică',        words:['alegeri','vot','parlament','guvern','demisie','presedinte'],                  on:true},
+  {id:'economie',  label:'Economie',        words:['economie','bursă','inflație','criză','leul','devalorizare'],                  on:false},
+  {id:'sanatate',  label:'Sănătate',        words:['epidemie','virus','vaccin','alertă','pandemie'],                              on:false},
+  {id:'razboi',    label:'Geopolitică',     words:['război','nato','sancțiuni','nuclear','terorist','conflict','bombardament'],   on:true},
+];
+
+// ─── STATE ───────────────────────────────────────
+let allArts = [], pending = [];
+let favs = new Set(), likes = new Set(), dislikes = new Set();
+let reactions = {}, userReact = {}, comments = {}, openCmts = new Set(), openExp = new Set();
+let curCat = 'toate';
+let apiKey = localStorage.getItem('gata_key') || '';
+let shareId = null;
+let seenUrls = new Set();
+let liveTimer = null;
+let profile = { age: 28, sex: 'masculin', edu: 'facultate', zone: 'Moldova', mood: 'ok' };
+
+// ─── QUIZ ─────────────────────────────────────────
+const QMAX = 8;
+let qStep = 0;
+
+function qRefresh() {
+  document.getElementById('qfill').style.width = (qStep / (QMAX - 1) * 100) + '%';
+  document.getElementById('qback').style.display = qStep > 0 ? 'block' : 'none';
+  document.getElementById('qnext').textContent = qStep === QMAX - 1 ? '🚀 Intru în GATA!' : 'Continuă →';
+}
+
+function qCollect(s) {
+  const sel = document.querySelector('#qs' + s + ' .q-opt.on');
+  if (s === 1 && sel) profile.sex = sel.dataset.v;
+  if (s === 2) profile.age = parseInt(document.getElementById('qage').value);
+  if (s === 3 && sel) profile.edu = sel.dataset.v;
+  if (s === 4 && sel) profile.zone = sel.dataset.v;
+  if (s === 5) {
+    INTERESTS.forEach(i => i.on = false);
+    document.querySelectorAll('#qints .q-opt.on').forEach(el => {
+      const ix = INTERESTS.find(x => x.id === el.dataset.v);
+      if (ix) ix.on = true;
+    });
+  }
+  const em = document.querySelector('.q-emoji.on');
+  if (s === 6 && em) profile.mood = em.dataset.v;
+}
+
+function qNext() {
+  if (qStep === QMAX - 1) { launch(); return; }
+  qCollect(qStep);
+  document.getElementById('qs' + qStep).classList.remove('on');
+  qStep++;
+  document.getElementById('qs' + qStep).classList.add('on');
+  if (qStep === QMAX - 1) buildSummary();
+  qRefresh();
+  document.querySelector('.q-body').scrollTop = 0;
+}
+
+function qPrev() {
+  document.getElementById('qs' + qStep).classList.remove('on');
+  qStep--;
+  document.getElementById('qs' + qStep).classList.add('on');
+  qRefresh();
+}
+
+function pickMood(el) {
+  document.querySelectorAll('.q-emoji').forEach(e => e.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function buildSummary() {
+  const em = { liceu: 'Liceu', medii: 'Studii medii', facultate: 'Facultate', master: 'Master/Doctorat' };
+  const sm = { masculin: 'Bărbat', feminin: 'Femeie', alt: 'Nespecificat' };
+  const ints = INTERESTS.filter(i => i.on).map(i => i.icon + ' ' + i.label).join(', ') || 'Generale';
+  document.getElementById('qsummary').innerHTML =
+    `<strong>${sm[profile.sex] || ''}, ${profile.age} ani</strong><br>` +
+    `📚 ${em[profile.edu] || ''}<br>` +
+    `🌍 ${profile.zone}<br>` +
+    `❤️ ${ints}`;
+}
+
+function launch() {
+  qCollect(qStep);
+  document.getElementById('s-age').value = profile.age;
+  document.getElementById('s-age-v').textContent = profile.age + ' ani';
+  document.getElementById('s-edu').value = profile.edu;
+  document.getElementById('s-zone').value = profile.zone;
+  document.getElementById('s-sex').value = profile.sex;
+  
+  // Activăm sursele în funcție de zona selectată
+  activateSourcesForZone(profile.zone);
+  
+  syncChips();
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderSources(); renderInts(); renderAlerts();
+  startLive();
+}
+
+function activateSourcesForZone(zone) {
+  if (zone === 'Moldova') {
+    // Moldova: toate sursele MD active + sursele RO majore active + INT opționale
+    SOURCES.forEach(s => {
+      if (s.geo === 'md') s.on = true;
+      else if (s.geo === 'ro') s.on = ['g4media','hotnews','digi24'].includes(s.id);
+      else if (s.geo === 'int') s.on = false;
+    });
+  } else if (zone === 'România') {
+    SOURCES.forEach(s => {
+      if (s.geo === 'ro') s.on = true;
+      else if (s.geo === 'md') s.on = ['tv8','europalib','zdg'].includes(s.id);
+      else if (s.geo === 'int') s.on = false;
+    });
+  } else {
+    // Europa / Global: surse internaționale + câteva locale
+    SOURCES.forEach(s => {
+      if (s.geo === 'int') s.on = ['bbc','reuters','guardian','dw-en'].includes(s.id);
+      else if (s.geo === 'md') s.on = ['tv8','europalib'].includes(s.id);
+      else if (s.geo === 'ro') s.on = ['g4media','digi24'].includes(s.id);
+    });
+  }
+}
+
+// Init quiz
+[1, 3, 4].forEach(s => {
+  document.querySelectorAll('#qs' + s + ' .q-opt').forEach(opt => {
+    opt.addEventListener('click', function () {
+      document.querySelectorAll('#qs' + s + ' .q-opt').forEach(o => o.classList.remove('on'));
+      this.classList.add('on');
+    });
+  });
+});
+document.getElementById('qints').innerHTML = INTERESTS.map(i =>
+  `<div class="q-opt" data-v="${i.id}" onclick="this.classList.toggle('on')"><span class="qi">${i.icon}</span>${i.label}</div>`
+).join('');
+qRefresh();
+
+// ─── APP ──────────────────────────────────────────
+function goTab(t) {
+  ['feed', 'fav', 'settings', 'alerts'].forEach(x => {
+    document.getElementById('scr-' + x).classList.toggle('on', x === t);
+    document.getElementById('nt-' + x).classList.toggle('on', x === t);
+  });
+  if (t === 'fav') renderFeed('fav-feed', allArts.filter(a => favs.has(a.id)));
+  if (t === 'settings') { renderSources(); renderInts(); document.getElementById('s-apikey').value = apiKey; }
+  if (t === 'alerts') renderAlerts();
+}
+
+document.querySelectorAll('.app-cat').forEach(b => b.addEventListener('click', function () {
+  document.querySelectorAll('.app-cat').forEach(x => x.classList.remove('on'));
+  this.classList.add('on');
+  curCat = this.dataset.cat;
+  renderMainFeed();
+}));
+
+function syncChips() {
+  const age = document.getElementById('s-age').value;
+  const edu = document.getElementById('s-edu').value;
+  const zone = document.getElementById('s-zone').value;
+  const sex = document.getElementById('s-sex').value;
+  profile = { ...profile, age: parseInt(age), edu, zone, sex };
+  const eL = { liceu: 'Liceu', medii: 'Medii', facultate: 'Facultate', master: 'Master' }[edu];
+  const sL = { masculin: '♂', feminin: '♀', alt: '🧑' }[sex];
+  document.getElementById('app-chips').innerHTML =
+    `<span class="app-chip">${sL} ${age} ani</span>` +
+    `<span class="app-chip">${eL}</span>` +
+    `<span class="app-chip">🌍 ${zone}</span>`;
+}
+
+function renderSources() {
+  const groups = [
+    { geo: 'md', label: '🇲🇩 Moldova' },
+    { geo: 'ro', label: '🇷🇴 România' },
+    { geo: 'int', label: '🌍 Internațional (tradus automat)' },
+  ];
+  let html = '';
+  groups.forEach(g => {
+    const srcs = SOURCES.filter(s => s.geo === g.geo);
+    html += `<div style="font-size:12px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:0.05em;padding:12px 16px 6px;">${g.label}</div>`;
+    html += `<div style="margin:0 14px 10px;background:white;border-radius:14px;overflow:hidden;border:1px solid #e5e5ea;box-shadow:0 1px 4px rgba(0,0,0,.05);">`;
+    html += srcs.map(s =>
+      `<div class="app-s-row">
+        <div class="app-s-icon" style="background:${s.color}20;">${s.lang === 'en' ? '🌐' : '📡'}</div>
+        <div class="app-s-info">
+          <div class="app-s-name">${s.name}</div>
+          <div class="app-s-sub">${s.sub}</div>
+        </div>
+        <button class="app-toggle ${s.on ? 'on' : 'off'}" onclick="toggleSrc('${s.id}')"></button>
+      </div>`
+    ).join('');
+    html += `</div>`;
+  });
+  document.getElementById('src-group').innerHTML = html;
+}
+function toggleSrc(id) { const s = SOURCES.find(x => x.id === id); s.on = !s.on; renderSources(); }
+
+function renderInts() {
+  document.getElementById('int-grid').innerHTML = INTERESTS.map(i =>
+    `<div class="app-int-chip${i.on ? ' on' : ''}" onclick="toggleInt('${i.id}')">${i.icon} ${i.label}</div>`
+  ).join('');
+}
+function toggleInt(id) { const i = INTERESTS.find(x => x.id === id); i.on = !i.on; renderInts(); renderMainFeed(); }
+
+function renderAlerts() {
+  document.getElementById('alerts-group').innerHTML = ALERT_TOPICS.map(t =>
+    `<div class="app-s-row">
+      <div class="app-s-info"><div class="app-s-name">${t.label}</div></div>
+      <button class="app-toggle ${t.on ? 'on' : 'off'}" onclick="toggleAlert('${t.id}')"></button>
+    </div>`
+  ).join('');
+}
+function toggleAlert(id) { const t = ALERT_TOPICS.find(x => x.id === id); t.on = !t.on; renderAlerts(); }
+
+function saveKey() {
+  apiKey = document.getElementById('s-apikey').value.trim();
+  localStorage.setItem('gata_key', apiKey);
+  showBanner('info', apiKey ? '✅ Cheie API salvată! Știrile vor fi personalizate cu AI.' : 'Cheie ștearsă.');
+}
+
+// ─── HELPERS ──────────────────────────────────────
+function strip(h) { return (h || '').replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim().substring(0, 500); }
+function ago(d) {
+  if (!d) return 'recent';
+  const m = Math.floor((Date.now() - new Date(d)) / 60000);
+  if (m < 1) return 'acum'; if (m < 60) return `acum ${m}m`;
+  const h = Math.floor(m / 60); if (h < 24) return `acum ${h}h`;
+  return `acum ${Math.floor(h / 24)}z`;
+}
+function catOf(t) {
+  t = (t || '').toLowerCase();
+  if (/fotbal|sport|meci|campionat|olimp|tenis|nba|formula/.test(t)) return 'Sport';
+  if (/sănăt|medic|spital|vaccin|boal|covid|virus|pandem|cancer/.test(t)) return 'Sănătate';
+  if (/econom|burs|pib|inflat|leul|euro|profit|finanț|investiț|bancă/.test(t)) return 'Business';
+  if (/tech|digital|inteligenț|\bai\b|robot|aplicați|soft|startup|iphone/.test(t)) return 'Tehnologie';
+  if (/nato|ue|onu|internation|geopolit|război|diplomatic|sancțiun|rusia|china|ucraina/.test(t)) return 'Internațional';
+  return 'Actualitate';
+}
+function catCls(c) {
+  return { Actualitate: 'nc-cat-act', Business: 'nc-cat-biz', 'Sănătate': 'nc-cat-san', Tehnologie: 'nc-cat-teh', Sport: 'nc-cat-spt', Internațional: 'nc-cat-int' }[c] || 'nc-cat-act';
+}
+
+// ─── SCORING ──────────────────────────────────────
+// Cuvinte cheie pentru știri de importanță majoră din România
+const MAJOR_RO_KEYWORDS = ['moldova','republica','chișinău','maia sandu','ue','nato','război','ucraina','rusia','criză','cutremur','inundații','alegeri','parlament','guvern','premier','president','economie','euro','inflație','lege','reformă','corupție','dosar'];
+
+function isImportantRoNews(a) {
+  const src = SOURCES.find(x => x.id === a.srcId);
+  if (!src || src.geo !== 'ro') return true; // sursele MD și INT trec mereu
+  const txt = (a.title + ' ' + (a.lead || a.summary || '')).toLowerCase();
+  return MAJOR_RO_KEYWORDS.some(kw => txt.includes(kw));
+}
+
+function score(a) {
+  let s = 0;
+  const txt = (a.title + ' ' + (a.lead || a.summary || '')).toLowerCase();
+  const src = SOURCES.find(x => x.id === a.srcId);
+
+  // Boost geografic — dacă utilizatorul e din Moldova, sursele MD primesc bonus mare
+  if (profile.zone === 'Moldova') {
+    if (src?.geo === 'md') s += 40;
+    else if (src?.geo === 'ro') {
+      // Din România doar știri de importanță majoră
+      if (!isImportantRoNews(a)) s -= 30;
+      else s += 5;
+    }
+    else if (src?.geo === 'int') s += 10;
+  } else if (profile.zone === 'România') {
+    if (src?.geo === 'ro') s += 40;
+    else if (src?.geo === 'md') s += 15;
+    else if (src?.geo === 'int') s += 10;
+  } else {
+    // Europa / Global — toate sursele egale
+    if (src?.geo === 'int') s += 20;
+  }
+
+  INTERESTS.filter(i => i.on).forEach(i => { s += i.kw.filter(k => txt.includes(k)).length * 15; });
+  [...likes].forEach(id => { if (allArts.find(x => x.id === id)?.category === a.category) s += 20; });
+  [...dislikes].forEach(id => { if (allArts.find(x => x.id === id)?.category === a.category) s -= 15; });
+  const m = Math.floor((Date.now() - new Date(a.pubDate || 0)) / 60000);
+  s += m < 30 ? 25 : m < 120 ? 15 : m < 360 ? 5 : 0;
+  if (src?.on) s += 10;
+  if (profile.mood === 'stresat' && /(tragic|mort|dezastr|criza|atac)/i.test(a.title)) s -= 20;
+  return s;
+}
+
+// ─── REACTIONS ────────────────────────────────────
+function toggleReact(id, emoji) {
+  const key = id + '_' + emoji;
+  if (!reactions[id]) reactions[id] = {};
+  if (userReact[key]) { reactions[id][emoji] = Math.max(0, (reactions[id][emoji] || 1) - 1); delete userReact[key]; }
+  else { reactions[id][emoji] = (reactions[id][emoji] || 0) + 1; userReact[key] = true; }
+  const bar = document.getElementById('rbar-' + id);
+  if (bar) bar.innerHTML = reactsHTML(id);
+}
+function reactsHTML(id) {
+  const r = reactions[id] || {};
+  return EMOJIS.map(e => {
+    const cnt = r[e] || 0;
+    const on = userReact[id + '_' + e] ? ' on' : '';
+    return `<button class="nc-react${on}" onclick="toggleReact('${id}','${e}')">${e}${cnt > 0 ? `<span class="nc-react-cnt">${cnt}</span>` : ''}</button>`;
+  }).join('') + `<button class="nc-share" onclick="openShare('${id}')">···</button>`;
+}
+
+// ─── COMMENTS ─────────────────────────────────────
+function toggleCmts(id) {
+  const wrap = document.getElementById('cmts-' + id);
+  const btn = document.getElementById('cbtn-' + id);
+  if (!wrap) return;
+  if (openCmts.has(id)) { openCmts.delete(id); wrap.classList.remove('on'); btn.classList.remove('cmt-on'); }
+  else { openCmts.add(id); wrap.classList.add('on'); btn.classList.add('cmt-on'); }
+}
+function sendCmt(id) {
+  const inp = document.getElementById('cinp-' + id);
+  const txt = (inp?.value || '').trim();
+  if (!txt) return;
+  if (!comments[id]) comments[id] = [];
+  comments[id].unshift({ name: 'Tu', text: txt, ts: 'acum' });
+  inp.value = '';
+  const list = document.getElementById('clist-' + id);
+  if (list) list.innerHTML = cmtsHTML(id);
+}
+function cmtsHTML(id) {
+  const c = comments[id] || [];
+  if (!c.length) return '<div class="nc-no-cmts">Fii primul care comentează!</div>';
+  return c.slice(0, 8).map(cm =>
+    `<div class="nc-cmt-item">
+      <div class="nc-cmt-av">${cm.name[0]}</div>
+      <div>
+        <span class="nc-cmt-name">${cm.name}</span>
+        <span class="nc-cmt-time">· ${cm.ts}</span>
+        <div class="nc-cmt-text">${cm.text}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ─── EXPAND ───────────────────────────────────────
+function toggleExp(id) {
+  const body = document.getElementById('exp-' + id);
+  const btn = document.getElementById('expbtn-' + id);
+  if (!body) return;
+  if (openExp.has(id)) { openExp.delete(id); body.classList.remove('on'); btn.textContent = '▼ Citește rezumatul complet'; }
+  else { openExp.add(id); body.classList.add('on'); btn.textContent = '▲ Mai puțin'; }
+}
+
+// ─── CARD HTML ────────────────────────────────────
+function cardHTML(a) {
+  if (!a || !a.id || !a.title) return '';
+  const src = SOURCES.find(s => s.id === a.srcId) || { color: '#888' };
+  const liked = likes.has(a.id), dislik = dislikes.has(a.id), saved = favs.has(a.id);
+  const sc = score(a), isRec = sc > 45;
+  const hasBody = (a.fullText || '').length > 20;
+  const cmtOpen = openCmts.has(a.id), expOpen = openExp.has(a.id);
+  const leadText = a.lead || (a.summary || '').substring(0, 240);
+
+  return `<div class="news-card${liked ? ' liked' : dislik ? ' disliked' : ''}" id="nc-${a.id}">
+  ${a.image ? `<div class="nc-img-wrap"><img class="nc-img" src="${a.image}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : ''}
+  <div class="nc-top">
+    <div class="nc-meta">
+      <div class="nc-dot" style="background:${src.color}"></div>
+      <span class="nc-source">${a.source || ''}</span>
+      ${a.lang === 'ru' ? '<span class="nc-translated">🔄 tradus din rusă</span>' : ''}
+      <div class="nc-sep"></div>
+      <span class="nc-time">${a.time || ''}</span>
+      <span class="nc-cat ${catCls(a.category)}">${a.category || ''}</span>
+      ${isRec ? '<span class="nc-rec">⭐ Top</span>' : ''}
+    </div>
+    <div class="nc-title">${a.title || ''}</div>
+    ${leadText ? `<div class="nc-lead">${leadText.substring(0, 300)}${leadText.length > 300 ? '...' : ''}</div>` : ''}
+  </div>
+  <div class="nc-div"></div>
+  <div class="nc-actions">
+    <button class="nc-btn${liked ? ' liked' : ''}"  onclick="doLike('${a.id}')">👍${liked ? ' Apreciat' : ''}</button>
+    <button class="nc-btn${dislik ? ' disliked' : ''}" onclick="doDislike('${a.id}')">👎</button>
+    <button class="nc-btn${saved ? ' saved' : ''}"  onclick="doSave('${a.id}')">🔖${saved ? ' Salvat' : ''}</button>
+    <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')">💬</button>
+    <button class="nc-share" onclick="openShare('${a.id}')">···</button>
+  </div>
+  <div class="nc-reacts" id="rbar-${a.id}">${reactsHTML(a.id)}</div>
+  <div class="nc-cmts${cmtOpen ? ' on' : ''}" id="cmts-${a.id}">
+    <div class="nc-cmt-input-row">
+      <input class="nc-cmt-input" id="cinp-${a.id}" placeholder="Scrie un comentariu..." onkeydown="if(event.key==='Enter')sendCmt('${a.id}')">
+      <button class="nc-cmt-send" onclick="sendCmt('${a.id}')">↑</button>
+    </div>
+    <div id="clist-${a.id}">${cmtsHTML(a.id)}</div>
+  </div>
+  ${(a.lead && a.lead.length > 100) || hasBody
+    ? `<button class="nc-expand-btn" id="expbtn-${a.id}" onclick="toggleExp('${a.id}')">${expOpen ? '▲ Mai puțin' : '▼ Rezumat complet + sursă'}</button>
+       <div class="nc-expand-body${expOpen ? ' on' : ''}" id="exp-${a.id}">
+         ${a.lead && a.lead.length > 200 ? `<div class="nc-full-text" style="margin-bottom:12px;">${a.lead}</div>` : ''}
+         ${hasBody ? `<div class="nc-full-text">${a.fullText}</div>` : ''}
+         <a class="nc-src-link" href="${a.url}" target="_blank">📰 Citește articolul complet la sursă →</a>
+       </div>`
+    : `<a class="nc-read-link" href="${a.url}" target="_blank">📰 Citește la sursă →</a>`
+  }
+</div>`;
+}
+
+// ─── RENDER ───────────────────────────────────────
+function renderMainFeed() {
+  let list = curCat === 'toate' ? [...allArts] : allArts.filter(a => a.category === curCat);
+  list.sort((a, b) => score(b) - score(a));
+  // Info discret despre știrile în rusă
+  const ruCount = list.filter(a => a.lang === 'ru').length;
+  if (ruCount > 0 && !apiKey) {
+    // Nu spamăm cu bannere — le marcăm vizual în card
+  }
+  renderFeed('main-feed', list);
+}
+
+function renderFeed(elId, list) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!list || !list.length) {
+    el.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">📭</div><div class="nc-empty-title">Nicio știre</div><div class="nc-empty-sub">Activează mai multe surse din Setări sau schimbă categoria.</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(cardHTML).join('');
+}
+
+function doLike(id) { if (likes.has(id)) likes.delete(id); else { likes.add(id); dislikes.delete(id); } renderMainFeed(); }
+function doDislike(id) { if (dislikes.has(id)) dislikes.delete(id); else { dislikes.add(id); likes.delete(id); } renderMainFeed(); }
+function doSave(id) { if (favs.has(id)) favs.delete(id); else favs.add(id); renderMainFeed(); }
+
+// ─── BANNERS ──────────────────────────────────────
+function showBanner(type, msg, ms = 5000) {
+  const b = document.getElementById('bn-' + type);
+  const t = document.getElementById('bn-' + type + '-t');
+  if (!b || !t) return;
+  t.textContent = msg; b.style.display = 'flex';
+  if (ms > 0) setTimeout(() => b.style.display = 'none', ms);
+}
+
+// ─── SHARE ────────────────────────────────────────
+function openShare(id) {
+  shareId = id;
+  const a = allArts.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('share-preview-txt').textContent = a.title;
+  document.getElementById('share-overlay').classList.add('on');
+}
+function closeShare() { document.getElementById('share-overlay').classList.remove('on'); shareId = null; }
+function doShare(pl) {
+  const a = allArts.find(x => x.id === shareId); if (!a) return;
+  const body = `${a.title}\n\n${a.lead || a.summary || ''}\n\n🔗 ${a.url}`;
+  const enc = encodeURIComponent(body), url = encodeURIComponent(a.url);
+  const map = {
+    whatsapp: `https://wa.me/?text=${enc}`,
+    telegram: `https://t.me/share/url?url=${url}&text=${encodeURIComponent(a.title + '\n\n' + (a.lead || a.summary || ''))}`,
+    viber: `viber://forward?text=${enc}`,
+    messenger: `https://www.facebook.com/dialog/send?link=${url}&app_id=291494419107518`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(a.title)}&url=${url}`,
+    instagram: `https://www.instagram.com/`,
+    tiktok: `https://www.tiktok.com/`,
+  };
+  if (map[pl]) window.open(map[pl], '_blank');
+  closeShare();
+}
+function copyShare() {
+  const a = allArts.find(x => x.id === shareId); if (!a) return;
+  navigator.clipboard.writeText(`${a.title}\n\n${a.lead || a.summary || ''}\n\n${a.url}`)
+    .then(() => { document.querySelector('.share-copy').textContent = '✅ Copiat!'; setTimeout(closeShare, 1500); })
+    .catch(() => { alert(a.url); closeShare(); });
+}
+
+// ─── RSS ──────────────────────────────────────────
+// Rezumat inteligent fără AI — curăță și structurează textul din RSS
+function buildSmartSummary(title, cleanText) {
+  if (!cleanText || cleanText.length < 30) return '';
+  
+  // Împărțim în propoziții
+  const sentences = cleanText
+    .replace(/\s+/g, ' ')
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 20 && s.length < 400);
+  
+  if (!sentences.length) return cleanText.substring(0, 300);
+  
+  // Filtrăm propozițiile irelevante (reclame, linkuri, etc.)
+  const noise = /citeşte mai mult|citește și|abonează|newsletter|publicitate|cookie|©|www\.|http|urmărește|distribuie|share|like|comment/i;
+  const good = sentences.filter(s => !noise.test(s));
+  
+  // Luăm primele 3-4 propoziții bune
+  const best = good.slice(0, 4);
+  if (!best.length) return sentences.slice(0, 3).join(' ');
+  
+  return best.join(' ');
+}
+
+async function fetchSrc(src) {
+  const res = await fetch(`${RSS_PROXY}/rss?url=${encodeURIComponent(src.rss)}`, { signal: AbortSignal.timeout(12000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const xml = await res.text();
+  if (xml.trimStart().startsWith('{')) throw new Error(JSON.parse(xml).error || 'Error');
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  const items = Array.from(doc.querySelectorAll('item')).slice(0, 15);
+  if (!items.length) throw new Error('Empty feed');
+  return items.map((item, i) => {
+    const g = tag => item.querySelector(tag)?.textContent?.trim() || '';
+    const title = g('title') || '(fără titlu)';
+    const link = g('link') || item.querySelector('guid')?.textContent?.trim() || '#';
+    const desc = g('description') || g('content') || '';
+    const pubDate = g('pubDate');
+    const clean = strip(desc);
+
+    // Extragem imaginea
+    let image = '';
+    const enclosure = item.querySelector('enclosure');
+    if (enclosure && (enclosure.getAttribute('type')||'').startsWith('image')) {
+      image = enclosure.getAttribute('url') || '';
+    }
+    if (!image) {
+      const media = item.querySelector('content') || item.querySelector('[url]');
+      if (media && media.getAttribute('url') && /\.(jpg|jpeg|png|webp)/i.test(media.getAttribute('url'))) {
+        image = media.getAttribute('url');
+      }
+    }
+    if (!image) {
+      const imgMatch = (desc || '').match(/<img[^>]+src=["']([^"']+\.(jpg|jpeg|png|webp)[^"']*)["']/i);
+      if (imgMatch) image = imgMatch[1];
+    }
+    if (!image) {
+      const thumb = item.querySelector('thumbnail');
+      if (thumb) image = thumb.getAttribute('url') || '';
+    }
+
+    // Detectăm limba
+    const cyrillicRatio = (title.match(/[а-яёА-ЯЁ]/g) || []).length / Math.max(title.length, 1);
+    const isRussian = cyrillicRatio > 0.3;
+
+    // Generăm rezumat inteligent fără AI
+    const smartSummary = buildSmartSummary(title, clean);
+
+    return {
+      id: `${src.id}-${i}-${Date.now()}`,
+      title,
+      lead: smartSummary,
+      summary: clean.substring(0, 300),
+      fullText: clean.length > 300 ? clean : '',
+      category: catOf(title),
+      source: src.name, srcId: src.id, lang: isRussian ? 'ru' : src.lang,
+      image,
+      time: ago(pubDate), url: link, pubDate
+    };
+  });
+}
+
+// ─── AI PERSONALIZARE ─────────────────────────────
+async function callAI(prompt) {
+  // Folosim Google Gemini — gratuit, fără limită de consum personal
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 3000 }
+      })
+    }
+  );
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return text.replace(/```json|```/g, '').trim();
+}
+
+async function aiPersonalize(arts) {
+  if (!apiKey || !arts.length) return arts;
+  const langMap = {
+    liceu: 'simplu și clar, fără jargon, fraze scurte, ca pentru un adolescent de 16 ani',
+    medii: 'accesibil și ușor de înțeles, fără termeni tehnici complicați',
+    facultate: 'standard, informativ, direct',
+    master: 'tehnic și detaliat, cu termeni de specialitate'
+  };
+  const langStyle = langMap[profile.edu] || 'standard';
+  let result = [...arts];
+
+  // Procesăm în batch-uri de câte 6
+  const toProcess = arts.slice(0, 12);
+  const batches = [];
+  for (let i = 0; i < toProcess.length; i += 6) batches.push(toProcess.slice(i, i + 6));
+
+  for (const batch of batches) {
+    try {
+      const prompt = `Ești editorul aplicației GATA de știri din Moldova. Pentru fiecare articol de mai jos:
+
+1. Dacă e în rusă (lang=ru) sau engleză (lang=en) — TRADUCE în română
+2. Rescrie TITLUL — concis, informativ, fără clickbait
+3. Scrie un REZUMAT COMPLET — 3-5 propoziții care explică: CE s-a întâmplat, UNDE, CÂND, DE CE contează. Stil direct, fapte clare. Limbaj: ${langStyle}. Adaptat pentru ${profile.age} ani din ${profile.zone}.
+
+IMPORTANT: rezumatul trebuie să fie complet și informativ, nu o bucată tăiată din text.
+
+Returnează DOAR JSON valid, fără alt text:
+[{"id":"...","title":"titlu rescris","summary":"rezumat complet de 3-5 propoziții"}]
+
+Articole:
+${JSON.stringify(batch.map(a => ({ id: a.id, title: a.title, summary: a.summary || a.fullText?.substring(0,300) || '', lang: a.lang })))}`;
+
+      const txt = await callAI(prompt, 3000);
+      const parsed = JSON.parse(txt);
+      const map = {};
+      parsed.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
+      result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
+    } catch(e) {
+      console.warn('AI batch error:', e.message);
+    }
+  }
+  return result;
+}
+
+// ─── QUIZ PREVIEW ─────────────────────────────────
+async function loadQuizPreview() {
+  try {
+    // Doar surse în română și fără articole în chirilică
+    const srcs = SOURCES.filter(s => s.on && s.lang === 'ro' && s.geo === 'md').slice(0, 4);
+    const results = await Promise.allSettled(srcs.map(s => fetchSrc(s)));
+    const arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+    // Filtrăm articolele în rusă (caractere chirilice în titlu)
+    const recent = arts
+      .filter(a => a.pubDate && (Date.now() - new Date(a.pubDate)) < 12 * 3600000)
+      .filter(a => {
+        const cyrRatio = (a.title.match(/[а-яёА-ЯЁ]/g) || []).length / Math.max(a.title.length, 1);
+        return cyrRatio < 0.1; // max 10% caractere chirilice
+      })
+      .slice(0, 5);
+    const el = document.getElementById('qpreview');
+    if (!el) return;
+    if (!recent.length) { el.innerHTML = '<div style="font-size:13px;color:#8e8e93;">Nu s-au putut încărca știrile.</div>'; return; }
+    el.innerHTML = recent.map(a =>
+      `<div class="q-news-card">
+        <div class="q-news-meta">
+          <span>${a.source}</span>
+          <span>·</span>
+          <span>${a.time}</span>
+          <span class="nc-cat ${catCls(a.category)}" style="margin-left:auto;">${a.category}</span>
+        </div>
+        <div class="q-news-title">${a.title}</div>
+      </div>`
+    ).join('');
+  } catch (e) { }
+}
+
+// ─── PENDING PILL ─────────────────────────────────
+let pendingCount = 0;
+function applyPending() {
+  allArts = [...pending, ...allArts].slice(0, 150);
+  pending = []; pendingCount = 0;
+  document.getElementById('app-newpill').style.display = 'none';
+  document.getElementById('app-status-txt').textContent =
+    `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole`;
+  renderMainFeed();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── LIVE ─────────────────────────────────────────
+async function loadAndRender() {
+  const feed = document.getElementById('main-feed');
+  feed.innerHTML = `
+    <div class="nc-skeleton"><div class="sk" style="height:11px;width:45%"></div><div class="sk" style="height:18px;width:95%"></div><div class="sk" style="height:18px;width:78%"></div><div class="sk" style="height:13px;width:60%"></div></div>
+    <div class="nc-skeleton"><div class="sk" style="height:11px;width:55%"></div><div class="sk" style="height:18px;width:88%"></div><div class="sk" style="height:18px;width:72%"></div><div class="sk" style="height:13px;width:65%"></div></div>
+    <div class="nc-skeleton"><div class="sk" style="height:11px;width:40%"></div><div class="sk" style="height:18px;width:96%"></div><div class="sk" style="height:18px;width:84%"></div><div class="sk" style="height:13px;width:55%"></div></div>`;
+
+  const active = SOURCES.filter(s => s.on);
+  const results = await Promise.allSettled(active.map(s => fetchSrc(s)));
+  let arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const failed = results.filter(r => r.status === 'rejected').length;
+
+  if (!arts.length) {
+    showBanner('err', 'Serverul nu răspunde. Rulează: cd ~/Downloads/stirio && node server.js', 0);
+    feed.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">🔌</div><div class="nc-empty-title">Server offline</div><div class="nc-empty-sub">Terminal:<br><code style="background:#f2f2f7;padding:3px 8px;border-radius:6px;font-size:12px;">cd ~/Downloads/stirio && node server.js</code></div></div>`;
+    return;
+  }
+
+  if (failed > 0) showBanner('warn', `${failed} sursă nu a răspuns. ${active.length - failed} funcționează.`);
+  arts.forEach(a => seenUrls.add(a.url));
+  allArts = arts.slice(0, 120);
+
+  document.getElementById('app-status-txt').textContent =
+    `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole`;
+  document.getElementById('app-live').style.display = 'inline';
+  renderMainFeed();
+  
+  // Dacă avem API key, personalizăm în background
+  if (apiKey) {
+    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă și traduce...';
+    aiPersonalize(allArts.slice(0, 12)).then(processed => {
+      // Actualizăm articolele procesate
+      processed.forEach(p => {
+        const idx = allArts.findIndex(a => a.id === p.id);
+        if (idx >= 0) allArts[idx] = p;
+      });
+      document.getElementById('app-status-txt').textContent =
+        `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole · ✅ AI`;
+      renderMainFeed();
+    }).catch(e => {
+      console.warn('AI background error:', e);
+      document.getElementById('app-status-txt').textContent =
+        `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole`;
+    });
+  }
+
+  const alertArt = arts.find(a => ALERT_TOPICS.filter(t => t.on).some(tp => tp.words.some(w => a.title.toLowerCase().includes(w))));
+  if (alertArt) showBanner('info', '🔔 ' + alertArt.title.substring(0, 65) + '...');
+}
+
+async function livePoll() {
+  const active = SOURCES.filter(s => s.on);
+  const results = await Promise.allSettled(active.map(s => fetchSrc(s)));
+  let arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  const fresh = arts.filter(a => !seenUrls.has(a.url));
+  if (!fresh.length) return;
+  const toAdd = fresh;
+  toAdd.forEach(a => seenUrls.add(a.url));
+  pending = [...toAdd, ...pending];
+  pendingCount += toAdd.length;
+  document.getElementById('app-newcnt').textContent = pendingCount;
+  document.getElementById('app-newpill').style.display = 'inline-block';
+  const alertArt = fresh.find(a => ALERT_TOPICS.filter(t => t.on).some(tp => tp.words.some(w => a.title.toLowerCase().includes(w))));
+  if (alertArt) showBanner('info', '🔔 ' + alertArt.title.substring(0, 65) + '...');
+}
+
+async function startLive() {
+  await loadAndRender();
+  if (liveTimer) clearInterval(liveTimer);
+  liveTimer = setInterval(livePoll, 3 * 60 * 1000);
+}
+
+// Start
+loadQuizPreview();
+</script>
+</body>
+</html>
