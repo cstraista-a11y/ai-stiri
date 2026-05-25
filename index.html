@@ -498,9 +498,9 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
       <input id="auth-email" type="email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:12px;outline:none;">
       <input id="auth-pass" type="password" placeholder="Parolă" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:16px;outline:none;">
       <div id="auth-err" style="font-size:13px;color:#ff3b30;margin-bottom:10px;display:none;"></div>
-      <button onclick="doLogin()" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Intră în cont</button>
-      <button onclick="showRegister()" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Creează cont nou</button>
-      <button onclick="skipAuth()" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
+      <button id="btn-do-login" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Intră în cont</button>
+      <button id="btn-show-register" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Creează cont nou</button>
+      <button id="btn-skip-auth" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
     </div>
     <div id="auth-mode-register" style="display:none;">
       <h2 style="font-size:22px;font-weight:700;margin-bottom:6px;">Cont nou</h2>
@@ -508,9 +508,9 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
       <input id="auth-email2" type="email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:12px;outline:none;">
       <input id="auth-pass2" type="password" placeholder="Parolă (min. 6 caractere)" style="width:100%;padding:13px 14px;border:1.5px solid #e5e5ea;border-radius:12px;font-size:15px;font-family:inherit;margin-bottom:16px;outline:none;">
       <div id="auth-err2" style="font-size:13px;color:#ff3b30;margin-bottom:10px;display:none;"></div>
-      <button onclick="doRegister()" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Creează cont</button>
-      <button onclick="showLogin()" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Am deja cont</button>
-      <button onclick="skipAuth()" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
+      <button id="btn-do-register" style="width:100%;padding:14px;background:#007aff;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:12px;">Creează cont</button>
+      <button id="btn-show-login" style="width:100%;padding:14px;background:#f2f2f7;color:#1c1c1e;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Am deja cont</button>
+      <button id="btn-skip-auth" style="width:100%;padding:12px;background:none;border:none;color:#8e8e93;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">Continuă fără cont</button>
     </div>
   </div>
 </div>
@@ -792,7 +792,7 @@ function buildSummary() {
     `❤️ ${ints}`;
 }
 
-function launch() {
+async function launch() {
   qCollect(qStep);
   document.getElementById('s-age').value = profile.age;
   document.getElementById('s-age-v').textContent = profile.age + ' ani';
@@ -1533,6 +1533,12 @@ async function saveUserProfile() {
 // ── INIT ──────────────────────────────────────────────────
 async function init() {
   loadQuizPreview();
+  // Auth button listeners
+  document.getElementById('btn-show-register')?.addEventListener('click', showRegister);
+  document.getElementById('btn-skip-auth')?.addEventListener('click', skipAuth);
+  document.getElementById('btn-do-login')?.addEventListener('click', doLogin);
+  document.getElementById('btn-show-login')?.addEventListener('click', showLogin);
+  document.getElementById('btn-do-register')?.addEventListener('click', doRegister);
   // Verificăm dacă utilizatorul e deja logat
   const { data: { session } } = await supa.auth.getSession();
   if (session) {
