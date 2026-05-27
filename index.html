@@ -1530,7 +1530,19 @@ function skipAuth() {
 
 async function loadUserProfile() {
   if (!currentUser) return;
-  const { data } = await supa.from('profiles').select('*').eq('id', currentUser.id).single();
+  
+  // Timeout 5 secunde — dacă Supabase nu răspunde, intrăm oricum
+  let data = null;
+  try {
+    const result = await Promise.race([
+      supa.from('profiles').select('*').eq('id', currentUser.id).single(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+    ]);
+    data = result.data;
+  } catch(e) {
+    console.warn('Profile load timeout/error:', e.message);
+  }
+  
   if (data) {
     profile = { age: data.age||28, sex: data.sex||'masculin', edu: data.edu||'facultate', zone: data.zone||'Moldova', mood: data.mood||'ok' };
     if (data.interests) INTERESTS.forEach(i => { i.on = data.interests.includes(i.id); });
@@ -1568,9 +1580,12 @@ async function loadUserProfile() {
     renderSources(); renderInts(); renderAlerts();
     startLive();
   } else {
+    // Nu există profil sau timeout — intrăm direct în feed cu setări default
     document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('quiz').style.display = 'flex';
-    loadQuizPreview();
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderSources(); renderInts(); renderAlerts();
+    startLive();
   }
 }
 
