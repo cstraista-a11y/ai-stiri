@@ -725,15 +725,27 @@ async function fetchRSS(rssUrl) {
     return await res.text();
   }
   // Pe Render folosim corsproxy.io
-  // Folosim allorigins.win — cel mai fiabil CORS proxy
-  const res = await fetch(
+  // Încercăm mai multe CORS proxies
+  const proxies = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-    { signal: AbortSignal.timeout(12000) }
-  );
-  if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
-  const text = await res.text();
-  if (!text || text.length < 100) throw new Error('Empty response');
-  return text;
+    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+    `https://proxy.cors.sh/${rssUrl}`,
+  ];
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl, { 
+        signal: AbortSignal.timeout(10000),
+        headers: { 'x-requested-with': 'XMLHttpRequest' }
+      });
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.length > 200 && (text.includes('<rss') || text.includes('<feed') || text.includes('<item'))) {
+          return text;
+        }
+      }
+    } catch(e) { continue; }
+  }
+  throw new Error('All proxies failed for ' + rssUrl);
 }
 
 // Supabase
@@ -1370,7 +1382,7 @@ Articole:
 ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary || a.fullText || '').substring(0, 500), lang: a.lang })))}`;
 
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GKEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GKEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
