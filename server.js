@@ -38,9 +38,8 @@ const FEEDS = [
   'https://www.zdg.md/feed',
   'https://moldova.europalibera.org/api/epiooi_yit',
   'https://moldova1.md/rss',
-  'https://nokta.md/feed/',
   'https://www.ipn.md/rss',
-  'https://www.protv.md/rss',
+  'https://www.publika.md/rss',
   'https://deschide.md/feed/',
   'https://publika.md/rss',
   // România
