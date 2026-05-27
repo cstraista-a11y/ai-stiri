@@ -135,13 +135,7 @@ body {
   background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
   width: 36px; height: 36px; cursor: pointer; font-size: 18px; color: white;
 }
-.app-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
-.app-chips::-webkit-scrollbar { display: none; }
-.app-chip {
-  font-size: 12px; font-weight: 600; padding: 4px 10px;
-  border-radius: 20px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
-  white-space: nowrap; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15);
-}
+.app-chips { display: none; }
 
 /* Cats */
 .app-cats {
@@ -551,7 +545,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
       <div class="app-logo">Ai <span class="app-logo-a">Știri</span></div>
       <button class="app-hbtn" onclick="goTab('alerts')">🔔</button>
     </div>
-    <div class="app-chips" id="app-chips"></div>
+    <!-- chips scoase -->
   </div>
 
   <!-- FEED -->
@@ -638,12 +632,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
           </select>
         </div>
       </div>
-      <div class="app-s-label" style="margin-top:4px;">AI Personalizare</div>
-      <div class="app-api-box">
-        <p>🤖 Adaugă cheia Google Gemini (gratuită!) și AI-ul va rezuma, traduce din rusă și personaliza știrile pentru tine.<br><a href="https://aistudio.google.com" target="_blank" style="color:#c07000;font-weight:700;">→ Obține cheia gratuită la aistudio.google.com</a></p>
-        <input class="app-api-inp" type="password" id="s-apikey" placeholder="AIza...">
-        <button class="app-api-save" onclick="saveKey()">Salvează cheia</button>
-      </div>
+      <!-- AI key ascunsă în server -->
     </div>
   </div>
 
@@ -732,7 +721,7 @@ const SOURCES = [
   {id:'newsmaker',  name:'NewsMaker',     sub:'🥇 Top credibilitate CJI', color:'#553C9A', on:true,  lang:'ro', geo:'md', rss:'https://newsmaker.md/feed/'},
   {id:'tv8',        name:'TV8.md',        sub:'🥇 Top credibilitate CJI', color:'#2B6CB0', on:true,  lang:'ro', geo:'md', rss:'https://tv8.md/feed/'},
   {id:'zdg',        name:'ZdG',           sub:'🥇 Investigații independente', color:'#276749', on:true, lang:'ro', geo:'md', rss:'https://www.zdg.md/feed'},
-  {id:'agora',      name:'Agora.md',      sub:'🥇 Top credibilitate CJI', color:'#8E44AD', on:true,  lang:'ro', geo:'md', rss:'https://agora.md/ro/rss'},
+  {id:'agora',      name:'Agora.md',      sub:'🥇 Top credibilitate CJI', color:'#8E44AD', on:true,  lang:'ro', geo:'md', rss:'https://agora.md/feed'},
   {id:'europalib',  name:'Europa Liberă', sub:'Radio Free Europe Moldova', color:'#1A56DB', on:true, lang:'ro', geo:'md', rss:'https://moldova.europalibera.org/api/epiooi_yit'},
   {id:'moldova1',   name:'Moldova1.md',   sub:'Top 3 credibilitate CJI',  color:'#1A6B9A', on:true,  lang:'ro', geo:'md', rss:'https://moldova1.md/rss'},
   {id:'nokta',      name:'Nokta.md',      sub:'🥇 Locul 1 CJI credibilitate', color:'#C0392B', on:true, lang:'ro', geo:'md', rss:'https://nokta.md/feed/'},
@@ -744,7 +733,6 @@ const SOURCES = [
   {id:'g4media',    name:'G4Media',       sub:'România — Verificat', color:'#2D3748', on:true, lang:'ro', geo:'ro', rss:'https://www.g4media.ro/feed'},
   {id:'hotnews',    name:'HotNews',       sub:'România',          color:'#DD6B20', on:true,  lang:'ro', geo:'ro', rss:'https://www.hotnews.ro/rss'},
   {id:'digi24',     name:'Digi24',        sub:'România',          color:'#E53E3E', on:true,  lang:'ro', geo:'ro', rss:'https://www.digi24.ro/rss'},
-  {id:'libertatea', name:'Libertatea',    sub:'România — Investigații', color:'#C05621', on:false, lang:'ro', geo:'ro', rss:'https://www.libertatea.ro/rss'},
   {id:'dw-ro',      name:'DW Română',     sub:'International',    color:'#1A1A6B', on:false, lang:'ro', geo:'int', rss:'https://www.dw.com/ro/rss'},
   // ── INTERNATIONAL 🔄 tradus automat ───────────────────────
   {id:'bbc',        name:'BBC World',     sub:'UK 🔄',            color:'#BB1919', on:false, lang:'en', geo:'int', rss:'https://feeds.bbci.co.uk/news/world/rss.xml'},
@@ -1265,9 +1253,13 @@ function buildSmartSummary(title, cleanText) {
 }
 
 async function fetchSrc(src) {
-  const res = await fetch(`${RSS_PROXY}/rss?url=${encodeURIComponent(src.rss)}`, { signal: AbortSignal.timeout(12000) });
+  let res;
+  try {
+    res = await fetch(`${RSS_PROXY}/rss?url=${encodeURIComponent(src.rss)}`, { signal: AbortSignal.timeout(10000) });
+  } catch(e) { throw new Error(`Network error: ${e.message}`); }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const xml = await res.text();
+  if (!xml || xml.length < 50) throw new Error('Empty response');
   if (xml.trimStart().startsWith('{')) throw new Error(JSON.parse(xml).error || 'Error');
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
   const items = Array.from(doc.querySelectorAll('item')).slice(0, 15);
@@ -1323,65 +1315,31 @@ async function fetchSrc(src) {
 }
 
 // ─── AI PERSONALIZARE ─────────────────────────────
-async function callAI(prompt) {
-  // Folosim Google Gemini — gratuit, fără limită de consum personal
-  const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 3000 }
-      })
-    }
-  );
-  const d = await r.json();
-  if (d.error) throw new Error(d.error.message);
-  const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return text.replace(/```json|```/g, '').trim();
+async function callAI(articles) {
+  // Folosim serverul nostru care are cheia Gemini ascunsă
+  const r = await fetch(`${RSS_PROXY}/ai`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ articles, profile })
+  });
+  if (!r.ok) throw new Error(`AI server error: ${r.status}`);
+  const data = await r.json();
+  return data.articles || [];
 }
 
 async function aiPersonalize(arts) {
-  if (!apiKey || !arts.length) return arts;
-  const langMap = {
-    liceu: 'simplu și clar, fără jargon, fraze scurte, ca pentru un adolescent de 16 ani',
-    medii: 'accesibil și ușor de înțeles, fără termeni tehnici complicați',
-    facultate: 'standard, informativ, direct',
-    master: 'tehnic și detaliat, cu termeni de specialitate'
-  };
-  const langStyle = langMap[profile.edu] || 'standard';
+  if (!arts.length) return arts;
   let result = [...arts];
-
-  // Procesăm în batch-uri de câte 6
   const toProcess = arts.slice(0, 12);
-  const batches = [];
-  for (let i = 0; i < toProcess.length; i += 6) batches.push(toProcess.slice(i, i + 6));
-
-  for (const batch of batches) {
-    try {
-      const prompt = `Ești editorul aplicației GATA de știri din Moldova. Pentru fiecare articol de mai jos:
-
-1. Dacă e în rusă (lang=ru) sau engleză (lang=en) — TRADUCE în română
-2. Rescrie TITLUL — concis, informativ, fără clickbait
-3. Scrie un REZUMAT COMPLET — 3-5 propoziții care explică: CE s-a întâmplat, UNDE, CÂND, DE CE contează. Stil direct, fapte clare. Limbaj: ${langStyle}. Adaptat pentru ${profile.age} ani din ${profile.zone}.
-
-IMPORTANT: rezumatul trebuie să fie complet și informativ, nu o bucată tăiată din text.
-
-Returnează DOAR JSON valid, fără alt text:
-[{"id":"...","title":"titlu rescris","summary":"rezumat complet de 3-5 propoziții"}]
-
-Articole:
-${JSON.stringify(batch.map(a => ({ id: a.id, title: a.title, summary: a.summary || a.fullText?.substring(0,300) || '', lang: a.lang })))}`;
-
-      const txt = await callAI(prompt, 3000);
-      const parsed = JSON.parse(txt);
-      const map = {};
-      parsed.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
-      result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
-    } catch(e) {
-      console.warn('AI batch error:', e.message);
-    }
+  
+  try {
+    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă știrile...';
+    const processed = await callAI(toProcess);
+    const map = {};
+    processed.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
+    result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
+  } catch(e) {
+    console.warn('AI error:', e.message);
   }
   return result;
 }
@@ -1439,13 +1397,21 @@ async function loadAndRender() {
     <div class="nc-skeleton"><div class="sk" style="height:11px;width:40%"></div><div class="sk" style="height:18px;width:96%"></div><div class="sk" style="height:18px;width:84%"></div><div class="sk" style="height:13px;width:55%"></div></div>`;
 
   const active = SOURCES.filter(s => s.on);
-  const results = await Promise.allSettled(active.map(s => fetchSrc(s)));
+  
+  // Încărcăm sursele în paralel cu timeout individual de 10s
+  const results = await Promise.allSettled(
+    active.map(s => Promise.race([
+      fetchSrc(s),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+    ]))
+  );
+  
   let arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
   const failed = results.filter(r => r.status === 'rejected').length;
 
   if (!arts.length) {
-    showBanner('err', 'Serverul nu răspunde. Rulează: cd ~/Downloads/stirio && node server.js', 0);
-    feed.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">🔌</div><div class="nc-empty-title">Server offline</div><div class="nc-empty-sub">Terminal:<br><code style="background:#f2f2f7;padding:3px 8px;border-radius:6px;font-size:12px;">cd ~/Downloads/stirio && node server.js</code></div></div>`;
+    showBanner('err', 'Nicio sursă nu a răspuns. Verifică conexiunea la internet.', 0);
+    feed.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">📡</div><div class="nc-empty-title">Nicio știre disponibilă</div><div class="nc-empty-sub">Verifică conexiunea și încearcă din nou.</div></div>`;
     return;
   }
 
@@ -1458,24 +1424,19 @@ async function loadAndRender() {
   document.getElementById('app-live').style.display = 'inline';
   renderMainFeed();
   
-  // Dacă avem API key, personalizăm în background
-  if (apiKey) {
-    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă și traduce...';
-    aiPersonalize(allArts.slice(0, 12)).then(processed => {
-      // Actualizăm articolele procesate
+  // AI în background — nu blochează feed-ul
+  setTimeout(() => {
+    aiPersonalize(allArts.slice(0, 10)).then(processed => {
+      if (!processed || !processed.length) return;
       processed.forEach(p => {
         const idx = allArts.findIndex(a => a.id === p.id);
-        if (idx >= 0) allArts[idx] = p;
+        if (idx >= 0) allArts[idx] = { ...allArts[idx], ...p };
       });
       document.getElementById('app-status-txt').textContent =
         `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole · ✅ AI`;
       renderMainFeed();
-    }).catch(e => {
-      console.warn('AI background error:', e);
-      document.getElementById('app-status-txt').textContent =
-        `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole`;
-    });
-  }
+    }).catch(e => console.warn('AI background:', e.message));
+  }, 100);
 
   const alertArt = arts.find(a => ALERT_TOPICS.filter(t => t.on).some(tp => tp.words.some(w => a.title.toLowerCase().includes(w))));
   if (alertArt) showBanner('info', '🔔 ' + alertArt.title.substring(0, 65) + '...');
