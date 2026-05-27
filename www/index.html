@@ -1159,7 +1159,7 @@ function cardHTML(a) {
       
     </div>
     <div class="nc-title">${a.title || ''}</div>
-    ${leadText ? `<div class="nc-lead">${leadText.substring(0, 300)}${leadText.length > 300 ? '...' : ''}</div>` : ''}
+    ${leadText ? `<div class="nc-lead">${leadText.substring(0, 220)}${leadText.length > 220 ? '...' : ''}</div>` : ''}
   </div>
   <div class="nc-div"></div>
   <div class="nc-actions">
@@ -1177,12 +1177,11 @@ function cardHTML(a) {
     </div>
     <div id="clist-${a.id}">${cmtsHTML(a.id)}</div>
   </div>
-  ${(a.lead && a.lead.length > 100) || hasBody
-    ? `<button class="nc-expand-btn" id="expbtn-${a.id}" onclick="toggleExp('${a.id}')">${expOpen ? '▲ Mai puțin' : '▼ Rezumat complet + sursă'}</button>
+  ${hasBody && a.fullText !== a.lead
+    ? `<button class="nc-expand-btn" id="expbtn-${a.id}" onclick="toggleExp('${a.id}')">${expOpen ? '▲ Mai puțin' : '▼ Citește mai mult'}</button>
        <div class="nc-expand-body${expOpen ? ' on' : ''}" id="exp-${a.id}">
-         ${a.lead && a.lead.length > 200 ? `<div class="nc-full-text" style="margin-bottom:12px;">${a.lead}</div>` : ''}
-         ${hasBody ? `<div class="nc-full-text">${a.fullText}</div>` : ''}
-         <a class="nc-src-link" href="${a.url}" target="_blank">📰 Citește articolul complet la sursă →</a>
+         <div class="nc-full-text">${a.fullText}</div>
+         <a class="nc-src-link" href="${a.url}" target="_blank">📰 Citește articolul complet →</a>
        </div>`
     : `<a class="nc-read-link" href="${a.url}" target="_blank">📰 Citește la sursă →</a>`
   }
