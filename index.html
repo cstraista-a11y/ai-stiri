@@ -725,21 +725,15 @@ async function fetchRSS(rssUrl) {
     return await res.text();
   }
   // Pe Render folosim corsproxy.io
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+  // Folosim allorigins.win — cel mai fiabil CORS proxy
+  const res = await fetch(
     `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-    `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
-  ];
-  for (const proxy of proxies) {
-    try {
-      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const text = await res.text();
-        if (text && text.length > 100) return text;
-      }
-    } catch(e) { continue; }
-  }
-  throw new Error('All proxies failed');
+    { signal: AbortSignal.timeout(12000) }
+  );
+  if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+  const text = await res.text();
+  if (!text || text.length < 100) throw new Error('Empty response');
+  return text;
 }
 
 // Supabase
