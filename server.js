@@ -39,6 +39,35 @@ const FEEDS = [
   'https://www.economist.com/latest/rss.xml',
 ];
 
+// ── CACHE RSS (5 minute) ──────────────────────────────────
+const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minute
+
+async function fetchWithCache(url) {
+  const now = Date.now();
+  if (cache.has(url)) {
+    const { data, ts } = cache.get(url);
+    if (now - ts < CACHE_TTL) {
+      console.log(`  📦 Cache hit: ${new URL(url).hostname}`);
+      return data;
+    }
+  }
+  const data = await fetchUrl(url);
+  cache.set(url, { data, ts: now });
+  console.log(`  🔄 Cache miss: ${new URL(url).hostname} (${data.length} bytes)`);
+  return data;
+}
+
+// Curățăm cache-ul expirat la fiecare 10 minute
+setInterval(() => {
+  const now = Date.now();
+  let cleaned = 0;
+  for (const [url, { ts }] of cache.entries()) {
+    if (now - ts > CACHE_TTL) { cache.delete(url); cleaned++; }
+  }
+  if (cleaned > 0) console.log(`  🧹 Cache curățat: ${cleaned} intrări expirate`);
+}, 10 * 60 * 1000);
+
 function fetchUrl(targetUrl, hops = 0) {
   return new Promise((resolve, reject) => {
     if (hops > 5) return reject(new Error('Too many redirects'));
@@ -101,13 +130,23 @@ const server = http.createServer(async (req, res) => {
 
   if (u.pathname === '/favicon.ico') { res.writeHead(204); res.end(); return; }
 
+  if (u.pathname === '/privacy') {
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'privacy.html'));
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Length', buf.length);
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end('Privacy page not found'); }
+    return;
+  }
+
   if (u.pathname === '/rss') {
     const feedUrl = u.searchParams.get('url');
     if (!feedUrl || !FEEDS.includes(feedUrl)) {
       res.writeHead(403); res.end(JSON.stringify({ error: 'Sursă nepermisă' })); return;
     }
     try {
-      const xml = await fetchUrl(feedUrl);
+      const xml = await fetchWithCache(feedUrl);
       res.setHeader('Content-Type', 'application/xml; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache');
       res.writeHead(200); res.end(xml);

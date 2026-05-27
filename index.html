@@ -3,15 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>AS · Ai Știri</title>
+<title>Ai Știri</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --brand: #0D0D0D;
+  --accent: #4FC3F7;
+  --accent2: #0A2463;
+  --bg: #F4F6F9;
+  --card: #ffffff;
+  --border: #E8ECF0;
+  --text: #0D0D0D;
+  --muted: #7A8394;
+  --pill: #EEF2FF;
+}
 body {
   font-family: 'DM Sans', -apple-system, sans-serif;
-  background: #f2f2f7;
-  color: #1c1c1e;
+  background: var(--bg);
+  color: var(--text);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -58,8 +69,8 @@ body {
   text-align: left;
   width: 100%;
 }
-.q-opt:hover { border-color: #007aff; }
-.q-opt.on { border-color: #007aff; background: #e8f0fb; color: #007aff; }
+.q-opt:hover { border-color: var(--accent2); }
+.q-opt.on { border-color: var(--accent2); background: #EEF2FF; color: var(--accent2); }
 .q-opt .qi { font-size: 24px; flex-shrink: 0; }
 
 .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -92,9 +103,9 @@ body {
 .q-next {
   flex: 2; padding: 14px;
   border: none; border-radius: 14px;
-  background: #007aff; font-size: 16px; font-weight: 700;
+  background: var(--accent2); font-size: 16px; font-weight: 700;
   color: white; cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 16px rgba(0,122,255,0.35);
+  box-shadow: 0 4px 16px rgba(10,36,99,0.3);
 }
 
 /* ─── APP ───────────────────────────────────── */
@@ -108,63 +119,63 @@ body {
 
 /* Header */
 .app-header {
-  background: white;
-  border-bottom: 1px solid #e5e5ea;
+  background: var(--brand);
+  border-bottom: none;
   padding: env(safe-area-inset-top, 16px) 18px 12px;
   padding-top: max(env(safe-area-inset-top, 0px), 16px);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 .app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.app-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
-.app-logo-a { color: #007aff; }
+.app-logo { font-size: 26px; font-weight: 900; letter-spacing: -1px; color: white; font-family: 'Arial Black', sans-serif; }
+.app-logo-a { color: var(--accent); }
 .app-hbtn {
-  background: #e8f0fb; border: none; border-radius: 50%;
-  width: 34px; height: 34px; cursor: pointer; font-size: 16px; color: #007aff;
+  background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
+  width: 36px; height: 36px; cursor: pointer; font-size: 18px; color: white;
 }
 .app-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
 .app-chips::-webkit-scrollbar { display: none; }
 .app-chip {
   font-size: 12px; font-weight: 600; padding: 4px 10px;
-  border-radius: 20px; background: #e8f0fb; color: #007aff;
-  white-space: nowrap; flex-shrink: 0;
+  border-radius: 20px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+  white-space: nowrap; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15);
 }
 
 /* Cats */
 .app-cats {
-  background: white;
-  border-bottom: 1px solid #e5e5ea;
-  padding: 10px 16px;
+  background: var(--brand);
+  border-bottom: none;
+  padding: 8px 14px 12px;
   display: flex;
-  gap: 8px;
+  gap: 7px;
   overflow-x: auto;
   scrollbar-width: none;
   position: sticky;
-  top: 80px;
+  top: 76px;
   z-index: 99;
 }
 .app-cats::-webkit-scrollbar { display: none; }
 .app-cat {
   font-size: 13px; font-weight: 600;
-  padding: 6px 16px; border-radius: 20px; border: none;
-  background: #f2f2f7; color: #8e8e93;
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65);
   cursor: pointer; white-space: nowrap; font-family: inherit;
   transition: all 0.2s;
 }
-.app-cat.on { background: #007aff; color: white; }
+.app-cat.on { background: var(--accent); color: var(--brand); border-color: var(--accent); font-weight: 700; }
 
 /* Status */
 .app-status {
-  padding: 8px 18px;
+  padding: 8px 16px;
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 12px; color: #8e8e93;
-  background: white;
-  border-bottom: 1px solid #f2f2f7;
+  font-size: 12px; color: var(--muted);
+  background: var(--bg);
 }
 .app-live { color: #34c759; font-weight: 700; display: none; }
 .app-refresh {
-  font-size: 13px; font-weight: 700; color: #007aff;
+  font-size: 13px; font-weight: 700; color: var(--accent2);
   background: none; border: none; cursor: pointer; font-family: inherit;
 }
 
@@ -172,12 +183,13 @@ body {
 .app-newpill {
   display: none;
   margin: 10px auto 0;
-  padding: 8px 20px;
-  background: #007aff; color: white;
-  border: none; border-radius: 20px;
+  padding: 9px 22px;
+  background: var(--brand); color: var(--accent);
+  border: 2px solid var(--accent); border-radius: 20px;
   font-size: 13px; font-weight: 700;
   cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+  box-shadow: 0 4px 16px rgba(13,13,13,0.2);
+  letter-spacing: 0.02em;
 }
 
 /* Banners */
@@ -191,24 +203,24 @@ body {
   gap: 8px;
   line-height: 1.4;
 }
-.app-banner.info { background: #e8f0fb; color: #007aff; }
-.app-banner.err { background: #ffeaea; color: #ff3b30; }
-.app-banner.warn { background: #fff3e0; color: #ff9500; }
+.app-banner.info { background: #E8F4FD; color: #0A2463; border-left: 3px solid #4FC3F7; }
+.app-banner.err { background: #ffeaea; color: #cc2200; border-left: 3px solid #cc2200; }
+.app-banner.warn { background: #FFF8E8; color: #B45309; border-left: 3px solid #F59E0B; }
 
 /* Screens */
 .app-screen { display: none; }
 .app-screen.on { display: block; }
 
 /* Feed */
-.app-feed { padding: 12px 16px 90px; display: flex; flex-direction: column; gap: 14px; }
+.app-feed { padding: 14px 14px 90px; display: flex; flex-direction: column; gap: 12px; }
 
 /* ─── CARDS ─────────────────────────────────── */
 .news-card {
-  background: white;
+  background: var(--card);
   border-radius: 16px;
-  border: 1px solid #e5e5ea;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  overflow: visible;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(13,13,13,0.06);
+  overflow: hidden;
 }
 .news-card.liked { border-left: 4px solid #34c759; }
 .news-card.disliked { opacity: 0.35; }
@@ -224,36 +236,47 @@ body {
   font-size: 11px; font-weight: 700;
   padding: 3px 9px; border-radius: 20px;
 }
-.nc-cat-act { background: #e8f0fb; color: #007aff; }
-.nc-cat-biz { background: #e6f9ee; color: #1a8a3a; }
-.nc-cat-san { background: #f3eeff; color: #7c3aed; }
-.nc-cat-teh { background: #e0f5ff; color: #0077aa; }
-.nc-cat-spt { background: #fff4e0; color: #c05000; }
-.nc-cat-int { background: #ffeaea; color: #cc2200; }
+.nc-cat-act { background: #E8F4FD; color: #0A2463; }
+.nc-cat-biz { background: #E6F9EE; color: #1a8a3a; }
+.nc-cat-san { background: #F3EEFF; color: #7c3aed; }
+.nc-cat-teh { background: #E0F7FF; color: #006B9F; }
+.nc-cat-spt { background: #FFF4E0; color: #B45309; }
+.nc-cat-int { background: #EEF2FF; color: #0A2463; }
 .nc-rec { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: linear-gradient(135deg,#ff9500,#ff6000); color: white; }
 
 .nc-title { font-size: 16px; font-weight: 700; line-height: 1.35; color: #1c1c1e; margin-bottom: 8px; letter-spacing: -0.2px; }
 .nc-lead { font-size: 13px; color: #48484a; line-height: 1.65; }
 
 /* Divider */
-.nc-div { height: 1px; background: #f2f2f7; }
+.nc-div { height: 1px; background: var(--border); }
 
 /* Actions */
-.nc-actions { padding: 10px 14px; display: flex; align-items: center; gap: 6px; }
+.nc-actions { padding: 10px 12px; display: flex; align-items: center; gap: 6px; }
 .nc-btn {
-  font-size: 12px; font-weight: 600;
-  padding: 6px 12px; border-radius: 20px; border: none;
+  font-size: 18px;
+  width: 40px; height: 40px;
+  border-radius: 50%; border: none;
   background: #f2f2f7; color: #8e8e93;
   cursor: pointer; font-family: inherit;
-  display: flex; align-items: center; gap: 4px;
-  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
 }
-.nc-btn:hover { background: #e5e5ea; }
+.nc-btn:active { transform: scale(0.9); }
 .nc-btn.liked { background: #e6f9ee; color: #1a8a3a; }
-.nc-btn.saved { background: #e8f0fb; color: #007aff; }
+.nc-btn.saved { background: #E8F4FD; color: #0A2463; }
 .nc-btn.disliked { background: #ffeaea; color: #cc2200; }
-.nc-btn.cmt-on { background: #e8f0fb; color: #007aff; }
-.nc-share { margin-left: auto; background: none; border: none; font-size: 22px; cursor: pointer; color: #8e8e93; padding: 4px; line-height: 1; }
+.nc-btn.cmt-on { background: #E8F4FD; color: #0A2463; }
+.nc-btn-label { font-size: 11px; font-weight: 600; color: inherit; margin-left: 4px; }
+.nc-share {
+  margin-left: auto;
+  width: 40px; height: 40px;
+  border-radius: 50%; border: none;
+  background: #f2f2f7; color: #8e8e93;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit; line-height: 1; flex-shrink: 0;
+}
+.nc-share:active { transform: scale(0.9); }
 
 /* Reactions */
 .nc-reacts { padding: 8px 14px; display: flex; align-items: center; gap: 6px; border-top: 1px solid #f2f2f7; flex-wrap: wrap; }
@@ -265,7 +288,7 @@ body {
   transition: all 0.15s;
 }
 .nc-react:hover { background: #f2f2f7; }
-.nc-react.on { background: #e8f0fb; border-color: #007aff; }
+.nc-react.on { background: #E8F4FD; border-color: var(--accent2); }
 .nc-react-cnt { font-size: 12px; font-weight: 700; color: #8e8e93; }
 
 /* Comments */
@@ -299,17 +322,17 @@ body {
 /* Expand */
 .nc-expand-btn {
   width: 100%; padding: 10px 14px;
-  background: none; border: none; border-top: 1px solid #f2f2f7;
-  font-size: 13px; font-weight: 600; color: #007aff;
+  background: var(--bg); border: none; border-top: 1px solid var(--border);
+  font-size: 13px; font-weight: 700; color: var(--accent2);
   cursor: pointer; font-family: inherit;
   display: flex; align-items: center; gap: 5px;
-  text-align: left;
+  text-align: left; letter-spacing: 0.01em;
 }
 .nc-expand-body { display: none; padding: 12px 14px; border-top: 1px solid #f2f2f7; background: #fafafa; }
 .nc-expand-body.on { display: block; }
 .nc-full-text { font-size: 13px; color: #48484a; line-height: 1.75; margin-bottom: 12px; }
 .nc-src-link { font-size: 13px; font-weight: 700; color: #007aff; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
-.nc-read-link { display: block; padding: 10px 14px; border-top: 1px solid #f2f2f7; font-size: 13px; font-weight: 700; color: #007aff; text-decoration: none; }
+.nc-read-link { display: block; padding: 10px 14px; border-top: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--accent2); text-decoration: none; letter-spacing: 0.01em; }
 
 /* Imaginea articolului */
 .nc-img-wrap { width: 100%; overflow: hidden; border-radius: 14px 14px 0 0; max-height: 200px; background: #f2f2f7; }
@@ -339,10 +362,10 @@ body {
 .app-s-row:last-child { border-bottom: none; }
 .app-s-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
 .app-s-info { flex: 1; }
-.app-s-name { font-size: 15px; font-weight: 600; }
+.app-s-name { font-size: 15px; font-weight: 600; color: var(--text); }
 .app-s-sub { font-size: 12px; color: #8e8e93; margin-top: 2px; }
 .app-toggle { width: 51px; height: 31px; border-radius: 16px; border: none; cursor: pointer; position: relative; transition: background 0.25s; flex-shrink: 0; }
-.app-toggle.on { background: #34c759; }
+.app-toggle.on { background: var(--accent2); }
 .app-toggle.off { background: rgba(120,120,128,0.2); }
 .app-toggle::after { content: ''; position: absolute; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: left 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .app-toggle.on::after { left: 22px; }
@@ -350,11 +373,11 @@ body {
 select { font-size: 14px; font-weight: 600; color: #007aff; border: none; background: none; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
 .app-int-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 18px; }
 .app-int-chip { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 20px; border: 2px solid #e5e5ea; background: white; color: #8e8e93; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
-.app-int-chip.on { background: #007aff; color: white; border-color: #007aff; }
+.app-int-chip.on { background: var(--accent2); color: white; border-color: var(--accent2); }
 .app-api-box { margin: 0 14px 18px; padding: 16px; background: #fff8e8; border-radius: 16px; border: 1px solid rgba(255,149,0,0.3); }
 .app-api-box p { font-size: 13px; color: #c07000; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
 .app-api-inp { width: 100%; font-size: 14px; padding: 10px 14px; border: 1.5px solid rgba(255,149,0,0.3); border-radius: 10px; background: white; font-family: inherit; margin-bottom: 10px; color: #1c1c1e; }
-.app-api-save { font-size: 14px; font-weight: 700; padding: 10px 18px; background: #ff9500; color: white; border: none; border-radius: 10px; cursor: pointer; font-family: inherit; }
+.app-api-save { font-size: 14px; font-weight: 700; padding: 10px 18px; background: var(--accent2); color: white; border: none; border-radius: 10px; cursor: pointer; font-family: inherit; }
 
 /* ─── BOTTOM NAV ─────────────────────────────── */
 .app-nav {
@@ -365,15 +388,16 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
   width: 100%;
   max-width: 480px;
   display: flex;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid #e5e5ea;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  border-top: 2px solid var(--border);
   z-index: 200;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 20px rgba(13,13,13,0.08);
 }
-.app-nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px 12px; font-size: 10px; font-weight: 600; color: #8e8e93; border: none; background: transparent; cursor: pointer; font-family: inherit; gap: 3px; transition: color 0.15s; }
+.app-nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px 12px; font-size: 10px; font-weight: 700; color: var(--muted); border: none; background: transparent; cursor: pointer; font-family: inherit; gap: 3px; transition: color 0.15s; }
 .app-nav-tab .ni { font-size: 24px; }
-.app-nav-tab.on { color: #007aff; }
+.app-nav-tab.on { color: var(--accent2); }
 
 /* ─── SHARE MODAL ────────────────────────────── */
 .share-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.5); display: none; align-items: flex-end; justify-content: center; }
@@ -382,12 +406,17 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 .share-handle { width: 36px; height: 4px; background: #e5e5ea; border-radius: 2px; margin: 0 auto 16px; }
 .share-label { font-size: 12px; font-weight: 700; color: #8e8e93; text-align: center; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
 .share-preview { font-size: 14px; font-weight: 600; color: #1c1c1e; padding: 12px 14px; background: #f8f8f8; border-radius: 12px; margin-bottom: 16px; line-height: 1.4; }
-.share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-.share-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-.share-item:active { opacity: 0.7; }
-.share-icon { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
-.share-lbl { font-size: 11px; font-weight: 600; color: #8e8e93; }
-.share-copy { width: 100%; padding: 14px; background: #007aff; color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
+.share-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 10px; margin-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.share-scroll::-webkit-scrollbar { display: none; }
+.share-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
+.share-item:active { opacity: 0.75; transform: scale(0.9); }
+.share-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.share-lbl { font-size: 10px; font-weight: 600; color: #8e8e93; white-space: nowrap; }
+.share-copy { width: 100%; padding: 14px; background: var(--brand); color: var(--accent); border: 2px solid var(--accent); border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 10px; letter-spacing: 0.02em; }
 .share-close { width: 100%; padding: 14px; background: #f2f2f7; border: none; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; color: #1c1c1e; }
 </style>
 </head>
@@ -488,7 +517,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 <!-- ═══════════ AUTH ═══════════ -->
 <div id="auth-screen" style="min-height:100vh;background:white;max-width:480px;margin:0 auto;flex-direction:column;display:flex;">
   <div style="background:linear-gradient(160deg,#020B2E,#0A2463);padding:60px 28px 40px;text-align:center;">
-    <div style="font-size:40px;font-weight:800;color:white;letter-spacing:-2px;"><span style="font-family:Arial Black,sans-serif;">A<em style='color:#4FC3F7;font-style:normal;'>S</em></span> <span style="font-size:20px;opacity:0.5;">·</span> Ai <em style='color:#4FC3F7;font-style:normal;'>Știri</em></div>
+    <div style="font-size:40px;font-weight:800;color:white;letter-spacing:-2px;">Ai <em style='color:#4FC3F7;font-style:normal;'>Știri</em></div>
     <div style="font-size:15px;color:rgba(255,255,255,0.6);margin-top:8px;">Știri personalizate pentru tine</div>
   </div>
   <div style="padding:32px 24px;">
@@ -519,7 +548,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 <div id="app">
   <div class="app-header">
     <div class="app-header-top">
-      <div class="app-logo"><span style="color:var(--color-text-primary);">A</span><span class="app-logo-a">S</span> <span style="font-size:18px;font-weight:500;opacity:0.5;">·</span> Ai <span class="app-logo-a">Știri</span></div>
+      <div class="app-logo">Ai <span class="app-logo-a">Știri</span></div>
       <button class="app-hbtn" onclick="goTab('alerts')">🔔</button>
     </div>
     <div class="app-chips" id="app-chips"></div>
@@ -641,15 +670,47 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
     <div class="share-handle"></div>
     <div class="share-label">Distribuie știrea</div>
     <div class="share-preview" id="share-preview-txt"></div>
-    <div class="share-grid">
-      <div class="share-item" onclick="doShare('whatsapp')"><div class="share-icon" style="background:#25D366;">💬</div><div class="share-lbl">WhatsApp</div></div>
-      <div class="share-item" onclick="doShare('telegram')"><div class="share-icon" style="background:#229ED9;">✈️</div><div class="share-lbl">Telegram</div></div>
-      <div class="share-item" onclick="doShare('viber')"><div class="share-icon" style="background:#7360F2;">📳</div><div class="share-lbl">Viber</div></div>
-      <div class="share-item" onclick="doShare('messenger')"><div class="share-icon" style="background:linear-gradient(135deg,#0099FF,#A033FF);">💌</div><div class="share-lbl">Messenger</div></div>
-      <div class="share-item" onclick="doShare('facebook')"><div class="share-icon" style="background:#1877F2;">📘</div><div class="share-lbl">Facebook</div></div>
-      <div class="share-item" onclick="doShare('twitter')"><div class="share-icon" style="background:#000000;">𝕏</div><div class="share-lbl">Twitter/X</div></div>
-      <div class="share-item" onclick="doShare('instagram')"><div class="share-icon" style="background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);">📸</div><div class="share-lbl">Instagram</div></div>
-      <div class="share-item" onclick="doShare('tiktok')"><div class="share-icon" style="background:#000000;">🎵</div><div class="share-lbl">TikTok</div></div>
+    <div class="share-scroll">
+      <div class="share-item" onclick="doShare('whatsapp')">
+        <div class="share-icon" style="background:#25D366;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div><div class="share-lbl">WhatsApp</div>
+      </div>
+      <div class="share-item" onclick="doShare('telegram')">
+        <div class="share-icon" style="background:#229ED9;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div><div class="share-lbl">Telegram</div>
+      </div>
+      <div class="share-item" onclick="doShare('viber')">
+        <div class="share-icon" style="background:#7360F2;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M11.4 0C6.4.1 2.1 3.3.7 8c-.5 1.6-.7 3.8-.5 5.6.4 3.5 2.5 6.7 5.5 8.6v3.1l2.9-1.6c.9.3 1.9.4 2.9.4 5.9 0 10.7-4.5 10.7-10.1C22.1 8.2 22.2 8 22.1 8 21.9 3.5 17.1 0 11.4 0zm5.5 15.6c-.3.8-1.4 1.5-2.3 1.6-.6.1-1.2.1-3.7-.8-3.1-1.1-5.1-4.3-5.3-4.5-.2-.2-1.4-1.9-1.4-3.6 0-1.7.9-2.5 1.2-2.9.3-.3.7-.4 1-.4h.7c.2 0 .4.1.6.5.3.6 1 2.4 1.1 2.6.1.2.2.4.1.7-.2.4-.3.6-.5.9-.2.3-.4.6-.2.9.5.8 1.1 1.6 1.8 2.2.8.7 1.7 1.1 2.7 1.4.3.1.6 0 .8-.3.2-.4.9-1 1.1-1.3.2-.3.5-.3.8-.2.3.1 1.9.9 2.2 1.1.3.2.5.3.6.5-.2.3-.2 1.5-.5 2.1z"/></svg>
+        </div><div class="share-lbl">Viber</div>
+      </div>
+      <div class="share-item" onclick="doShare('facebook')">
+        <div class="share-icon" style="background:#1877F2;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div><div class="share-lbl">Facebook</div>
+      </div>
+      <div class="share-item" onclick="doShare('twitter')">
+        <div class="share-icon" style="background:#000;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div><div class="share-lbl">X</div>
+      </div>
+      <div class="share-item" onclick="doShare('instagram')">
+        <div class="share-icon" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </div><div class="share-lbl">Instagram</div>
+      </div>
+      <div class="share-item" onclick="doShare('tiktok')">
+        <div class="share-icon" style="background:#000;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </div><div class="share-lbl">TikTok</div>
+      </div>
+      <div class="share-item" onclick="copyShare()">
+        <div class="share-icon" style="background:#f2f2f7;border:1px solid #e5e5ea;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A2463" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div><div class="share-lbl">Copiază</div>
+      </div>
     </div>
     <button class="share-copy" onclick="copyShare()">📋 Copiază linkul și textul</button>
     <button class="share-close" onclick="closeShare()">Închide</button>
@@ -1077,18 +1138,18 @@ function cardHTML(a) {
       <div class="nc-sep"></div>
       <span class="nc-time">${a.time || ''}</span>
       <span class="nc-cat ${catCls(a.category)}">${a.category || ''}</span>
-      ${isRec ? '<span class="nc-rec">⭐ Top</span>' : ''}
+      
     </div>
     <div class="nc-title">${a.title || ''}</div>
     ${leadText ? `<div class="nc-lead">${leadText.substring(0, 300)}${leadText.length > 300 ? '...' : ''}</div>` : ''}
   </div>
   <div class="nc-div"></div>
   <div class="nc-actions">
-    <button class="nc-btn${liked ? ' liked' : ''}"  onclick="doLike('${a.id}')">👍${liked ? ' Apreciat' : ''}</button>
-    <button class="nc-btn${dislik ? ' disliked' : ''}" onclick="doDislike('${a.id}')">👎</button>
-    <button class="nc-btn${saved ? ' saved' : ''}"  onclick="doSave('${a.id}')">🔖${saved ? ' Salvat' : ''}</button>
-    <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')">💬</button>
-    <button class="nc-share" onclick="openShare('${a.id}')">···</button>
+    <button class="nc-btn${liked ? ' liked' : ''}" onclick="doLike('${a.id}')" title="Apreciez">👍</button>
+    <button class="nc-btn${dislik ? ' disliked' : ''}" onclick="doDislike('${a.id}')" title="Nu mă interesează">👎</button>
+    <button class="nc-btn${saved ? ' saved' : ''}" onclick="doSave('${a.id}')" title="${saved ? 'Salvat' : 'Salvează'}">🔖</button>
+    <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')" title="Comentarii">💬</button>
+    <button class="nc-share" onclick="openShare('${a.id}')" title="Distribuie">⋯</button>
   </div>
   <div class="nc-reacts" id="rbar-${a.id}">${reactsHTML(a.id)}</div>
   <div class="nc-cmts${cmtOpen ? ' on' : ''}" id="cmts-${a.id}">
