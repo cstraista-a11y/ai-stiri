@@ -721,7 +721,6 @@ const SOURCES = [
   {id:'newsmaker',  name:'NewsMaker',     sub:'🥇 Top credibilitate CJI', color:'#553C9A', on:true,  lang:'ro', geo:'md', rss:'https://newsmaker.md/feed/'},
   {id:'tv8',        name:'TV8.md',        sub:'🥇 Top credibilitate CJI', color:'#2B6CB0', on:true,  lang:'ro', geo:'md', rss:'https://tv8.md/feed/'},
   {id:'zdg',        name:'ZdG',           sub:'🥇 Investigații independente', color:'#276749', on:true, lang:'ro', geo:'md', rss:'https://www.zdg.md/feed'},
-  {id:'agora',      name:'Agora.md',      sub:'🥇 Top credibilitate CJI', color:'#8E44AD', on:true,  lang:'ro', geo:'md', rss:'https://agora.md/feed'},
   {id:'europalib',  name:'Europa Liberă', sub:'Radio Free Europe Moldova', color:'#1A56DB', on:true, lang:'ro', geo:'md', rss:'https://moldova.europalibera.org/api/epiooi_yit'},
   {id:'moldova1',   name:'Moldova1.md',   sub:'Top 3 credibilitate CJI',  color:'#1A6B9A', on:true,  lang:'ro', geo:'md', rss:'https://moldova1.md/rss'},
   {id:'nokta',      name:'Nokta.md',      sub:'🥇 Locul 1 CJI credibilitate', color:'#C0392B', on:true, lang:'ro', geo:'md', rss:'https://nokta.md/feed/'},
@@ -1481,11 +1480,21 @@ async function doLogin() {
   const email = document.getElementById('auth-email').value.trim();
   const pass = document.getElementById('auth-pass').value;
   const errEl = document.getElementById('auth-err');
+  const btn = document.getElementById('btn-do-login');
   errEl.style.display = 'none';
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if (error) { errEl.textContent = 'Email sau parolă incorectă.'; errEl.style.display = 'block'; return; }
-  currentUser = data.user;
-  await loadUserProfile();
+  if (!email || !pass) { errEl.textContent = 'Introdu email și parolă.'; errEl.style.display = 'block'; return; }
+  if (btn) { btn.textContent = 'Se conectează...'; btn.disabled = true; }
+  try {
+    const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+    if (error) { errEl.textContent = 'Email sau parolă incorectă.'; errEl.style.display = 'block'; return; }
+    currentUser = data.user;
+    await loadUserProfile();
+  } catch(e) {
+    errEl.textContent = 'Eroare de conexiune. Încearcă din nou.';
+    errEl.style.display = 'block';
+  } finally {
+    if (btn) { btn.textContent = 'Intră în cont'; btn.disabled = false; }
+  }
 }
 
 async function doRegister() {

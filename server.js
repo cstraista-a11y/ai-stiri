@@ -1,5 +1,20 @@
 const http = require('http');
 const https = require('https');
+const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args)).catch(() => {
+  // fallback cu https nativ
+  return new Promise((resolve, reject) => {
+    const url = new URL(args[0]);
+    const options = { ...args[1], hostname: url.hostname, path: url.pathname + url.search };
+    const req = require('https').request(options, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => resolve({ ok: res.statusCode < 400, json: () => Promise.resolve(JSON.parse(data)), text: () => Promise.resolve(data) }));
+    });
+    req.on('error', reject);
+    if (args[1]?.body) req.write(args[1].body);
+    req.end();
+  });
+});
 const { URL } = require('url');
 const path = require('path');
 const fs = require('fs');
@@ -11,7 +26,6 @@ const FEEDS = [
   'https://newsmaker.md/feed/',
   'https://tv8.md/feed/',
   'https://www.zdg.md/feed',
-  'https://agora.md/ro/rss',
   'https://moldova.europalibera.org/api/epiooi_yit',
   'https://moldova1.md/rss',
   'https://nokta.md/feed/',
@@ -23,7 +37,6 @@ const FEEDS = [
   'https://www.g4media.ro/feed',
   'https://www.hotnews.ro/rss',
   'https://www.digi24.ro/rss',
-  'https://www.libertatea.ro/rss',
   'https://www.dw.com/ro/rss',
   // Internațional EN
   'https://feeds.bbci.co.uk/news/world/rss.xml',
@@ -129,6 +142,62 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (u.pathname === '/favicon.ico') { res.writeHead(204); res.end(); return; }
+
+  if (u.pathname === '/ai') {
+    if (req.method !== 'POST') { res.writeHead(405); res.end('Method not allowed'); return; }
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const { articles, profile } = JSON.parse(body);
+        const langMap = {
+          liceu: 'simplu și clar, fără jargon, fraze scurte',
+          medii: 'accesibil, ușor de înțeles',
+          facultate: 'standard, informativ',
+          master: 'tehnic și detaliat'
+        };
+        const langStyle = langMap[profile?.edu] || 'standard';
+        const zone = profile?.zone || 'Moldova';
+        const age = profile?.age || 28;
+
+        const prompt = `Ești editorul aplicației Ai Știri din Moldova. Pentru fiecare articol:
+1. Dacă e în rusă sau engleză — traduce în română naturală
+2. Rescrie TITLUL — concis, informativ, fără clickbait, max 12 cuvinte
+3. Scrie un REZUMAT de 3-4 propoziții: CE s-a întâmplat, UNDE, CÂND, DE CE contează. Stil direct, jurnalistic. Limbaj: ${langStyle}. Cititor: ${age} ani din ${zone}.
+
+Returnează DOAR JSON valid:
+[{"id":"...","title":"...","summary":"..."}]
+
+Articole:
+${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary || a.fullText || '').substring(0, 400), lang: a.lang })))}`;
+
+        const geminiRes = await fetch(
+          \`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}\`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 4000 }
+            })
+          }
+        );
+        const geminiData = await geminiRes.json();
+        const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+        const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
+        const parsed = JSON.parse(clean);
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({ ok: true, articles: parsed }));
+        console.log(\`  🤖 AI rezumat: \${parsed.length} articole\`);
+      } catch(e) {
+        console.error('AI error:', e.message);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
 
   if (u.pathname === '/privacy') {
     try {
