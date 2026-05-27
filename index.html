@@ -1487,7 +1487,9 @@ async function doLogin() {
   try {
     const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
     if (error) { errEl.textContent = 'Email sau parolă incorectă.'; errEl.style.display = 'block'; return; }
+    if (!data.user) { errEl.textContent = 'Eroare la autentificare.'; errEl.style.display = 'block'; return; }
     currentUser = data.user;
+    console.log('Login OK, user:', currentUser.id);
     await loadUserProfile();
   } catch(e) {
     errEl.textContent = 'Eroare de conexiune. Încearcă din nou.';
