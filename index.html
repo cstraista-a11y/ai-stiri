@@ -917,17 +917,15 @@ document.querySelectorAll('.app-cat').forEach(b => b.addEventListener('click', f
 }));
 
 function syncChips() {
-  const age = document.getElementById('s-age').value;
-  const edu = document.getElementById('s-edu').value;
-  const zone = document.getElementById('s-zone').value;
-  const sex = document.getElementById('s-sex').value;
+  const ageEl = document.getElementById('s-age');
+  const eduEl = document.getElementById('s-edu');
+  const zoneEl = document.getElementById('s-zone');
+  const sexEl = document.getElementById('s-sex');
+  const age = ageEl?.value || profile.age;
+  const edu = eduEl?.value || profile.edu;
+  const zone = zoneEl?.value || profile.zone;
+  const sex = sexEl?.value || profile.sex;
   profile = { ...profile, age: parseInt(age), edu, zone, sex };
-  const eL = { liceu: 'Liceu', medii: 'Medii', facultate: 'Facultate', master: 'Master' }[edu];
-  const sL = { masculin: '♂', feminin: '♀', alt: '🧑' }[sex];
-  document.getElementById('app-chips').innerHTML =
-    `<span class="app-chip">${sL} ${age} ani</span>` +
-    `<span class="app-chip">${eL}</span>` +
-    `<span class="app-chip">🌍 ${zone}</span>`;
 }
 
 function renderSources() {
@@ -1541,15 +1539,23 @@ async function loadUserProfile() {
       if (likedData) likedData.forEach(r => likes.add(r.article_id));
     } catch(e) { console.warn('Load likes error:', e); }
 
+    // Ascundem auth și quiz, arătăm app
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'none';
-    document.getElementById('s-age').value = profile.age;
-    document.getElementById('s-age-v').textContent = profile.age + ' ani';
-    document.getElementById('s-edu').value = profile.edu;
-    document.getElementById('s-zone').value = profile.zone;
-    document.getElementById('s-sex').value = profile.sex;
-    syncChips();
     document.getElementById('app').style.display = 'block';
+    
+    // Acum că app-ul e vizibil, setăm valorile în setări
+    const sAge = document.getElementById('s-age');
+    const sAgeV = document.getElementById('s-age-v');
+    const sEdu = document.getElementById('s-edu');
+    const sZone = document.getElementById('s-zone');
+    const sSex = document.getElementById('s-sex');
+    if (sAge) sAge.value = profile.age;
+    if (sAgeV) sAgeV.textContent = profile.age + ' ani';
+    if (sEdu) sEdu.value = profile.edu;
+    if (sZone) sZone.value = profile.zone;
+    if (sSex) sSex.value = profile.sex;
+    
     renderSources(); renderInts(); renderAlerts();
     startLive();
   } else {
