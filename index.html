@@ -1536,7 +1536,7 @@ async function loadUserProfile() {
   try {
     const result = await Promise.race([
       supa.from('profiles').select('*').eq('id', currentUser.id).single(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 15000))
     ]);
     data = result.data;
   } catch(e) {
