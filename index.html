@@ -991,7 +991,34 @@ function renderSources() {
   });
   document.getElementById('src-group').innerHTML = html;
 }
-function toggleSrc(id) { const s = SOURCES.find(x => x.id === id); s.on = !s.on; renderSources(); }
+function toggleSrc(id) { 
+  const s = SOURCES.find(x => x.id === id); 
+  s.on = !s.on; 
+  renderSources();
+  // Re-încărcăm feed-ul cu noile surse
+  if (s.on) {
+    showBanner('info', `Se încarcă ${s.name}...`);
+    fetchSrc(s).then(newArts => {
+      newArts.forEach(a => { if (!allArts.find(x => x.url === a.url)) allArts.unshift(a); });
+      allArts = allArts.slice(0, 150);
+      renderMainFeed();
+      // Traducem articolele noi dacă sunt EN/RU
+      const toTranslate = newArts.filter(a => a.lang !== 'ro').slice(0, 3);
+      if (toTranslate.length) {
+        aiPersonalize(toTranslate).then(translated => {
+          translated.forEach(p => {
+            const idx = allArts.findIndex(a => a.id === p.id);
+            if (idx >= 0) allArts[idx] = { ...allArts[idx], ...p };
+          });
+          renderMainFeed();
+        });
+      }
+    }).catch(e => showBanner('warn', `${s.name} nu a răspuns.`));
+  } else {
+    allArts = allArts.filter(a => a.srcId !== id);
+    renderMainFeed();
+  }
+}
 
 function renderInts() {
   document.getElementById('int-grid').innerHTML = INTERESTS.map(i =>
@@ -1027,11 +1054,13 @@ function ago(d) {
 }
 function catOf(t) {
   t = (t || '').toLowerCase();
-  if (/fotbal|sport|meci|campionat|olimp|tenis|nba|formula/.test(t)) return 'Sport';
-  if (/sănăt|medic|spital|vaccin|boal|covid|virus|pandem|cancer/.test(t)) return 'Sănătate';
-  if (/econom|burs|pib|inflat|leul|euro|profit|finanț|investiț|bancă/.test(t)) return 'Business';
-  if (/tech|digital|inteligenț|\bai\b|robot|aplicați|soft|startup|iphone/.test(t)) return 'Tehnologie';
-  if (/nato|ue|onu|internation|geopolit|război|diplomatic|sancțiun|rusia|china|ucraina/.test(t)) return 'Internațional';
+  // Sport — verificăm primul, cuvinte foarte specifice
+  if (/\bfotbal\b|\bsport\b|\bmeci\b|\bcampionat\b|\bolimpic\b|\bolimpiada\b|\btenis\b|\bnba\b|\bformula 1\b|\bf1\b|\bbaschet\b|\bvolei\b|\bruges\b|\batletism\b|\bboxing\b|\bmartiale\b/.test(t)) return 'Sport';
+  if (/sănăt|medic|spital|vaccin|boal|covid|virus|pandem|cancer|diabet|tratament/.test(t)) return 'Sănătate';
+  if (/econom|bursă|pib|inflați|leul|euro|profit|finanț|investiți|bancă|piață|acțiun|cripto/.test(t)) return 'Business';
+  if (/tehnolog|digital|inteligenț|\bai\b|robot|aplicați|software|startup|iphone|android|cyber/.test(t)) return 'Tehnologie';
+  // Internațional — doar știri cu context geopolitic clar
+  if (/\bnato\b|\bue\b|\bonu\b|geopolit|\brazboi\b|\brazboi\b|diplomatic|sancțiun|\brusia\b|\bchina\b|\bucraina\b|\btrump\b|\bputin\b|\bzelenski\b/.test(t)) return 'Internațional';
   return 'Actualitate';
 }
 function catCls(c) {
@@ -1398,21 +1427,32 @@ async function aiPersonalize(arts) {
   if (!arts.length) return arts;
   let result = [...arts];
   
-  // Un singur batch de 6 articole pentru a evita rate limiting
-  const toProcess = arts.slice(0, 6);
+  // Prioritizăm articolele netraduse (EN/RU) și primele 8
+  const needTranslation = arts.filter(a => a.lang !== 'ro').slice(0, 4);
+  const needSummary = arts.filter(a => a.lang === 'ro').slice(0, 4);
+  const toProcess = [...needTranslation, ...needSummary].slice(0, 6);
+  
+  if (!toProcess.length) return result;
   
   try {
-    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă știrile...';
+    document.getElementById('app-status-txt').textContent = '🤖 AI traduce și rezumă...';
     const aiResults = await callAI(toProcess);
     const map = {};
     aiResults.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
     result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
-    console.log('AI OK:', aiResults.length, 'articole procesate');
+    console.log('AI OK:', aiResults.length, 'articole');
   } catch(e) {
     console.warn('AI error:', e.message);
     if (e.message.includes('429')) {
-      // Rate limit - așteptăm 30 secunde și reîncercăm
-      setTimeout(() => aiPersonalize(arts), 30000);
+      setTimeout(() => {
+        aiPersonalize(arts).then(processed => {
+          processed.forEach(p => {
+            const idx = allArts.findIndex(a => a.id === p.id);
+            if (idx >= 0) allArts[idx] = { ...allArts[idx], ...p };
+          });
+          renderMainFeed();
+        });
+      }, 15000);
     }
   }
   return result;
