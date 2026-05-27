@@ -497,14 +497,14 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
     <!-- Step 7 -->
     <div class="q-step" id="qs7">
       <div class="q-title">Profilul tău! 🎉</div>
-      <div class="q-sub">GATA va personaliza fiecare știre pentru tine — titluri, texte, și ordinea sunt adaptate profilului tău.</div>
+      <div class="q-sub">Ai Știri va personaliza fiecare știre pentru tine — titluri, texte, și ordinea sunt adaptate profilului tău.</div>
       <div class="q-summary" id="qsummary"></div>
     </div>
   </div>
 
   <div class="q-footer">
     <button class="q-back" id="qback" style="display:none" onclick="qPrev()">← Înapoi</button>
-    <button class="q-next" id="qnext" onclick="qNext()">Continuă →</button>
+    <button class="q-next" id="qnext" onclick="qNext().catch(e=>console.error(e))">Continuă →</button>
   </div>
 </div>
 
@@ -787,7 +787,7 @@ let qStep = 0;
 function qRefresh() {
   document.getElementById('qfill').style.width = (qStep / (QMAX - 1) * 100) + '%';
   document.getElementById('qback').style.display = qStep > 0 ? 'block' : 'none';
-  document.getElementById('qnext').textContent = qStep === QMAX - 1 ? '🚀 Intru în GATA!' : 'Continuă →';
+  document.getElementById('qnext').textContent = qStep === QMAX - 1 ? '🚀 Intru în Ai Știri!' : 'Continuă →';
 }
 
 function qCollect(s) {
@@ -807,8 +807,8 @@ function qCollect(s) {
   if (s === 6 && em) profile.mood = em.dataset.v;
 }
 
-function qNext() {
-  if (qStep === QMAX - 1) { launch(); return; }
+async function qNext() {
+  if (qStep === QMAX - 1) { await launch(); return; }
   qCollect(qStep);
   document.getElementById('qs' + qStep).classList.remove('on');
   qStep++;
