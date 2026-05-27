@@ -508,8 +508,15 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
   </div>
 </div>
 
+<!-- ═══════════ LOADING ═══════════ -->
+<div id="loading-screen" style="min-height:100vh;background:#0A2463;max-width:480px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="font-size:48px;font-weight:900;color:white;font-family:'Arial Black',sans-serif;letter-spacing:-2px;">Ai <span style="color:#4FC3F7;">Știri</span></div>
+  <div style="margin-top:32px;width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#4FC3F7;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
 <!-- ═══════════ AUTH ═══════════ -->
-<div id="auth-screen" style="min-height:100vh;background:white;max-width:480px;margin:0 auto;flex-direction:column;display:flex;">
+<div id="auth-screen" style="min-height:100vh;background:white;max-width:480px;margin:0 auto;flex-direction:column;display:none;">
   <div style="background:linear-gradient(160deg,#020B2E,#0A2463);padding:60px 28px 40px;text-align:center;">
     <div style="font-size:40px;font-weight:800;color:white;letter-spacing:-2px;">Ai <em style='color:#4FC3F7;font-style:normal;'>Știri</em></div>
     <div style="font-size:15px;color:rgba(255,255,255,0.6);margin-top:8px;">Știri personalizate pentru tine</div>
@@ -707,12 +714,46 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 </div>
 
 <script>
-const RSS_PROXY = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://ai-stiri.onrender.com';
+const IS_LOCAL = window.location.hostname === 'localhost';
+const RSS_PROXY = IS_LOCAL ? 'http://localhost:3000' : 'https://ai-stiri.onrender.com';
+
+// Fetch RSS direct din browser cu CORS proxy
+async function fetchRSS(rssUrl) {
+  if (IS_LOCAL) {
+    const res = await fetch(`${RSS_PROXY}/rss?url=${encodeURIComponent(rssUrl)}`, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  }
+  // Pe Render folosim corsproxy.io
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
+    `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
+  ];
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.length > 100) return text;
+      }
+    } catch(e) { continue; }
+  }
+  throw new Error('All proxies failed');
+}
 
 // Supabase
 const SUPA_URL = 'https://pdjigbowhllyjlehegoa.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkamlnYm93aGxseWpsZWhlZ29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MzU0NzksImV4cCI6MjA5NTMxMTQ3OX0.FslDt9ftvAe0a_RwfbKXejMAB647zsk2OZSmqKzwlcA';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    storageKey: 'ai-stiri-session',
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+  }
+});
 let currentUser = null;
 const EMOJIS = ['❤️','😮','😂','😡','😢'];
 
@@ -723,11 +764,9 @@ const SOURCES = [
   {id:'zdg',        name:'ZdG',           sub:'🥇 Investigații independente', color:'#276749', on:true, lang:'ro', geo:'md', rss:'https://www.zdg.md/feed'},
   {id:'europalib',  name:'Europa Liberă', sub:'Radio Free Europe Moldova', color:'#1A56DB', on:true, lang:'ro', geo:'md', rss:'https://moldova.europalibera.org/api/epiooi_yit'},
   {id:'moldova1',   name:'Moldova1.md',   sub:'Top 3 credibilitate CJI',  color:'#1A6B9A', on:true,  lang:'ro', geo:'md', rss:'https://moldova1.md/rss'},
-  {id:'nokta',      name:'Nokta.md',      sub:'🥇 Locul 1 CJI credibilitate', color:'#C0392B', on:true, lang:'ro', geo:'md', rss:'https://nokta.md/feed/'},
   {id:'ipn',        name:'IPN.md',        sub:'Agenție de presă independentă', color:'#117A65', on:true, lang:'ro', geo:'md', rss:'https://www.ipn.md/rss'},
-  {id:'veridica',   name:'Veridica.md',   sub:'Știri echidistante verificate', color:'#1F618D', on:true, lang:'ro', geo:'md', rss:'https://www.protv.md/rss'},
+  {id:'veridica',   name:'Veridica.md',   sub:'Știri echidistante verificate', color:'#1F618D', on:true, lang:'ro', geo:'md', rss:'https://www.publika.md/rss'},
   {id:'deschide',   name:'Deschide.md',   sub:'Moldova',          color:'#2980B9', on:false, lang:'ro', geo:'md', rss:'https://deschide.md/feed/'},
-  {id:'stiri-md',   name:'Stiri.md',      sub:'Moldova',          color:'#E67E22', on:false, lang:'ro', geo:'md', rss:'https://publika.md/rss'},
   // ── ROMÂNIA (știri de importanță majoră) ──────────────────
   {id:'g4media',    name:'G4Media',       sub:'România — Verificat', color:'#2D3748', on:true, lang:'ro', geo:'ro', rss:'https://www.g4media.ro/feed'},
   {id:'hotnews',    name:'HotNews',       sub:'România',          color:'#DD6B20', on:true,  lang:'ro', geo:'ro', rss:'https://www.hotnews.ro/rss'},
@@ -1250,12 +1289,7 @@ function buildSmartSummary(title, cleanText) {
 }
 
 async function fetchSrc(src) {
-  let res;
-  try {
-    res = await fetch(`${RSS_PROXY}/rss?url=${encodeURIComponent(src.rss)}`, { signal: AbortSignal.timeout(10000) });
-  } catch(e) { throw new Error(`Network error: ${e.message}`); }
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const xml = await res.text();
+  const xml = await fetchRSS(src.rss);
   if (!xml || xml.length < 50) throw new Error('Empty response');
   if (xml.trimStart().startsWith('{')) throw new Error(JSON.parse(xml).error || 'Error');
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
@@ -1313,8 +1347,8 @@ async function fetchSrc(src) {
 
 // ─── AI PERSONALIZARE ─────────────────────────────
 async function callAI(articles) {
-  // Folosim serverul nostru care are cheia Gemini ascunsă
-  const r = await fetch(`${RSS_PROXY}/ai`, {
+  const aiUrl = IS_LOCAL ? `${RSS_PROXY}/ai` : 'https://ai-stiri.onrender.com/ai';
+  const r = await fetch(aiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ articles, profile })
@@ -1463,6 +1497,7 @@ async function startLive() {
 
 // ── AUTH ──────────────────────────────────────────────────
 function showAuthScreen() {
+  document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -1538,7 +1573,7 @@ async function loadUserProfile() {
   try {
     const result = await Promise.race([
       supa.from('profiles').select('*').eq('id', currentUser.id).single(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 15000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 20000))
     ]);
     data = result.data;
   } catch(e) {
@@ -1563,6 +1598,7 @@ async function loadUserProfile() {
     } catch(e) { console.warn('Load likes error:', e); }
 
     // Ascundem auth și quiz, arătăm app
+    document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -1583,6 +1619,7 @@ async function loadUserProfile() {
     startLive();
   } else {
     // Nu există profil sau timeout — intrăm direct în feed cu setări default
+    document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -1604,6 +1641,12 @@ async function saveUserProfile() {
 
 // ── INIT ──────────────────────────────────────────────────
 async function init() {
+  // Arătăm loading screen imediat
+  document.getElementById('loading-screen').style.display = 'flex';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  
   loadQuizPreview();
   
   // Auth button listeners
