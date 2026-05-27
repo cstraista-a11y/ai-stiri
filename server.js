@@ -1,20 +1,30 @@
 const http = require('http');
 const https = require('https');
-const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args)).catch(() => {
-  // fallback cu https nativ
+// Folosim https nativ pentru Gemini API
+function fetchJson(url, options = {}) {
   return new Promise((resolve, reject) => {
-    const url = new URL(args[0]);
-    const options = { ...args[1], hostname: url.hostname, path: url.pathname + url.search };
-    const req = require('https').request(options, res => {
+    const parsed = new URL(url);
+    const reqOptions = {
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+    };
+    const req = https.request(reqOptions, res => {
       let data = '';
       res.on('data', c => data += c);
-      res.on('end', () => resolve({ ok: res.statusCode < 400, json: () => Promise.resolve(JSON.parse(data)), text: () => Promise.resolve(data) }));
+      res.on('end', () => resolve({ 
+        ok: res.statusCode < 400, 
+        status: res.statusCode,
+        json: () => Promise.resolve(JSON.parse(data)), 
+        text: () => Promise.resolve(data) 
+      }));
     });
     req.on('error', reject);
-    if (args[1]?.body) req.write(args[1].body);
+    if (options.body) req.write(options.body);
     req.end();
   });
-});
+}
 const { URL } = require('url');
 const path = require('path');
 const fs = require('fs');
@@ -171,8 +181,8 @@ Returnează DOAR JSON valid:
 Articole:
 ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary || a.fullText || '').substring(0, 400), lang: a.lang })))}`;
 
-        const geminiRes = await fetch(
-          \`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}\`,
+        const geminiRes = await fetchJson(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -184,12 +194,12 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
         );
         const geminiData = await geminiRes.json();
         const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-        const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
+        const clean = text.replace(/```json|```/g, '').trim();
         const parsed = JSON.parse(clean);
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(JSON.stringify({ ok: true, articles: parsed }));
-        console.log(\`  🤖 AI rezumat: \${parsed.length} articole\`);
+        console.log(`  🤖 AI rezumat: \${parsed.length} articole`);
       } catch(e) {
         console.error('AI error:', e.message);
         res.writeHead(500);
