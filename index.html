@@ -724,27 +724,22 @@ async function fetchRSS(rssUrl) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.text();
   }
-  // Pe Render folosim corsproxy.io
-  // Încercăm mai multe CORS proxies
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
-  ];
-  for (const proxyUrl of proxies) {
-    try {
-      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
-      if (!res.ok) continue;
-      let text = await res.text();
-      // allorigins /get returnează JSON cu contents
-      if (text.startsWith('{') && text.includes('"contents"')) {
-        try { text = JSON.parse(text).contents; } catch(e) {}
-      }
-      if (text && text.length > 200 && (text.includes('<rss') || text.includes('<feed') || text.includes('<item'))) {
-        return text;
-      }
-    } catch(e) { continue; }
-  }
+  // Cloudflare Worker proxy — fără restricții, 100k/zi gratuit
+  try {
+    const res = await fetch(`https://ai-stiri-proxy.cstraista.workers.dev/?url=${encodeURIComponent(rssUrl)}`, { signal: AbortSignal.timeout(12000) });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 200 && (text.includes('<rss') || text.includes('<item') || text.includes('<feed'))) return text;
+    }
+  } catch(e) { console.warn('CF:', e.message); }
+  // Fallback allorigins
+  try {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`, { signal: AbortSignal.timeout(12000) });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.contents && d.contents.length > 200) return d.contents;
+    }
+  } catch(e) {}
   throw new Error('All proxies failed');
 }
 
