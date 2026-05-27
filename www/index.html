@@ -1291,11 +1291,15 @@ async function fetchSrc(src) {
   if (!items.length) throw new Error('Empty feed');
   return items.map((item, i) => {
     const g = tag => item.querySelector(tag)?.textContent?.trim() || '';
+    const gAttr = (tag, attr) => item.querySelector(tag)?.getAttribute(attr) || '';
     const title = g('title') || '(fără titlu)';
     const link = g('link') || item.querySelector('guid')?.textContent?.trim() || '#';
-    const desc = g('description') || g('content') || '';
-    const pubDate = g('pubDate');
+    // Extragem textul din toate câmpurile posibile
+    const desc = g('description') || g('content\\:encoded') || g('content') || g('summary') || '';
+    const pubDate = g('pubDate') || g('dc\\:date') || g('published') || '';
     const clean = strip(desc);
+    // Dacă descrierea e prea scurtă, folosim titlul extins
+    const fullClean = clean.length > 50 ? clean : title;
 
     // Extragem imaginea
     let image = '';
@@ -1341,30 +1345,70 @@ async function fetchSrc(src) {
 
 // ─── AI PERSONALIZARE ─────────────────────────────
 async function callAI(articles) {
-  const aiUrl = IS_LOCAL ? `${RSS_PROXY}/ai` : 'https://ai-stiri.onrender.com/ai';
-  const r = await fetch(aiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ articles, profile })
-  });
-  if (!r.ok) throw new Error(`AI server error: ${r.status}`);
-  const data = await r.json();
-  return data.articles || [];
+  // Apelăm Gemini direct din browser
+  const GKEY = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
+  const langMap = {
+    liceu: 'simplu și clar, fără jargon, fraze scurte',
+    medii: 'accesibil, ușor de înțeles',
+    facultate: 'standard, informativ, jurnalistic',
+    master: 'tehnic și detaliat'
+  };
+  const langStyle = langMap[profile.edu] || 'standard';
+  
+  const prompt = `Ești editorul aplicației Ai Știri din Moldova. Pentru fiecare articol:
+1. Dacă titlul sau textul e în rusă sau engleză — TRADUCE COMPLET în română
+2. Rescrie TITLUL — concis, informativ, max 12 cuvinte, fără clickbait
+3. Scrie un REZUMAT de 3-4 propoziții: CE s-a întâmplat, UNDE, CÂND, DE CE contează. NU repeta titlul. Stil direct, jurnalistic. Limbaj: ${langStyle}. Cititor: ${profile.age} ani din ${profile.zone}.
+
+IMPORTANT: rezumatul trebuie să fie DIFERIT de titlu și să aducă informații noi.
+
+Returnează DOAR JSON valid:
+[{"id":"...","title":"...","summary":"..."}]
+
+Articole:
+${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary || a.fullText || '').substring(0, 500), lang: a.lang })))}`;
+
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GKEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 4000 }
+      })
+    }
+  );
+  if (!r.ok) throw new Error(`Gemini error: ${r.status}`);
+  const d = await r.json();
+  const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+  const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+  return parsed;
 }
 
 async function aiPersonalize(arts) {
   if (!arts.length) return arts;
   let result = [...arts];
-  const toProcess = arts.slice(0, 12);
   
-  try {
-    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă știrile...';
-    const processed = await callAI(toProcess);
-    const map = {};
-    processed.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
-    result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
-  } catch(e) {
-    console.warn('AI error:', e.message);
+  // Procesăm în batch-uri de câte 8
+  const toProcess = arts.slice(0, 16);
+  const batches = [];
+  for (let i = 0; i < toProcess.length; i += 8) {
+    batches.push(toProcess.slice(i, i + 8));
+  }
+  
+  let processed = 0;
+  for (const batch of batches) {
+    try {
+      document.getElementById('app-status-txt').textContent = `🤖 AI rezumă... ${processed}/${toProcess.length}`;
+      const aiResults = await callAI(batch);
+      const map = {};
+      aiResults.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
+      result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
+      processed += batch.length;
+    } catch(e) {
+      console.warn('AI batch error:', e.message);
+    }
   }
   return result;
 }
