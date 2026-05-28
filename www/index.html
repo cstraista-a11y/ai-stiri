@@ -800,6 +800,10 @@ const SOURCES = [
   {id:'g4media',    name:'G4Media',       sub:'România — Verificat', color:'#2D3748', on:true, lang:'ro', geo:'ro', rss:'https://www.g4media.ro/feed'},
   {id:'hotnews',    name:'HotNews',       sub:'România',          color:'#DD6B20', on:true,  lang:'ro', geo:'ro', rss:'https://www.hotnews.ro/rss'},
   {id:'digi24',     name:'Digi24',        sub:'România',          color:'#E53E3E', on:true,  lang:'ro', geo:'ro', rss:'https://www.digi24.ro/rss'},
+  // ── SPORT în română ──────────────────────────────────────
+  {id:'prosport',   name:'ProSport',      sub:'Sport România',    color:'#E53E3E', on:true,  lang:'ro', geo:'ro', cat:'Sport', rss:'https://www.prosport.ro/feed/'},
+  {id:'gazeta',     name:'Gazeta Sporturilor', sub:'Sport România', color:'#CC0000', on:true, lang:'ro', geo:'ro', cat:'Sport', rss:'https://www.gsp.ro/rss/'},
+  {id:'digisport',  name:'DigiSport',     sub:'Sport TV',         color:'#0066CC', on:true,  lang:'ro', geo:'ro', cat:'Sport', rss:'https://www.digisport.ro/rss/'},
   {id:'dw-ro',      name:'DW Română',     sub:'International',    color:'#1A1A6B', on:false, lang:'ro', geo:'int', rss:'https://www.dw.com/ro/rss'},
   // ── INTERNATIONAL 🔄 tradus automat ───────────────────────
   {id:'bbc',        name:'BBC World',     sub:'UK 🔄',            color:'#BB1919', on:false, lang:'en', geo:'int', rss:'https://feeds.bbci.co.uk/news/world/rss.xml'},
@@ -977,12 +981,17 @@ function goTab(t) {
   if (t === 'alerts') renderAlerts();
 }
 
-document.querySelectorAll('.app-cat').forEach(b => b.addEventListener('click', function () {
-  document.querySelectorAll('.app-cat').forEach(x => x.classList.remove('on'));
-  this.classList.add('on');
-  curCat = this.dataset.cat;
-  renderMainFeed();
-}));
+function setupCatButtons() {
+  document.querySelectorAll('.app-cat').forEach(b => {
+    b.onclick = function() {
+      document.querySelectorAll('.app-cat').forEach(x => x.classList.remove('on'));
+      this.classList.add('on');
+      curCat = this.dataset.cat;
+      renderMainFeed();
+    };
+  });
+}
+setupCatButtons();
 
 function syncChips() {
   const ageEl = document.getElementById('s-age');
