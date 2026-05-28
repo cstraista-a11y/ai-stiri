@@ -534,7 +534,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
 </div>
 
 <!-- ═══════════ AUTH ═══════════ -->
-<div id="auth-screen" style="min-height:100vh;background:white;max-width:480px;margin:0 auto;flex-direction:column;display:none;">
+<div id="auth-screen" style="display:none;">
   <div style="background:linear-gradient(160deg,#020B2E,#0A2463);padding:60px 28px 40px;text-align:center;">
     <div style="font-size:40px;font-weight:800;color:white;letter-spacing:-2px;">Ai <em style='color:#4FC3F7;font-style:normal;'>Știri</em></div>
     <div style="font-size:15px;color:rgba(255,255,255,0.6);margin-top:8px;">Știri personalizate pentru tine</div>
@@ -658,7 +658,17 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
           </select>
         </div>
       </div>
-      <!-- AI key ascunsă în server -->
+      <div class="app-s-label" style="margin-top:4px;">Contul meu</div>
+      <div class="app-s-group">
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#ffeaea;">🔄</div>
+          <div class="app-s-info">
+            <div class="app-s-name">Reface profilul</div>
+            <div class="app-s-sub">Reia quiz-ul de personalizare</div>
+          </div>
+          <button onclick="resetProfile()" style="font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;border:none;background:#ffeaea;color:#cc2200;cursor:pointer;font-family:inherit;">Resetează</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -928,7 +938,12 @@ async function launch() {
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   renderSources(); renderInts(); renderAlerts();
-  await saveUserProfile(); // Salvăm profilul în Supabase
+  // Salvăm profilul local — fără cont necesar
+  const activeInts = INTERESTS.filter(i => i.on).map(i => i.id);
+  localStorage.setItem('ai-stiri-profile', JSON.stringify({
+    age: profile.age, sex: profile.sex, edu: profile.edu,
+    zone: profile.zone, mood: profile.mood, interests: activeInts
+  }));
   startLive();
 }
 
@@ -1003,6 +1018,12 @@ function syncChips() {
   const zone = zoneEl?.value || profile.zone;
   const sex = sexEl?.value || profile.sex;
   profile = { ...profile, age: parseInt(age), edu, zone, sex };
+  // Salvăm automat în localStorage
+  const activeInts = INTERESTS.filter(i => i.on).map(i => i.id);
+  localStorage.setItem('ai-stiri-profile', JSON.stringify({
+    age: profile.age, sex: profile.sex, edu: profile.edu,
+    zone: profile.zone, mood: profile.mood || 'ok', interests: activeInts
+  }));
 }
 
 function renderSources() {
@@ -1099,6 +1120,13 @@ setTimeout(() => {
   const btn = document.getElementById('notif-toggle');
   if (btn && Notification.permission === 'granted') btn.className = 'app-toggle on';
 }, 1000);
+
+function resetProfile() {
+  if (confirm('Ești sigur? Vei reface quiz-ul de personalizare.')) {
+    localStorage.removeItem('ai-stiri-profile');
+    location.reload();
+  }
+}
 
 function saveKey() {
   apiKey = document.getElementById('s-apikey').value.trim();
@@ -1832,40 +1860,34 @@ async function saveUserProfile() {
 
 // ── INIT ──────────────────────────────────────────────────
 async function init() {
-  // Arătăm loading screen imediat
   document.getElementById('loading-screen').style.display = 'flex';
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('quiz').style.display = 'none';
   document.getElementById('app').style.display = 'none';
-  
+
   loadQuizPreview();
-  
-  // Auth button listeners
-  document.getElementById('btn-show-register')?.addEventListener('click', showRegister);
-  document.getElementById('btn-skip-auth')?.addEventListener('click', skipAuth);
-  document.getElementById('btn-do-login')?.addEventListener('click', doLogin);
-  document.getElementById('btn-show-login')?.addEventListener('click', showLogin);
-  document.getElementById('btn-do-register')?.addEventListener('click', doRegister);
 
-  // Ascultăm schimbările de auth — acesta prinde și sesiunile existente
-  supa.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session && !currentUser) {
-      currentUser = session.user;
-      await loadUserProfile();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      showAuthScreen();
-    }
-  });
-
-  // Verificăm sesiunea existentă
-  const { data: { session } } = await supa.auth.getSession();
-  if (session && session.user) {
-    currentUser = session.user;
-    await loadUserProfile();
-  } else {
-    showAuthScreen();
+  // Verificăm dacă utilizatorul a completat deja quiz-ul (salvat local)
+  const savedProfile = localStorage.getItem('ai-stiri-profile');
+  if (savedProfile) {
+    try {
+      const p = JSON.parse(savedProfile);
+      profile = { ...profile, ...p };
+      INTERESTS.forEach(i => { i.on = (p.interests || []).includes(i.id); });
+      // Sărim direct în feed
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      activateSourcesForZone(profile.zone);
+      renderSources(); renderInts(); renderAlerts();
+      startLive();
+      return;
+    } catch(e) { localStorage.removeItem('ai-stiri-profile'); }
   }
+
+  // Prima vizită — arătăm quiz-ul direct
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('quiz').style.display = 'flex';
+  loadQuizPreview();
 }
 
 // Start
