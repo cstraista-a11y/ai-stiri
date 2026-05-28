@@ -1006,7 +1006,6 @@ function setupCatButtons() {
     };
   });
 }
-setupCatButtons();
 
 function syncChips() {
   const ageEl = document.getElementById('s-age');
@@ -1821,6 +1820,7 @@ async function loadUserProfile() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('quiz').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    setupCatButtons();
     
     // Acum că app-ul e vizibil, setăm valorile în setări
     const sAge = document.getElementById('s-age');
