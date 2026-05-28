@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Ai Știri</title>
+<meta name="description" content="Știri personalizate din Moldova cu AI — surse verificate, traduse și adaptate pentru tine.">
+<meta name="theme-color" content="#0A2463">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ai Știri">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1770,6 +1777,43 @@ async function init() {
 
 // Start
 init();
+
+// Înregistrăm Service Worker pentru PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered'))
+      .catch(e => console.warn('SW failed:', e));
+  });
+}
+
+// Banner "Instalează aplicația" pe iOS
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Arătăm butonul de instalare după 30 secunde
+  setTimeout(() => {
+    if (deferredPrompt) showInstallBanner();
+  }, 30000);
+});
+
+function showInstallBanner() {
+  const banner = document.createElement('div');
+  banner.id = 'install-banner';
+  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0A2463;color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;align-items:center;gap:10px;max-width:340px;';
+  banner.innerHTML = '<span>📲</span><span>Instalează Ai Știri pe telefon</span><button onclick="document.getElementById(\'install-banner\').remove()" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:18px;line-height:1;margin-left:auto;">×</button>';
+  banner.addEventListener('click', async (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+    }
+    banner.remove();
+  });
+  document.body.appendChild(banner);
+}
 </script>
 </body>
 </html>

@@ -152,6 +152,34 @@ const server = http.createServer(async (req, res) => {
 
   if (u.pathname === '/favicon.ico') { res.writeHead(204); res.end(); return; }
 
+  // PWA fișiere
+  if (u.pathname === '/manifest.json') {
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'manifest.json'));
+      res.setHeader('Content-Type', 'application/manifest+json');
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end(); }
+    return;
+  }
+  if (u.pathname === '/sw.js') {
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'sw.js'));
+      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Service-Worker-Allowed', '/');
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end(); }
+    return;
+  }
+  if (u.pathname === '/icon-192.png' || u.pathname === '/icon-512.png') {
+    // Servim logo.svg ca icon (browserul îl acceptă)
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'logo.svg'));
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end(); }
+    return;
+  }
+
   if (u.pathname === '/ai') {
     if (req.method !== 'POST') { res.writeHead(405); res.end('Method not allowed'); return; }
     let body = '';
@@ -215,6 +243,16 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
       res.setHeader('Content-Length', buf.length);
       res.writeHead(200); res.end(buf);
     } catch(e) { res.writeHead(404); res.end('Privacy page not found'); }
+    return;
+  }
+
+  if (u.pathname === '/admin') {
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'admin.html'));
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Length', buf.length);
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end('Admin page not found'); }
     return;
   }
 
