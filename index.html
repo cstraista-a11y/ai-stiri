@@ -336,8 +336,8 @@ body {
 .nc-read-link { display: block; padding: 10px 14px; border-top: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--accent2); text-decoration: none; letter-spacing: 0.01em; }
 
 /* Imaginea articolului */
-.nc-img-wrap { width: 100%; overflow: hidden; border-radius: 14px 14px 0 0; max-height: 200px; background: #f2f2f7; }
-.nc-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; }
+.nc-img-wrap { width: 100%; overflow: hidden; border-radius: 14px 14px 0 0; max-height: 200px; background: #f2f2f7; contain: layout; }
+.nc-img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; will-change: transform; }
 .nc-img:hover { transform: scale(1.02); }
 
 /* Badge tradus din rusă */
@@ -576,6 +576,7 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
     <div class="app-status">
       <span id="app-status-txt">Se încarcă...</span>
       <span class="app-live" id="app-live">● LIVE</span>
+      <button id="sort-toggle" onclick="toggleSort()" style="background:none;border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;">⚡ Smart</button>
     </div>
     <div style="text-align:center;">
       <button class="app-newpill" id="app-newpill" onclick="applyPending()">▲ <span id="app-newcnt">0</span> știri noi</button>
@@ -819,6 +820,7 @@ let allArts = [], pending = [];
 let favs = new Set(), likes = new Set(), dislikes = new Set();
 let reactions = {}, userReact = {}, comments = {}, openCmts = new Set(), openExp = new Set();
 let curCat = 'toate';
+let sortMode = 'smart'; // 'smart' sau 'chrono'
 let apiKey = localStorage.getItem('gata_key') || '';
 let shareId = null;
 let seenUrls = new Set();
@@ -1189,7 +1191,7 @@ function cardHTML(a) {
   const leadText = a.lead || (a.summary || '').substring(0, 240);
 
   return `<div class="news-card${liked ? ' liked' : dislik ? ' disliked' : ''}" id="nc-${a.id}">
-  ${a.image ? `<div class="nc-img-wrap"><img class="nc-img" src="${a.image}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : ''}
+  ${a.image ? `<div class="nc-img-wrap"><img class="nc-img" src="${a.image}" alt="" loading="lazy" decoding="async" fetchpriority="low" onerror="this.parentElement.remove()"></div>` : ''}
   <div class="nc-top">
     <div class="nc-meta">
       <div class="nc-dot" style="background:${src.color}"></div>
@@ -1252,7 +1254,40 @@ function renderFeed(elId, list) {
     el.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">📭</div><div class="nc-empty-title">Nicio știre</div><div class="nc-empty-sub">Activează mai multe surse din Setări sau schimbă categoria.</div></div>`;
     return;
   }
-  el.innerHTML = list.map(cardHTML).join('');
+  
+  // Dacă feed-ul e gol sau are skeleton, facem render complet
+  if (!el.querySelector('.news-card')) {
+    el.innerHTML = list.map(cardHTML).join('');
+    return;
+  }
+  
+  // Altfel actualizăm doar cardurile care s-au schimbat (evităm flick imaginilor)
+  const existingIds = new Set([...el.querySelectorAll('.news-card')].map(c => c.id.replace('nc-', '')));
+  const newIds = new Set(list.map(a => a.id));
+  
+  // Dacă lista s-a schimbat semnificativ, re-render complet
+  const overlap = [...newIds].filter(id => existingIds.has(id)).length;
+  if (overlap < newIds.size * 0.5) {
+    el.innerHTML = list.map(cardHTML).join('');
+    return;
+  }
+  
+  // Actualizăm doar textul cardurilor existente fără a le recrea
+  list.forEach(a => {
+    const card = document.getElementById('nc-' + a.id);
+    if (card) {
+      // Actualizăm doar titlul și lead-ul dacă s-au schimbat
+      const titleEl = card.querySelector('.nc-title');
+      const leadEl = card.querySelector('.nc-lead');
+      if (titleEl && titleEl.textContent !== a.title) titleEl.textContent = a.title;
+      if (leadEl && a.lead && leadEl.textContent !== a.lead) leadEl.textContent = a.lead;
+    } else {
+      // Card nou — îl adăugăm la început
+      const div = document.createElement('div');
+      div.innerHTML = cardHTML(a);
+      el.insertBefore(div.firstChild, el.firstChild);
+    }
+  });
 }
 
 function doLike(id) { if (likes.has(id)) likes.delete(id); else { likes.add(id); dislikes.delete(id); } renderMainFeed(); }
