@@ -1512,16 +1512,19 @@ async function loadAndRender() {
 
   const active = SOURCES.filter(s => s.on);
   
-  // Încărcăm sursele în paralel cu timeout individual de 10s
-  const results = await Promise.allSettled(
-    active.map(s => Promise.race([
-      fetchSrc(s),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-    ]))
-  );
+  // Arătăm primele știri imediat ce vin, nu așteptăm toate sursele
+  let arts = [];
+  let failed = 0;
   
-  let arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
-  const failed = results.filter(r => r.status === 'rejected').length;
+  const fetchPromises = active.map(s => Promise.race([
+    fetchSrc(s),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+  ]));
+
+  // Procesăm sursele pe rând cum vin
+  const results = await Promise.allSettled(fetchPromises);
+  arts = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  failed = results.filter(r => r.status === 'rejected').length;
 
   if (!arts.length) {
     showBanner('err', 'Nicio sursă nu a răspuns. Verifică conexiunea la internet.', 0);
@@ -1538,19 +1541,24 @@ async function loadAndRender() {
   document.getElementById('app-live').style.display = 'inline';
   renderMainFeed();
   
-  // AI în background — nu blochează feed-ul
-  setTimeout(() => {
-    aiPersonalize(allArts.slice(0, 10)).then(processed => {
-      if (!processed || !processed.length) return;
-      processed.forEach(p => {
-        const idx = allArts.findIndex(a => a.id === p.id);
-        if (idx >= 0) allArts[idx] = { ...allArts[idx], ...p };
-      });
+  // AI imediat — procesăm primele articole fără întârziere
+  const aiArts = allArts.slice(0, 6);
+  aiPersonalize(aiArts).then(processed => {
+    if (!processed?.length) return;
+    let changed = 0;
+    processed.forEach(p => {
+      const idx = allArts.findIndex(a => a.id === p.id);
+      if (idx >= 0 && (p.title !== allArts[idx].title || p.lead)) {
+        allArts[idx] = { ...allArts[idx], ...p };
+        changed++;
+      }
+    });
+    if (changed > 0) {
       document.getElementById('app-status-txt').textContent =
         `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole · ✅ AI`;
       renderMainFeed();
-    }).catch(e => console.warn('AI background:', e.message));
-  }, 100);
+    }
+  }).catch(e => console.warn('AI:', e.message));
 
   const alertArt = arts.find(a => ALERT_TOPICS.filter(t => t.on).some(tp => tp.words.some(w => a.title.toLowerCase().includes(w))));
   if (alertArt) showBanner('info', '🔔 ' + alertArt.title.substring(0, 65) + '...');
