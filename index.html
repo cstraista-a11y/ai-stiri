@@ -11,6 +11,17 @@
 <meta name="apple-mobile-web-app-title" content="Ai Știri">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "f3b84c4a-3c82-4dfb-b8d8-fc30a40f2fda",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -655,6 +666,16 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
   <div class="app-screen" id="scr-alerts">
     <div class="app-scr-title">Alerte</div>
     <div class="app-s-scroll">
+      <div class="app-s-group">
+        <div class="app-s-row">
+          <div class="app-s-icon" style="background:#FFF0F0;">🔔</div>
+          <div class="app-s-info">
+            <div class="app-s-name">Notificări push</div>
+            <div class="app-s-sub">Știri urgente instant</div>
+          </div>
+          <button class="app-toggle off" id="notif-toggle" onclick="toggleNotifications()"></button>
+        </div>
+      </div>
       <div class="app-s-group" id="alerts-group"></div>
     </div>
   </div>
@@ -1045,6 +1066,30 @@ function renderAlerts() {
   ).join('');
 }
 function toggleAlert(id) { const t = ALERT_TOPICS.find(x => x.id === id); t.on = !t.on; renderAlerts(); }
+
+async function toggleNotifications() {
+  const btn = document.getElementById('notif-toggle');
+  try {
+    if (Notification.permission === 'granted') {
+      btn.className = 'app-toggle off';
+      showBanner('info', 'Notificările pot fi dezactivate din setările browserului.');
+    } else {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        btn.className = 'app-toggle on';
+        showBanner('info', '✅ Notificări activate! Vei fi anunțat la știri urgente.');
+      } else {
+        showBanner('warn', 'Notificările au fost blocate. Activează-le din setările browserului.');
+      }
+    }
+  } catch(e) { console.warn('Notifications:', e); }
+}
+
+// Actualizăm starea butonului la deschidere
+setTimeout(() => {
+  const btn = document.getElementById('notif-toggle');
+  if (btn && Notification.permission === 'granted') btn.className = 'app-toggle on';
+}, 1000);
 
 function saveKey() {
   apiKey = document.getElementById('s-apikey').value.trim();
@@ -1582,6 +1627,10 @@ async function loadAndRender() {
     `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole`;
   document.getElementById('app-live').style.display = 'inline';
   renderMainFeed();
+  // Inițializăm notificările
+  initNotifications();
+  // Verificăm știri urgente
+  checkUrgentNews(allArts);
   
   // AI imediat — procesăm primele articole fără întârziere
   const aiArts = allArts.slice(0, 6);
@@ -1812,6 +1861,36 @@ async function init() {
 
 // Start
 init();
+
+// ── NOTIFICĂRI PUSH ────────────────────────────────────
+async function initNotifications() {
+  try {
+    if (typeof OneSignal === 'undefined') return;
+    const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
+    if (!isSubscribed) {
+      // Cerem permisiunea după 10 secunde
+      setTimeout(async () => {
+        await OneSignal.Notifications.requestPermission();
+      }, 10000);
+    }
+  } catch(e) { console.warn('OneSignal:', e.message); }
+}
+
+// Verificăm știrile urgente și trimitem notificare
+function checkUrgentNews(arts) {
+  const urgentWords = ['urgent','accident','incendiu','cutremur','atac','explozie','dezastru','alertă'];
+  const urgent = arts.find(a => urgentWords.some(w => a.title.toLowerCase().includes(w)));
+  if (!urgent) return;
+  // Notificare locală (nu necesită server)
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('🔔 Ai Știri — Știre urgentă', {
+      body: urgent.title,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: 'urgent-' + urgent.id,
+    });
+  }
+}
 
 // Înregistrăm Service Worker pentru PWA
 if ('serviceWorker' in navigator) {
