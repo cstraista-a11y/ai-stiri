@@ -1,4 +1,4 @@
-const CACHE = 'ai-stiri-v1';
+const CACHE = 'ai-stiri-v3';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {

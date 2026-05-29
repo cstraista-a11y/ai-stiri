@@ -576,13 +576,13 @@ select { font-size: 14px; font-weight: 600; color: #007aff; border: none; backgr
   <!-- FEED -->
   <div class="app-screen on" id="scr-feed">
     <div class="app-cats">
-      <button class="app-cat on" data-cat="toate">Toate</button>
-      <button class="app-cat" data-cat="Actualitate">Actualitate</button>
-      <button class="app-cat" data-cat="Business">Business</button>
-      <button class="app-cat" data-cat="Sănătate">Sănătate</button>
-      <button class="app-cat" data-cat="Tehnologie">Tehnologie</button>
-      <button class="app-cat" data-cat="Sport">Sport</button>
-      <button class="app-cat" data-cat="Internațional">Internațional</button>
+      <button class="app-cat on" onclick="setCat('toate',this)">Toate</button>
+      <button class="app-cat" onclick="setCat('Actualitate',this)">Actualitate</button>
+      <button class="app-cat" onclick="setCat('Business',this)">Business</button>
+      <button class="app-cat" onclick="setCat('Sănătate',this)">Sănătate</button>
+      <button class="app-cat" onclick="setCat('Tehnologie',this)">Tehnologie</button>
+      <button class="app-cat" onclick="setCat('Sport',this)">Sport</button>
+      <button class="app-cat" onclick="setCat('Internațional',this)">Internațional</button>
     </div>
     <div class="app-status">
       <span id="app-status-txt">Se încarcă...</span>
@@ -996,15 +996,15 @@ function goTab(t) {
   if (t === 'alerts') renderAlerts();
 }
 
+function setCat(cat, btn) {
+  document.querySelectorAll('.app-cat').forEach(x => x.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  curCat = cat;
+  renderMainFeed();
+}
+
 function setupCatButtons() {
-  document.querySelectorAll('.app-cat').forEach(b => {
-    b.onclick = function() {
-      document.querySelectorAll('.app-cat').forEach(x => x.classList.remove('on'));
-      this.classList.add('on');
-      curCat = this.dataset.cat;
-      renderMainFeed();
-    };
-  });
+  // Backup - pentru compatibilitate
 }
 
 function syncChips() {
