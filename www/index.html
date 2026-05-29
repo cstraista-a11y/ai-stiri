@@ -1332,43 +1332,11 @@ function renderFeed(elId, list) {
   const el = document.getElementById(elId);
   if (!el) return;
   if (!list || !list.length) {
-    el.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">📭</div><div class="nc-empty-title">Nicio știre</div><div class="nc-empty-sub">Activează mai multe surse din Setări sau schimbă categoria.</div></div>`;
+    el.innerHTML = `<div class="nc-empty"><div class="nc-empty-icon">📭</div><div class="nc-empty-title">Nicio știre în această categorie</div><div class="nc-empty-sub">Activează mai multe surse din Setări.</div></div>`;
     return;
   }
-  
-  // Dacă feed-ul e gol sau are skeleton, facem render complet
-  if (!el.querySelector('.news-card')) {
-    el.innerHTML = list.map(cardHTML).join('');
-    return;
-  }
-  
-  // Altfel actualizăm doar cardurile care s-au schimbat (evităm flick imaginilor)
-  const existingIds = new Set([...el.querySelectorAll('.news-card')].map(c => c.id.replace('nc-', '')));
-  const newIds = new Set(list.map(a => a.id));
-  
-  // Dacă lista s-a schimbat semnificativ, re-render complet
-  const overlap = [...newIds].filter(id => existingIds.has(id)).length;
-  if (overlap < newIds.size * 0.5) {
-    el.innerHTML = list.map(cardHTML).join('');
-    return;
-  }
-  
-  // Actualizăm doar textul cardurilor existente fără a le recrea
-  list.forEach(a => {
-    const card = document.getElementById('nc-' + a.id);
-    if (card) {
-      // Actualizăm doar titlul și lead-ul dacă s-au schimbat
-      const titleEl = card.querySelector('.nc-title');
-      const leadEl = card.querySelector('.nc-lead');
-      if (titleEl && titleEl.textContent !== a.title) titleEl.textContent = a.title;
-      if (leadEl && a.lead && leadEl.textContent !== a.lead) leadEl.textContent = a.lead;
-    } else {
-      // Card nou — îl adăugăm la început
-      const div = document.createElement('div');
-      div.innerHTML = cardHTML(a);
-      el.insertBefore(div.firstChild, el.firstChild);
-    }
-  });
+  // Render simplu și direct — fără diff
+  el.innerHTML = list.map(cardHTML).join('');
 }
 
 function doLike(id) { if (likes.has(id)) likes.delete(id); else { likes.add(id); dislikes.delete(id); } renderMainFeed(); }
