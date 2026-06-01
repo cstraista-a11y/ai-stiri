@@ -1318,13 +1318,11 @@ function cardHTML(a) {
   </div>
   <div class="nc-div"></div>
   <div class="nc-actions">
-    <button class="nc-btn${liked ? ' liked' : ''}" onclick="doLike('${a.id}')" title="Apreciez">👍</button>
-    <button class="nc-btn${dislik ? ' disliked' : ''}" onclick="doDislike('${a.id}')" title="Nu mă interesează">👎</button>
+    <div class="nc-react-wrap" id="rbar-${a.id}">${reactsHTML(a.id)}</div>
     <button class="nc-btn${saved ? ' saved' : ''}" onclick="doSave('${a.id}')" title="${saved ? 'Salvat' : 'Salvează'}">🔖</button>
     <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')" title="Comentarii">💬</button>
     <button class="nc-share" onclick="openShare('${a.id}')" title="Distribuie">⋯</button>
   </div>
-  <div class="nc-reacts" id="rbar-${a.id}">${reactsHTML(a.id)}</div>
   <div class="nc-cmts${cmtOpen ? ' on' : ''}" id="cmts-${a.id}">
     <div class="nc-cmt-input-row">
       <input class="nc-cmt-input" id="cinp-${a.id}" placeholder="Scrie un comentariu..." onkeydown="if(event.key==='Enter')sendCmt('${a.id}')">
