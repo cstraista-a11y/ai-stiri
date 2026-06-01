@@ -1193,15 +1193,19 @@ function score(a) {
 
 // ─── REACTIONS ────────────────────────────────────
 let holdTimer = null;
+let holdFired = false;
 
-function startHold(id) {
+function startHold(id, e) {
+  if (e) e.preventDefault();
+  holdFired = false;
   holdTimer = setTimeout(() => {
+    holdFired = true;
     holdTimer = null;
     openPicker(id);
-  }, 500); // 500ms hold
+  }, 500);
 }
 
-function endHold() {
+function endHold(e) {
   if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
 }
 
@@ -1209,10 +1213,14 @@ function openPicker(id) {
   document.querySelectorAll('.nc-react-picker.show').forEach(p => p.classList.remove('show'));
   const picker = document.getElementById('picker-' + id);
   if (picker) picker.classList.add('show');
-  // Închidem la click în afară
   setTimeout(() => {
-    document.addEventListener('click', () => closePicker('picker-' + id), { once: true });
-  }, 10);
+    document.addEventListener('click', function closeIt(ev) {
+      if (!picker.contains(ev.target)) {
+        picker.classList.remove('show');
+        document.removeEventListener('click', closeIt);
+      }
+    });
+  }, 50);
 }
 
 function closePicker(pickerId) {
@@ -1220,16 +1228,11 @@ function closePicker(pickerId) {
   if (picker) picker.classList.remove('show');
 }
 
-function quickReact(id) {
-  if (holdTimer === null) return; // A fost hold, nu click
-  // Click rapid = toggle ❤️
-  const hasReact = Object.keys(userReact).some(k => k.startsWith(id + '_'));
-  if (hasReact) {
-    const myEmoji = EMOJIS.find(e => userReact[id + '_' + e]);
-    if (myEmoji) toggleReact(id, myEmoji);
-  } else {
-    toggleReact(id, '❤️');
-  }
+function quickReact(id, e) {
+  if (holdFired) { holdFired = false; return; } // A fost hold, nu click
+  // Click rapid = toggle ❤️ sau emoji ales anterior
+  const myEmoji = EMOJIS.find(em => userReact[id + '_' + em]);
+  toggleReact(id, myEmoji || '❤️');
 }
 
 function toggleReact(id, emoji) {
