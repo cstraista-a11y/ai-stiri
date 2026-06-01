@@ -1518,32 +1518,51 @@ async function aiPersonalize(arts) {
   if (!arts.length) return arts;
   let result = [...arts];
   
-  // Prioritizăm articolele netraduse (EN/RU) și primele 8
-  const needTranslation = arts.filter(a => a.lang !== 'ro').slice(0, 4);
-  const needSummary = arts.filter(a => a.lang === 'ro').slice(0, 4);
-  const toProcess = [...needTranslation, ...needSummary].slice(0, 6);
+  try {
+    // 1. Cerem mai întâi rezumatele pre-generate de pe server (instant!)
+    const cacheRes = await fetch(`${RSS_PROXY}/ai-cache`, { signal: AbortSignal.timeout(5000) });
+    if (cacheRes.ok) {
+      const serverCache = await cacheRes.json();
+      let fromCache = 0;
+      result = result.map(a => {
+        if (serverCache[a.id]) {
+          fromCache++;
+          return { ...a, title: serverCache[a.id].title, lead: serverCache[a.id].summary, lang: 'ro' };
+        }
+        return a;
+      });
+      if (fromCache > 0) {
+        console.log('AI cache:', fromCache, 'articole din server cache');
+        document.getElementById('app-status-txt').textContent =
+          `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole · ✅ AI`;
+        return result;
+      }
+    }
+  } catch(e) { console.warn('Server cache unavailable:', e.message); }
+  
+  // 2. Fallback: Gemini direct din browser (dacă cache-ul serverului e gol)
+  const toProcess = arts.filter(a => a.lang !== 'ro').slice(0, 4)
+    .concat(arts.filter(a => a.lang === 'ro').slice(0, 3))
+    .slice(0, 6);
   
   if (!toProcess.length) return result;
   
   try {
-    document.getElementById('app-status-txt').textContent = '🤖 AI traduce și rezumă...';
+    document.getElementById('app-status-txt').textContent = '🤖 AI rezumă...';
     const aiResults = await callAI(toProcess);
     const map = {};
     aiResults.forEach(x => { map[x.id] = { title: x.title, lead: x.summary, lang: 'ro' }; });
     result = result.map(a => map[a.id] ? { ...a, ...map[a.id] } : a);
-    console.log('AI OK:', aiResults.length, 'articole');
+    document.getElementById('app-status-txt').textContent =
+      `${new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} · ${allArts.length} articole · ✅ AI`;
   } catch(e) {
     console.warn('AI error:', e.message);
+    // 429 rate limit — așteptăm și reîncercăm
     if (e.message.includes('429')) {
-      setTimeout(() => {
-        aiPersonalize(arts).then(processed => {
-          processed.forEach(p => {
-            const idx = allArts.findIndex(a => a.id === p.id);
-            if (idx >= 0) allArts[idx] = { ...allArts[idx], ...p };
-          });
-          renderMainFeed();
-        });
-      }, 15000);
+      setTimeout(() => aiPersonalize(arts).then(p => {
+        p.forEach(x => { const i = allArts.findIndex(a => a.id === x.id); if (i >= 0) allArts[i] = {...allArts[i],...x}; });
+        renderMainFeed();
+      }), 20000);
     }
   }
   return result;

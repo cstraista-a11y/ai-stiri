@@ -65,6 +65,69 @@ const FEEDS = [
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
 
+// ── CACHE REZUMATE AI (15 minute) ─────────────────────────
+const GEMINI_KEY = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
+const aiSummaryCache = new Map(); // id -> { title, summary, ts }
+const AI_CACHE_TTL = 15 * 60 * 1000; // 15 minute
+let aiGenerating = false;
+
+// Pre-generăm rezumate pentru primele 12 articole
+async function preGenerateSummaries(articles) {
+  if (aiGenerating || !articles.length) return;
+  aiGenerating = true;
+  
+  // Filtrăm articolele care nu au rezumat în cache
+  const toProcess = articles.filter(a => {
+    const cached = aiSummaryCache.get(a.id);
+    return !cached || (Date.now() - cached.ts > AI_CACHE_TTL);
+  }).slice(0, 12);
+  
+  if (!toProcess.length) { aiGenerating = false; return; }
+  
+  try {
+    const prompt = `Ești editorul Ai Știri Moldova. Pentru fiecare articol:
+1. Dacă e în rusă/engleză — TRADUCE COMPLET în română
+2. Rescrie TITLUL — max 12 cuvinte, informativ, fără clickbait
+3. REZUMAT 3-4 propoziții: CE, UNDE, CÂND, DE CE contează. NU repeta titlul. Stil jurnalistic direct.
+
+Returnează DOAR JSON valid:
+[{"id":"...","title":"...","summary":"..."}]
+
+Articole:
+${JSON.stringify(toProcess.map(a => ({ id: a.id, title: a.title, text: (a.summary || '').substring(0, 400), lang: a.lang || 'ro' })))}`;
+
+    const res = await fetchJson(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 4000 }
+        })
+      }
+    );
+    
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    
+    parsed.forEach(item => {
+      aiSummaryCache.set(item.id, {
+        title: item.title,
+        summary: item.summary,
+        ts: Date.now()
+      });
+    });
+    
+    console.log(`  🤖 AI pre-generat: \${parsed.length} rezumate în cache`);
+  } catch(e) {
+    console.warn('  ⚠️  AI pre-generate error:', e.message);
+  } finally {
+    aiGenerating = false;
+  }
+}
+
 async function fetchWithCache(url) {
   const now = Date.now();
   if (cache.has(url)) {
@@ -86,6 +149,10 @@ setInterval(() => {
   let cleaned = 0;
   for (const [url, { ts }] of cache.entries()) {
     if (now - ts > CACHE_TTL) { cache.delete(url); cleaned++; }
+  }
+  // Curățăm și cache-ul AI
+  for (const [id, { ts }] of aiSummaryCache.entries()) {
+    if (now - ts > AI_CACHE_TTL * 2) { aiSummaryCache.delete(id); cleaned++; }
   }
   if (cleaned > 0) console.log(`  🧹 Cache curățat: ${cleaned} intrări expirate`);
 }, 10 * 60 * 1000);
@@ -177,6 +244,21 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Content-Type', 'image/svg+xml');
       res.writeHead(200); res.end(buf);
     } catch(e) { res.writeHead(404); res.end(); }
+    return;
+  }
+
+  if (u.pathname === '/ai-cache') {
+    // Returnează rezumatele pre-generate din cache
+    const result = {};
+    aiSummaryCache.forEach((val, key) => {
+      if (Date.now() - val.ts < AI_CACHE_TTL) {
+        result[key] = { title: val.title, summary: val.summary };
+      }
+    });
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.writeHead(200);
+    res.end(JSON.stringify(result));
     return;
   }
 
