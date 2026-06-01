@@ -1245,11 +1245,27 @@ function toggleReact(id, emoji) {
 }
 function reactsHTML(id) {
   const r = reactions[id] || {};
-  return EMOJIS.map(e => {
-    const cnt = r[e] || 0;
-    const on = userReact[id + '_' + e] ? ' on' : '';
-    return `<button class="nc-react${on}" onclick="toggleReact('${id}','${e}')">${e}${cnt > 0 ? `<span class="nc-react-cnt">${cnt}</span>` : ''}</button>`;
-  }).join('') + `<button class="nc-share" onclick="openShare('${id}')">···</button>`;
+  const totalReacts = EMOJIS.reduce((s, e) => s + (r[e] || 0), 0);
+  const myReact = EMOJIS.find(e => userReact[id + '_' + e]);
+  const displayEmoji = myReact || '❤️';
+  const isOn = myReact ? ' on' : '';
+  const pickerBtns = EMOJIS.map(e =>
+    `<button class="nc-react-opt" onclick="event.stopPropagation();toggleReact('${id}','${e}');closePicker('picker-${id}')">${e}</button>`
+  ).join('');
+  return `<div style="position:relative;display:inline-flex;">
+    <button class="nc-react-btn${isOn}"
+      id="reactbtn-${id}"
+      onclick="quickReact('${id}',event)"
+      onmousedown="startHold('${id}',event)"
+      onmouseup="endHold(event)"
+      onmouseleave="endHold(event)"
+      ontouchstart="startHold('${id}',event)"
+      ontouchend="endHold(event)">
+      <span style="font-size:18px;">${displayEmoji}</span>
+      ${totalReacts > 0 ? `<span class="nc-react-btn-cnt">${totalReacts}</span>` : ''}
+    </button>
+    <div class="nc-react-picker" id="picker-${id}">${pickerBtns}</div>
+  </div>`;
 }
 
 // ─── COMMENTS ─────────────────────────────────────
