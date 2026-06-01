@@ -1243,30 +1243,7 @@ function toggleReact(id, emoji) {
   const bar = document.getElementById('rbar-' + id);
   if (bar) bar.innerHTML = reactsHTML(id);
 }
-function reactsHTML(id) {
-  const r = reactions[id] || {};
-  const totalReacts = EMOJIS.reduce((s, e) => s + (r[e] || 0), 0);
-  const myReact = EMOJIS.find(e => userReact[id + '_' + e]);
-  const displayEmoji = myReact || '❤️';
-  const isOn = myReact ? ' on' : '';
-  const pickerBtns = EMOJIS.map(e =>
-    `<button class="nc-react-opt" onclick="event.stopPropagation();toggleReact('${id}','${e}');closePicker('picker-${id}')">${e}</button>`
-  ).join('');
-  return `<div style="position:relative;display:inline-flex;">
-    <button class="nc-react-btn${isOn}"
-      id="reactbtn-${id}"
-      onclick="quickReact('${id}',event)"
-      onmousedown="startHold('${id}',event)"
-      onmouseup="endHold(event)"
-      onmouseleave="endHold(event)"
-      ontouchstart="startHold('${id}',event)"
-      ontouchend="endHold(event)">
-      <span style="font-size:18px;">${displayEmoji}</span>
-      ${totalReacts > 0 ? `<span class="nc-react-btn-cnt">${totalReacts}</span>` : ''}
-    </button>
-    <div class="nc-react-picker" id="picker-${id}">${pickerBtns}</div>
-  </div>`;
-}
+function reactsHTML(id) { return ''; }
 
 // ─── COMMENTS ─────────────────────────────────────
 function toggleCmts(id) {
@@ -1337,7 +1314,7 @@ function cardHTML(a) {
   </div>
   <div class="nc-div"></div>
   <div class="nc-actions">
-    <div class="nc-react-wrap" id="rbar-${a.id}">${reactsHTML(a.id)}</div>
+
     <button class="nc-btn${saved ? ' saved' : ''}" onclick="doSave('${a.id}')" title="${saved ? 'Salvat' : 'Salvează'}">🔖</button>
     <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')" title="Comentarii">💬</button>
     <button class="nc-share" onclick="openShare('${a.id}')" title="Distribuie">⋯</button>
