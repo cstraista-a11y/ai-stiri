@@ -1314,7 +1314,8 @@ function cardHTML(a) {
   </div>
   <div class="nc-div"></div>
   <div class="nc-actions">
-
+    <button class="nc-btn${liked ? ' liked' : ''}" onclick="doLike('${a.id}')" title="Apreciez">👍</button>
+    <button class="nc-btn${dislik ? ' disliked' : ''}" onclick="doDislike('${a.id}')" title="Nu mă interesează">👎</button>
     <button class="nc-btn${saved ? ' saved' : ''}" onclick="doSave('${a.id}')" title="${saved ? 'Salvat' : 'Salvează'}">🔖</button>
     <button class="nc-btn${cmtOpen ? ' cmt-on' : ''}" id="cbtn-${a.id}" onclick="toggleCmts('${a.id}')" title="Comentarii">💬</button>
     <button class="nc-share" onclick="openShare('${a.id}')" title="Distribuie">⋯</button>
