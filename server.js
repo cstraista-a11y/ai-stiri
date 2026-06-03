@@ -328,6 +328,15 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     return;
   }
 
+  if (u.pathname === '/mondial') {
+    try {
+      const buf = fs.readFileSync(path.join(__dirname, 'mondial.html'));
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.writeHead(200); res.end(buf);
+    } catch(e) { res.writeHead(404); res.end('Mondial page not found'); }
+    return;
+  }
+
   if (u.pathname === '/admin') {
     try {
       const buf = fs.readFileSync(path.join(__dirname, 'admin.html'));
