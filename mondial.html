@@ -4,138 +4,144 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏆 Mondial 2026 — Ai Știri</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --black:#0D0D0D; --blue:#0A2463; --accent:#4FC3F7;
-  --gold:#FFD700; --green:#00C851; --red:#E53935;
-  --white:#FAFAF8; --gray:#6B7280; --card:#fff; --bg:#0f1923;
-  --bg2:#1a2533; --border:rgba(255,255,255,0.08);
+:root{
+  --black:#090E1A;--bg:#0D1526;--bg2:#131D30;--bg3:#1A2540;
+  --blue:#0A2463;--accent:#4FC3F7;--gold:#F5C842;--green:#10B981;--red:#EF4444;
+  --white:#F8FAFC;--gray:#64748B;--border:rgba(255,255,255,0.07);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:white;min-height:100vh;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
 
 /* HEADER */
-.header{background:linear-gradient(180deg,#0a1628,#0f1f3d);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-.header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
-.back-btn{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.6);font-size:14px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.06);padding:6px 12px;border-radius:20px;border:1px solid var(--border);}
-.back-btn:hover{color:white;background:rgba(255,255,255,0.1);}
-.header-title{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--gold);}
-.live-badge{display:flex;align-items:center;gap:5px;background:rgba(229,57,53,0.2);border:1px solid rgba(229,57,53,0.4);color:#ff6b6b;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
-.live-dot{width:6px;height:6px;border-radius:50%;background:#ff4444;animation:pulse 1.2s ease infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
+.header{background:rgba(9,14,26,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;}
+.back-btn{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:600;text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--border);transition:all 0.2s;}
+.back-btn:hover{color:white;border-color:rgba(255,255,255,0.2);}
+.header-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold);}
+.live-badge{display:flex;align-items:center;gap:4px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:0.05em;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#EF4444;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
 /* TABS */
-.tabs{display:flex;overflow-x:auto;padding:0 12px 0;gap:2px;scrollbar-width:none;}
+.tabs{display:flex;overflow-x:auto;padding:0 12px;scrollbar-width:none;border-top:1px solid var(--border);}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{padding:10px 14px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);border:none;background:none;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:2px solid transparent;transition:all 0.2s;flex-shrink:0;}
+.tab{padding:9px 14px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.35);border:none;background:none;cursor:pointer;white-space:nowrap;font-family:'Outfit',sans-serif;border-bottom:2px solid transparent;transition:all 0.2s;letter-spacing:0.03em;flex-shrink:0;}
 .tab.on{color:var(--gold);border-bottom-color:var(--gold);}
 
 /* CONTENT */
 .content{max-width:600px;margin:0 auto;padding:14px;}
 .page{display:none;}
 .page.on{display:block;}
-.s-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;margin-bottom:4px;color:white;}
-.s-sub{font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:16px;}
 
-/* NEWS CARD */
-.news-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
-.nc-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;color:rgba(255,255,255,0.4);}
-.nc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
-.nc-badge{background:var(--gold);color:var(--black);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:auto;}
-.nc-title{font-size:14px;font-weight:700;line-height:1.4;margin-bottom:6px;color:white;}
-.nc-lead{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;}
-.nc-link{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;}
+/* SECTION TITLE */
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:2px;}
+.s-sub{font-size:12px;color:var(--gray);margin-bottom:16px;font-weight:400;}
+
+/* NEWS CARD — minimalist cu imagine */
+.nc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;transition:border-color 0.2s;}
+.nc:hover{border-color:rgba(255,255,255,0.12);}
+.nc-img{width:100%;height:160px;object-fit:cover;background:linear-gradient(135deg,var(--bg3),var(--blue));display:block;}
+.nc-img-placeholder{width:100%;height:120px;background:linear-gradient(135deg,#0A2463 0%,#1a3a6c 100%);display:flex;align-items:center;justify-content:center;font-size:32px;}
+.nc-body{padding:12px 14px;}
+.nc-meta{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+.nc-src{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.05em;}
+.nc-dot{width:3px;height:3px;border-radius:50%;background:var(--border);}
+.nc-time{font-size:11px;color:var(--gray);}
+.nc-translated{font-size:10px;font-weight:700;background:rgba(79,195,247,0.12);color:var(--accent);padding:2px 6px;border-radius:4px;margin-left:auto;}
+.nc-title{font-size:14px;font-weight:700;line-height:1.4;color:var(--white);margin-bottom:6px;}
+.nc-lead{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:8px;}
+.nc-link{font-size:11px;font-weight:700;color:var(--accent);text-decoration:none;}
 
 /* MATCH CARD */
-.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px;}
-.match-stage{font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
-.match-teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.match-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;}
+.match-stage{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;}
+.match-teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .match-team{text-align:center;flex:1;}
-.match-flag{font-size:38px;display:block;margin-bottom:6px;}
-.match-name{font-size:13px;font-weight:700;color:white;}
-.match-score{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--gold);padding:0 12px;flex-shrink:0;}
-.match-vs{font-size:18px;font-weight:900;color:rgba(255,255,255,0.2);padding:0 12px;flex-shrink:0;}
-.match-time{font-size:12px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:14px;}
+.match-flag{font-size:40px;display:block;margin-bottom:6px;}
+.match-name{font-size:13px;font-weight:700;color:var(--white);}
+.match-vs{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gray);padding:0 12px;flex-shrink:0;letter-spacing:2px;}
+.match-time{font-size:12px;color:var(--gray);text-align:center;margin-bottom:14px;}
 
-/* PREDICTION */
-.pred-title{font-size:13px;font-weight:700;margin-bottom:10px;text-align:center;color:rgba(255,255,255,0.7);}
+/* VOTE BUTTONS */
+.pred-label-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:10px;}
 .pred-btns{display:flex;gap:8px;}
-.pred-btn{flex:1;padding:10px 6px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.04);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:3px;color:white;}
-.pred-btn:hover{border-color:var(--gold);background:rgba(255,215,0,0.08);}
-.pred-btn.selected{border-color:var(--gold);background:rgba(255,215,0,0.12);color:var(--gold);}
-.pred-pct{font-size:18px;font-weight:900;color:var(--gold);}
-.pred-label{font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;}
+.pred-btn{flex:1;padding:12px 6px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--white);}
+.pred-btn:hover{border-color:rgba(245,200,66,0.4);background:rgba(245,200,66,0.06);}
+.pred-btn.voted{border-color:var(--gold);background:rgba(245,200,66,0.1);}
+.pred-pct{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--gold);}
+.pred-team{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);}
+.pred-sub{font-size:10px;color:var(--gray);}
 
 /* SCORE PRED */
-.score-pred{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
-.score-pred-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:10px;}
-.score-inputs{display:flex;align-items:center;justify-content:center;gap:12px;}
-.score-input{width:52px;height:52px;border:2px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.05);color:white;font-size:24px;font-weight:900;text-align:center;font-family:'Playfair Display',serif;}
+.score-pred{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.score-pred-title{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em;}
+.score-inputs{display:flex;align-items:center;justify-content:center;gap:10px;}
+.score-input{width:54px;height:54px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.04);color:var(--white);font-size:26px;font-weight:800;text-align:center;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
 .score-input:focus{outline:none;border-color:var(--gold);}
-.score-vs{font-size:18px;color:rgba(255,255,255,0.3);font-weight:900;}
-.score-submit{width:100%;margin-top:10px;padding:10px;background:var(--gold);color:var(--black);border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+.score-vs2{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gray);letter-spacing:2px;}
+.score-submit{width:100%;margin-top:10px;padding:11px;background:var(--gold);color:#090E1A;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:0.05em;}
+.score-result{text-align:center;margin-top:8px;font-size:12px;color:var(--gray);}
 
 /* QUIZ */
-.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px;}
-.quiz-progress{height:3px;background:rgba(255,255,255,0.1);border-radius:3px;margin-bottom:16px;overflow:hidden;}
-.quiz-progress-bar{height:100%;background:var(--gold);border-radius:3px;transition:width 0.3s;}
-.quiz-q{font-size:15px;font-weight:700;margin-bottom:16px;line-height:1.5;color:white;}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;}
+.quiz-progress{height:2px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:16px;overflow:hidden;}
+.quiz-progress-bar{height:100%;background:var(--gold);border-radius:2px;transition:width 0.4s ease;}
+.quiz-counter{font-size:11px;color:var(--gray);margin-bottom:12px;}
+.quiz-q{font-size:15px;font-weight:700;margin-bottom:16px;line-height:1.5;color:var(--white);}
 .quiz-opts{display:flex;flex-direction:column;gap:8px;}
-.quiz-opt{padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.04);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.2s;color:white;}
-.quiz-opt:hover{border-color:var(--accent);background:rgba(79,195,247,0.08);}
-.quiz-opt.correct{border-color:var(--green);background:rgba(0,200,81,0.12);color:#4ade80;}
-.quiz-opt.wrong{border-color:var(--red);background:rgba(229,57,53,0.12);color:#f87171;}
-.quiz-result{text-align:center;padding:24px 20px;}
-.quiz-score-big{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--gold);}
-.quiz-score-label{font-size:14px;color:rgba(255,255,255,0.5);margin-top:4px;}
-.quiz-next{width:100%;padding:14px;background:var(--gold);color:var(--black);border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:16px;}
+.quiz-opt{padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);font-size:14px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;text-align:left;transition:all 0.2s;color:rgba(255,255,255,0.8);}
+.quiz-opt:hover{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(16,185,129,0.1);color:#6EE7B7;}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,0.1);color:#FCA5A5;}
+.quiz-result{text-align:center;padding:20px 0;}
+.quiz-score-big{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:4px;color:var(--gold);line-height:1;}
+.quiz-score-label{font-size:14px;color:var(--gray);margin-top:6px;}
+.quiz-next{width:100%;padding:13px;background:var(--gold);color:#090E1A;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:16px;}
 
 /* STANDINGS */
-.standings-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
-.group-header{background:linear-gradient(135deg,#0A2463,#1a3a7c);color:white;padding:10px 14px;font-size:13px;font-weight:800;display:flex;justify-content:space-between;align-items:center;}
-.group-header .gname{color:var(--gold);}
+.standings-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.group-header{background:rgba(10,36,99,0.6);padding:9px 14px;font-size:11px;font-weight:700;display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,0.5);letter-spacing:0.05em;}
+.group-header .gname{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;}
 table{width:100%;border-collapse:collapse;}
-th{font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);padding:7px 14px;text-align:right;border-bottom:1px solid var(--border);}
+th{font-size:10px;font-weight:700;color:var(--gray);padding:7px 12px;text-align:right;border-bottom:1px solid var(--border);letter-spacing:0.05em;}
 th:first-child{text-align:left;}
-td{font-size:12px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:right;color:rgba(255,255,255,0.8);}
+td{font-size:12px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:right;color:rgba(255,255,255,0.7);}
 td:first-child{text-align:left;}
 .team-cell{display:flex;align-items:center;gap:8px;}
-.team-flag{font-size:18px;}
-.team-name{font-weight:600;color:white;}
-.pts{font-weight:900;color:var(--gold);}
-tr.q1{background:rgba(0,200,81,0.06);}
-tr.q2{background:rgba(79,195,247,0.04);}
+.team-flag{font-size:17px;}
+.team-name{font-weight:600;color:var(--white);font-size:13px;}
+.pts{font-weight:800;color:var(--gold);}
+tr.q1 td{background:rgba(16,185,129,0.04);}
+tr.q2 td{background:rgba(79,195,247,0.03);}
 
 /* LEADERBOARD */
-.lb-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
-.lb-header{background:linear-gradient(135deg,var(--gold),#ff9500);color:var(--black);padding:12px 16px;font-weight:800;font-size:14px;display:flex;justify-content:space-between;}
-.lb-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);}
-.lb-rank{font-size:16px;font-weight:900;color:var(--gold);width:28px;text-align:center;flex-shrink:0;}
-.lb-rank.gold{color:#FFD700;}
-.lb-rank.silver{color:#C0C0C0;}
-.lb-rank.bronze{color:#CD7F32;}
-.lb-name{flex:1;font-weight:600;color:white;}
-.lb-pts{font-weight:900;color:var(--gold);font-size:15px;}
-.lb-coef{font-size:11px;color:rgba(255,255,255,0.4);}
+.lb-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.lb-header{background:rgba(245,200,66,0.1);border-bottom:1px solid rgba(245,200,66,0.15);padding:10px 16px;font-size:12px;font-weight:700;color:var(--gold);display:flex;justify-content:space-between;letter-spacing:0.05em;text-transform:uppercase;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:18px;width:28px;text-align:center;flex-shrink:0;letter-spacing:1px;}
+.lb-name{flex:1;font-weight:600;color:var(--white);font-size:14px;}
+.lb-pts{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);letter-spacing:1px;}
+.lb-coef{font-size:10px;color:var(--gray);}
+.coef-badge{background:rgba(245,200,66,0.12);border:1px solid rgba(245,200,66,0.25);color:var(--gold);font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;}
 
-/* PRONOSTIC */
-.match-day-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;margin-top:16px;display:flex;align-items:center;gap:6px;}
+/* WINNER */
+.winner-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.winner-btn{padding:16px 10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.03);cursor:pointer;font-family:'Outfit',sans-serif;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--white);}
+.winner-btn:hover{border-color:rgba(245,200,66,0.4);background:rgba(245,200,66,0.06);}
+.winner-btn.voted{border-color:var(--gold);background:rgba(245,200,66,0.1);}
+.winner-btn .flag{font-size:30px;}
+.winner-btn .wname{font-size:13px;font-weight:700;color:var(--white);}
+.winner-btn .wpct{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);letter-spacing:1px;}
 
-/* WINNER POLL */
-.winner-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px;}
-.winner-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
-.winner-opt{padding:14px 8px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.04);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px;color:white;}
-.winner-opt:hover{border-color:var(--gold);}
-.winner-opt.selected{border-color:var(--gold);background:rgba(255,215,0,0.1);color:var(--gold);}
-.winner-opt .flag{font-size:28px;}
-.winner-pct{font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;}
+.day-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold);margin:14px 0 8px;display:flex;align-items:center;gap:8px;}
+.day-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* LOADING */
-.loading{text-align:center;padding:40px;color:rgba(255,255,255,0.3);}
+.info-box{background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.15);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;}
+.info-box strong{color:var(--gold);}
 
-/* COEF BADGE */
-.coef{background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);color:var(--gold);font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;}
+.loading{text-align:center;padding:40px;color:var(--gray);font-size:14px;}
 </style>
 </head>
 <body>
@@ -143,17 +149,17 @@ tr.q2{background:rgba(79,195,247,0.04);}
 <div class="header">
   <div class="header-top">
     <a href="/app" class="back-btn">← Știri</a>
-    <div class="header-title">🏆 Mondial 2026</div>
+    <div class="header-brand">⚽ MONDIAL 2026</div>
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   </div>
   <div class="tabs">
     <button class="tab on" onclick="showTab('stiri',this)">📰 Știri</button>
     <button class="tab" onclick="showTab('meciuri',this)">⚽ Meciuri</button>
-    <button class="tab" onclick="showTab('pronostic',this)">🎯 Pronostic</button>
+    <button class="tab" onclick="showTab('pronostic',this)">🎯 Scor</button>
     <button class="tab" onclick="showTab('quiz',this)">🧠 Quiz</button>
     <button class="tab" onclick="showTab('clasament',this)">📊 Grupe</button>
     <button class="tab" onclick="showTab('lider',this)">🏅 Top</button>
-    <button class="tab" onclick="showTab('winner',this)">🥇 Câștigătoare</button>
+    <button class="tab" onclick="showTab('winner',this)">🥇 Final</button>
   </div>
 </div>
 
@@ -161,664 +167,631 @@ tr.q2{background:rgba(79,195,247,0.04);}
 
 <!-- ȘTIRI -->
 <div class="page on" id="page-stiri">
-  <div class="s-title">📰 Știri Live CM 2026</div>
-  <div class="s-sub">Surse internaționale · traduse cu AI la 15 minute</div>
-  <div id="news-container"><div class="loading">⚽ Se încarcă...</div></div>
+  <div class="s-title">ȘTIRI LIVE</div>
+  <div class="s-sub">Surse internaționale · traduse cu AI · actualizate la 15 min</div>
+  <div id="news-container"><div class="loading">⚽ Se încarcă știrile...</div></div>
 </div>
 
 <!-- MECIURI -->
 <div class="page" id="page-meciuri">
-  <div class="s-title">⚽ Meciuri</div>
-  <div class="s-sub">Urmărește meciurile de azi</div>
-  <div id="matches-container">
+  <div class="s-title">MECIURI</div>
+  <div class="s-sub">Votează câștigătoarea fiecărui meci</div>
 
-    <div class="match-day-title">📅 11 Iunie 2026 · Meciul de deschidere</div>
-    <div class="match-card">
-      <div class="match-stage">🏟️ Estadio Azteca, Mexico City · Grupa A</div>
-      <div class="match-teams">
-        <div class="match-team"><span class="match-flag">🇲🇽</span><div class="match-name">Mexic</div></div>
-        <div class="match-vs">VS</div>
-        <div class="match-team"><span class="match-flag">🇿🇦</span><div class="match-name">Africa de Sud</div></div>
-      </div>
-      <div class="match-time">⏰ 22:00 ora României · Antena 1</div>
-      <div class="pred-title">Cine câștigă? Votul tău:</div>
-      <div class="pred-btns">
-        <button class="pred-btn" onclick="vote('m1','1',this)"><span class="pred-pct" id="m1-pct1">?</span><span>🇲🇽 Mexic</span><span class="pred-label">câștigă</span></button>
-        <button class="pred-btn" onclick="vote('m1','x',this)"><span class="pred-pct" id="m1-pctx">?</span><span>🤝 Egal</span><span class="pred-label">&nbsp;</span></button>
-        <button class="pred-btn" onclick="vote('m1','2',this)"><span class="pred-pct" id="m1-pct2">?</span><span>🇿🇦 A.Sud</span><span class="pred-label">câștigă</span></button>
-      </div>
+  <div class="day-label">11 IUNIE 2026</div>
+  <div class="match-card">
+    <div class="match-stage">GRUPA A · ESTADIO AZTECA, MEXICO CITY</div>
+    <div class="match-teams">
+      <div class="match-team"><span class="match-flag">🇲🇽</span><div class="match-name">Mexic</div></div>
+      <div class="match-vs">VS</div>
+      <div class="match-team"><span class="match-flag">🇿🇦</span><div class="match-name">Africa de Sud</div></div>
     </div>
-
-    <div class="match-day-title">📅 12 Iunie 2026</div>
-    <div class="match-card">
-      <div class="match-stage">🏟️ SoFi Stadium, LA · Grupa B</div>
-      <div class="match-teams">
-        <div class="match-team"><span class="match-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><div class="match-name">Anglia</div></div>
-        <div class="match-vs">VS</div>
-        <div class="match-team"><span class="match-flag">🇭🇷</span><div class="match-name">Croația</div></div>
-      </div>
-      <div class="match-time">⏰ 21:00 ora României · Antena 1</div>
-      <div class="pred-title">Cine câștigă?</div>
-      <div class="pred-btns">
-        <button class="pred-btn" onclick="vote('m2','1',this)"><span class="pred-pct" id="m2-pct1">?</span><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Anglia</span><span class="pred-label">câștigă</span></button>
-        <button class="pred-btn" onclick="vote('m2','x',this)"><span class="pred-pct" id="m2-pctx">?</span><span>🤝 Egal</span><span class="pred-label">&nbsp;</span></button>
-        <button class="pred-btn" onclick="vote('m2','2',this)"><span class="pred-pct" id="m2-pct2">?</span><span>🇭🇷 Croația</span><span class="pred-label">câștigă</span></button>
-      </div>
+    <div class="match-time">22:00 ora României · Antena 1</div>
+    <div class="pred-label-title">Cine câștigă?</div>
+    <div class="pred-btns">
+      <button class="pred-btn" id="btn-m1-1" onclick="vote('m1','1')"><span class="pred-pct" id="pct-m1-1">-</span><span class="pred-team">🇲🇽 Mexic</span><span class="pred-sub">câștigă</span></button>
+      <button class="pred-btn" id="btn-m1-x" onclick="vote('m1','x')"><span class="pred-pct" id="pct-m1-x">-</span><span class="pred-team">🤝 Egal</span><span class="pred-sub">&nbsp;</span></button>
+      <button class="pred-btn" id="btn-m1-2" onclick="vote('m1','2')"><span class="pred-pct" id="pct-m1-2">-</span><span class="pred-team">🇿🇦 A.Sud</span><span class="pred-sub">câștigă</span></button>
     </div>
+  </div>
 
-    <div class="match-card">
-      <div class="match-stage">🏟️ AT&T Stadium, Dallas · Grupa E</div>
-      <div class="match-teams">
-        <div class="match-team"><span class="match-flag">🇧🇷</span><div class="match-name">Brazilia</div></div>
-        <div class="match-vs">VS</div>
-        <div class="match-team"><span class="match-flag">🇲🇦</span><div class="match-name">Maroc</div></div>
-      </div>
-      <div class="match-time">⏰ 00:00 ora României · Antena 1</div>
-      <div class="pred-title">Cine câștigă?</div>
-      <div class="pred-btns">
-        <button class="pred-btn" onclick="vote('m3','1',this)"><span class="pred-pct" id="m3-pct1">?</span><span>🇧🇷 Brazilia</span><span class="pred-label">câștigă</span></button>
-        <button class="pred-btn" onclick="vote('m3','x',this)"><span class="pred-pct" id="m3-pctx">?</span><span>🤝 Egal</span><span class="pred-label">&nbsp;</span></button>
-        <button class="pred-btn" onclick="vote('m3','2',this)"><span class="pred-pct" id="m3-pct2">?</span><span>🇲🇦 Maroc</span><span class="pred-label">câștigă</span></button>
-      </div>
+  <div class="day-label">12 IUNIE 2026</div>
+  <div class="match-card">
+    <div class="match-stage">GRUPA B · SOFI STADIUM, LOS ANGELES</div>
+    <div class="match-teams">
+      <div class="match-team"><span class="match-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><div class="match-name">Anglia</div></div>
+      <div class="match-vs">VS</div>
+      <div class="match-team"><span class="match-flag">🇭🇷</span><div class="match-name">Croația</div></div>
     </div>
+    <div class="match-time">21:00 ora României · Antena 1</div>
+    <div class="pred-label-title">Cine câștigă?</div>
+    <div class="pred-btns">
+      <button class="pred-btn" id="btn-m2-1" onclick="vote('m2','1')"><span class="pred-pct" id="pct-m2-1">-</span><span class="pred-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Anglia</span><span class="pred-sub">câștigă</span></button>
+      <button class="pred-btn" id="btn-m2-x" onclick="vote('m2','x')"><span class="pred-pct" id="pct-m2-x">-</span><span class="pred-team">🤝 Egal</span><span class="pred-sub">&nbsp;</span></button>
+      <button class="pred-btn" id="btn-m2-2" onclick="vote('m2','2')"><span class="pred-pct" id="pct-m2-2">-</span><span class="pred-team">🇭🇷 Croația</span><span class="pred-sub">câștigă</span></button>
+    </div>
+  </div>
 
+  <div class="match-card">
+    <div class="match-stage">GRUPA E · AT&T STADIUM, DALLAS</div>
+    <div class="match-teams">
+      <div class="match-team"><span class="match-flag">🇧🇷</span><div class="match-name">Brazilia</div></div>
+      <div class="match-vs">VS</div>
+      <div class="match-team"><span class="match-flag">🇲🇦</span><div class="match-name">Maroc</div></div>
+    </div>
+    <div class="match-time">00:00 ora României · Antena 1</div>
+    <div class="pred-label-title">Cine câștigă?</div>
+    <div class="pred-btns">
+      <button class="pred-btn" id="btn-m3-1" onclick="vote('m3','1')"><span class="pred-pct" id="pct-m3-1">-</span><span class="pred-team">🇧🇷 Brazilia</span><span class="pred-sub">câștigă</span></button>
+      <button class="pred-btn" id="btn-m3-x" onclick="vote('m3','x')"><span class="pred-pct" id="pct-m3-x">-</span><span class="pred-team">🤝 Egal</span><span class="pred-sub">&nbsp;</span></button>
+      <button class="pred-btn" id="btn-m3-2" onclick="vote('m3','2')"><span class="pred-pct" id="pct-m3-2">-</span><span class="pred-team">🇲🇦 Maroc</span><span class="pred-sub">câștigă</span></button>
+    </div>
   </div>
 </div>
 
 <!-- PRONOSTIC SCOR -->
 <div class="page" id="page-pronostic">
-  <div class="s-title">🎯 Pronostic Scor</div>
+  <div class="s-title">PRONOSTIC SCOR</div>
   <div class="s-sub">Ghicește scorul exact · Câștigă puncte la clasament</div>
+  <div class="info-box"><strong>Sistem coeficienți:</strong> Câștigătoare = <strong>+10 pct</strong> · Diferență goluri = <strong>+20 pct (2x)</strong> · Scor exact = <strong>+30 pct (3x)</strong></div>
 
-  <div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:rgba(255,255,255,0.7);">
-    💡 <strong style="color:var(--gold)">Sistem de punctare:</strong> Câștigătoare corectă = <span class="coef">1.5x</span> · Scor exact = <span class="coef">3x</span> · Diferență de goluri corectă = <span class="coef">2x</span>
-  </div>
-
-  <div class="match-day-title">📅 11 Iunie 2026</div>
-
+  <div class="day-label">11 IUNIE 2026</div>
   <div class="match-card">
-    <div class="match-stage">🏟️ Estadio Azteca · Grupa A</div>
+    <div class="match-stage">GRUPA A · AZTECA</div>
     <div class="match-teams">
       <div class="match-team"><span class="match-flag">🇲🇽</span><div class="match-name">Mexic</div></div>
-      <div class="match-vs">-</div>
+      <div class="match-vs">VS</div>
       <div class="match-team"><span class="match-flag">🇿🇦</span><div class="match-name">Africa de Sud</div></div>
     </div>
     <div class="score-pred">
-      <div class="score-pred-title">⚽ Scorul tău pronosticat:</div>
+      <div class="score-pred-title">Scorul tău pronosticat</div>
       <div class="score-inputs">
-        <input type="number" class="score-input" id="s-m1-h" min="0" max="20" value="2" placeholder="0">
-        <div class="score-vs">—</div>
-        <input type="number" class="score-input" id="s-m1-a" min="0" max="20" value="0" placeholder="0">
+        <input type="number" class="score-input" id="s-m1-h" min="0" max="20" value="2">
+        <div class="score-vs2">—</div>
+        <input type="number" class="score-input" id="s-m1-a" min="0" max="20" value="0">
       </div>
-      <button class="score-submit" onclick="submitScore('m1')">Trimite pronosticul 🎯</button>
-      <div id="s-m1-result" style="text-align:center;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.5);"></div>
+      <button class="score-submit" onclick="submitScore('m1')">Trimite pronosticul →</button>
+      <div class="score-result" id="r-m1"></div>
     </div>
   </div>
 
-  <div class="match-day-title">📅 12 Iunie 2026</div>
-
+  <div class="day-label">12 IUNIE 2026</div>
   <div class="match-card">
-    <div class="match-stage">🏟️ SoFi Stadium · Grupa B</div>
+    <div class="match-stage">GRUPA B · SOFI STADIUM</div>
     <div class="match-teams">
       <div class="match-team"><span class="match-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><div class="match-name">Anglia</div></div>
-      <div class="match-vs">-</div>
+      <div class="match-vs">VS</div>
       <div class="match-team"><span class="match-flag">🇭🇷</span><div class="match-name">Croația</div></div>
     </div>
     <div class="score-pred">
-      <div class="score-pred-title">⚽ Scorul tău pronosticat:</div>
+      <div class="score-pred-title">Scorul tău pronosticat</div>
       <div class="score-inputs">
-        <input type="number" class="score-input" id="s-m2-h" min="0" max="20" value="2" placeholder="0">
-        <div class="score-vs">—</div>
-        <input type="number" class="score-input" id="s-m2-a" min="0" max="20" value="1" placeholder="0">
+        <input type="number" class="score-input" id="s-m2-h" min="0" max="20" value="2">
+        <div class="score-vs2">—</div>
+        <input type="number" class="score-input" id="s-m2-a" min="0" max="20" value="1">
       </div>
-      <button class="score-submit" onclick="submitScore('m2')">Trimite pronosticul 🎯</button>
-      <div id="s-m2-result" style="text-align:center;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.5);"></div>
+      <button class="score-submit" onclick="submitScore('m2')">Trimite pronosticul →</button>
+      <div class="score-result" id="r-m2"></div>
     </div>
   </div>
 
   <div class="match-card">
-    <div class="match-stage">🏟️ AT&T Stadium · Grupa E</div>
+    <div class="match-stage">GRUPA E · AT&T STADIUM</div>
     <div class="match-teams">
       <div class="match-team"><span class="match-flag">🇧🇷</span><div class="match-name">Brazilia</div></div>
-      <div class="match-vs">-</div>
+      <div class="match-vs">VS</div>
       <div class="match-team"><span class="match-flag">🇲🇦</span><div class="match-name">Maroc</div></div>
     </div>
     <div class="score-pred">
-      <div class="score-pred-title">⚽ Scorul tău pronosticat:</div>
+      <div class="score-pred-title">Scorul tău pronosticat</div>
       <div class="score-inputs">
-        <input type="number" class="score-input" id="s-m3-h" min="0" max="20" value="2" placeholder="0">
-        <div class="score-vs">—</div>
-        <input type="number" class="score-input" id="s-m3-a" min="0" max="20" value="0" placeholder="0">
+        <input type="number" class="score-input" id="s-m3-h" min="0" max="20" value="2">
+        <div class="score-vs2">—</div>
+        <input type="number" class="score-input" id="s-m3-a" min="0" max="20" value="0">
       </div>
-      <button class="score-submit" onclick="submitScore('m3')">Trimite pronosticul 🎯</button>
-      <div id="s-m3-result" style="text-align:center;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.5);"></div>
+      <button class="score-submit" onclick="submitScore('m3')">Trimite pronosticul →</button>
+      <div class="score-result" id="r-m3"></div>
     </div>
   </div>
-
 </div>
 
 <!-- QUIZ -->
 <div class="page" id="page-quiz">
-  <div class="s-title">🧠 Quiz Mondial</div>
-  <div class="s-sub" id="quiz-date-sub">Quiz zilnic · se reînnoiește în fiecare zi</div>
+  <div class="s-title">QUIZ ZILNIC</div>
+  <div class="s-sub" id="quiz-sub">Se reînnoiește în fiecare zi cu întrebări noi</div>
   <div id="quiz-container"></div>
 </div>
 
-<!-- CLASAMENT GRUPE -->
+<!-- GRUPE -->
 <div class="page" id="page-clasament">
-  <div class="s-title">📊 Grupele CM 2026</div>
+  <div class="s-title">GRUPE CM 2026</div>
   <div class="s-sub">48 echipe · 12 grupe · 11–28 iunie 2026</div>
-
-  <div id="groups-container">
-  <!-- Grupa A -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa A</span><span class="gname">Mexic · Af.Sud · Coreea · Cehia</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇲🇽</span><span class="team-name">Mexic</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇿🇦</span><span class="team-name">Africa de Sud</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇰🇷</span><span class="team-name">Coreea de Sud</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇨🇿</span><span class="team-name">Cehia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa B -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa B</span><span class="gname">Anglia · Croația · Ghana · Slovacia</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Anglia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇭🇷</span><span class="team-name">Croația</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇬🇭</span><span class="team-name">Ghana</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇸🇰</span><span class="team-name">Slovacia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa C -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa C</span><span class="gname">SUA · Panama · Serbia · Noua Zeelandă</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇺🇸</span><span class="team-name">SUA</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇵🇦</span><span class="team-name">Panama</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇷🇸</span><span class="team-name">Serbia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇳🇿</span><span class="team-name">Noua Zeelandă</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa D -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa D</span><span class="gname">Franța · Arabia Saudită · Nigeria · Chile</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇫🇷</span><span class="team-name">Franța</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇸🇦</span><span class="team-name">Arabia Saudită</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇳🇬</span><span class="team-name">Nigeria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇨🇱</span><span class="team-name">Chile</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa E -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa E</span><span class="gname">Spania · Brazilia · Japonia · Camerun</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇪🇸</span><span class="team-name">Spania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇧🇷</span><span class="team-name">Brazilia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇯🇵</span><span class="team-name">Japonia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇨🇲</span><span class="team-name">Camerun</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa F -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa F</span><span class="gname">Belgia · Australia · Austria · Ivory Coast</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇧🇪</span><span class="team-name">Belgia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇦🇺</span><span class="team-name">Australia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇦🇹</span><span class="team-name">Austria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇨🇮</span><span class="team-name">Côte d'Ivoire</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa G -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa G</span><span class="gname">Germania · Columbia · Turcia · Georgia</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇩🇪</span><span class="team-name">Germania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇨🇴</span><span class="team-name">Columbia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇹🇷</span><span class="team-name">Turcia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇬🇪</span><span class="team-name">Georgia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa H -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa H</span><span class="gname">Portugalia · Senegal · Polonia · Slovenia</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇵🇹</span><span class="team-name">Portugalia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇸🇳</span><span class="team-name">Senegal</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇵🇱</span><span class="team-name">Polonia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇸🇮</span><span class="team-name">Slovenia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa I -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa I</span><span class="gname">Argentina · Canada · Ecuador · Algeria</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇦🇷</span><span class="team-name">Argentina</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇨🇦</span><span class="team-name">Canada</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇪🇨</span><span class="team-name">Ecuador</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇩🇿</span><span class="team-name">Algeria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa J -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa J</span><span class="gname">Olanda · Iran · Peru · Tanzania</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇳🇱</span><span class="team-name">Olanda</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇮🇷</span><span class="team-name">Iran</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇵🇪</span><span class="team-name">Peru</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇹🇿</span><span class="team-name">Tanzania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa K -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa K</span><span class="gname">Uruguay · Qatar · Ungaria · Guineea</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇺🇾</span><span class="team-name">Uruguay</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇶🇦</span><span class="team-name">Qatar</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇭🇺</span><span class="team-name">Ungaria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇬🇳</span><span class="team-name">Guineea</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
-  </div>
-  <!-- Grupa L -->
-  <div class="standings-card">
-    <div class="group-header"><span>Grupa L</span><span class="gname">Maroc · Croația · Venezuela · Indonezia</span></div>
-    <table>
-      <tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
-      <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇲🇦</span><span class="team-name">Maroc</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇭🇷</span><span class="team-name">Croația</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇻🇪</span><span class="team-name">Venezuela</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-      <tr><td><div class="team-cell"><span class="team-flag">🇮🇩</span><span class="team-name">Indonezia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
-    </table>
+  <div style="display:flex;gap:8px;margin-bottom:12px;font-size:11px;">
+    <span style="color:#6EE7B7;">■ Loc 1 calificat</span>
+    <span style="color:#7DD3FC;">■ Loc 2 calificat</span>
   </div>
 
-  <p style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;margin-top:8px;">🟢 Loc 1 · 🔵 Loc 2 · Clasament actualizat pe parcurs</p>
+  <!-- toate 12 grupe -->
+  <div id="all-groups">
+    <!-- Grupa A -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA A <span class="gname">Mexic · Africa de Sud · Coreea de Sud · Cehia</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇲🇽</span><span class="team-name">Mexic</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇿🇦</span><span class="team-name">Africa de Sud</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇰🇷</span><span class="team-name">Coreea de Sud</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇨🇿</span><span class="team-name">Cehia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa B -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA B <span class="gname">Anglia · Croația · Ghana · Slovacia</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="team-name">Anglia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇭🇷</span><span class="team-name">Croația</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇬🇭</span><span class="team-name">Ghana</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇸🇰</span><span class="team-name">Slovacia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa C -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA C <span class="gname">SUA · Panama · Serbia · Noua Zeelandă</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇺🇸</span><span class="team-name">SUA</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇵🇦</span><span class="team-name">Panama</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇷🇸</span><span class="team-name">Serbia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇳🇿</span><span class="team-name">Noua Zeelandă</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa D -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA D <span class="gname">Franța · Arabia Saudită · Nigeria · Chile</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇫🇷</span><span class="team-name">Franța</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇸🇦</span><span class="team-name">Arabia Saudită</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇳🇬</span><span class="team-name">Nigeria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇨🇱</span><span class="team-name">Chile</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa E -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA E <span class="gname">Spania · Brazilia · Japonia · Camerun</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇪🇸</span><span class="team-name">Spania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇧🇷</span><span class="team-name">Brazilia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇯🇵</span><span class="team-name">Japonia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇨🇲</span><span class="team-name">Camerun</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa F -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA F <span class="gname">Belgia · Australia · Austria · Côte d'Ivoire</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇧🇪</span><span class="team-name">Belgia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇦🇺</span><span class="team-name">Australia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇦🇹</span><span class="team-name">Austria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇨🇮</span><span class="team-name">Côte d'Ivoire</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa G -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA G <span class="gname">Germania · Columbia · Turcia · Georgia</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇩🇪</span><span class="team-name">Germania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇨🇴</span><span class="team-name">Columbia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇹🇷</span><span class="team-name">Turcia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇬🇪</span><span class="team-name">Georgia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa H -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA H <span class="gname">Portugalia · Senegal · Polonia · Slovenia</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇵🇹</span><span class="team-name">Portugalia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇸🇳</span><span class="team-name">Senegal</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇵🇱</span><span class="team-name">Polonia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇸🇮</span><span class="team-name">Slovenia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa I -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA I <span class="gname">Argentina · Canada · Ecuador · Algeria</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇦🇷</span><span class="team-name">Argentina</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇨🇦</span><span class="team-name">Canada</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇪🇨</span><span class="team-name">Ecuador</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇩🇿</span><span class="team-name">Algeria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa J -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA J <span class="gname">Olanda · Iran · Peru · Tanzania</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇳🇱</span><span class="team-name">Olanda</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇮🇷</span><span class="team-name">Iran</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇵🇪</span><span class="team-name">Peru</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇹🇿</span><span class="team-name">Tanzania</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa K -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA K <span class="gname">Uruguay · Qatar · Ungaria · Guineea</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇺🇾</span><span class="team-name">Uruguay</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇶🇦</span><span class="team-name">Qatar</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇭🇺</span><span class="team-name">Ungaria</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇬🇳</span><span class="team-name">Guineea</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
+    <!-- Grupa L -->
+    <div class="standings-card">
+      <div class="group-header">GRUPA L <span class="gname">Maroc · Croația · Venezuela · Indonezia</span></div>
+      <table><tr><th>Echipă</th><th>J</th><th>V</th><th>E</th><th>Î</th><th>Pct</th></tr>
+        <tr class="q1"><td><div class="team-cell"><span class="team-flag">🇲🇦</span><span class="team-name">Maroc</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr class="q2"><td><div class="team-cell"><span class="team-flag">🇭🇷</span><span class="team-name">Croația</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇻🇪</span><span class="team-name">Venezuela</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+        <tr><td><div class="team-cell"><span class="team-flag">🇮🇩</span><span class="team-name">Indonezia</span></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td class="pts">0</td></tr>
+      </table>
+    </div>
   </div>
 </div>
 
 <!-- LEADERBOARD -->
 <div class="page" id="page-lider">
-  <div class="s-title">🏅 Clasament Fani</div>
-  <div class="s-sub">Top pronosticatori · Sistem de punctare cu coeficienți</div>
-
-  <div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;">
-    <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;">📊 Cum se calculează punctele:</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">
-      🏆 Câștigătoare corectă → <span class="coef">+10 pct</span><br>
-      ⚽ Scor exact → <span class="coef">+30 pct</span> (3x bonus)<br>
-      📊 Diferență goluri corectă → <span class="coef">+20 pct</span> (2x bonus)<br>
-      🧠 Răspuns corect quiz → <span class="coef">+5 pct</span>
-    </div>
+  <div class="s-title">CLASAMENT FANI</div>
+  <div class="s-sub">Top pronosticatori · Puncte acumulate din quiz + scoruri</div>
+  <div class="info-box">
+    <strong>Cum câștigi puncte:</strong><br>
+    ⚽ Vot câștigătoare meci = +5 · 🎯 Scor exact = +30 · 📊 Diferență corectă = +20 · 🧠 Quiz corect = +5
   </div>
-
   <div class="lb-card">
-    <div class="lb-header"><span>🏆 Top Pronosticatori</span><span>Puncte</span></div>
-    <div id="leaderboard-body">
-      <div class="lb-row">
-        <div class="lb-rank gold">🥇</div>
-        <div class="lb-name">Fan Mondial</div>
-        <div style="text-align:right;"><div class="lb-pts">—</div><div class="lb-coef">0 pronosticuri</div></div>
-      </div>
-      <div class="lb-row" style="background:rgba(255,215,0,0.04);">
-        <div class="lb-rank" style="color:#c0c0c0;">🥈</div>
-        <div class="lb-name">Tu poți fi aici!</div>
-        <div style="text-align:right;"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div>
-      </div>
-      <div class="lb-row">
-        <div class="lb-rank" style="color:#cd7f32;">🥉</div>
-        <div class="lb-name">Microbist Moldova</div>
-        <div style="text-align:right;"><div class="lb-pts">—</div><div class="lb-coef">0 pronosticuri</div></div>
-      </div>
+    <div class="lb-header"><span>TOP FANI</span><span>PUNCTE</span></div>
+    <div class="lb-row"><div class="lb-rank" style="color:var(--gold)">🥇</div><div class="lb-name">Microbist Moldova</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div class="lb-row"><div class="lb-rank" style="color:#C0C0C0">🥈</div><div class="lb-name">Fan CM 2026</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div class="lb-row"><div class="lb-rank" style="color:#CD7F32">🥉</div><div class="lb-name">Suporter Mondial</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;color:var(--gray);">Punctele tale:</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:1px;" id="my-pts-display">0</span>
     </div>
-    <div style="padding:12px 16px;text-align:center;">
-      <div id="my-score-display" style="font-size:13px;color:rgba(255,255,255,0.5);">Punctele tale: <strong style="color:var(--gold)" id="my-pts">0</strong></div>
-    </div>
-  </div>
-
-  <div style="background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.2);border-radius:12px;padding:14px;text-align:center;">
-    <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:6px;">📢 Clasament complet în curând</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.4);">Trimite pronosticurile și rezolvă quiz-ul zilnic pentru a urca în clasament!</div>
   </div>
 </div>
 
 <!-- CÂȘTIGĂTOARE -->
 <div class="page" id="page-winner">
-  <div class="s-title">🥇 Cine câștigă CM?</div>
-  <div class="s-sub">Votul fanilor Ai Știri · <span id="winner-total-label">0 voturi</span></div>
-
-  <div class="winner-card">
-    <div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:12px;">🏆 Votul tău pentru câștigătoare:</div>
-    <div class="winner-opts">
-      <button class="winner-opt" onclick="voteWinner('brazilia')"><span class="flag">🇧🇷</span><strong>Brazilia</strong><span class="winner-pct" id="w-brazilia">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('franta')"><span class="flag">🇫🇷</span><strong>Franța</strong><span class="winner-pct" id="w-franta">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('anglia')"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><strong>Anglia</strong><span class="winner-pct" id="w-anglia">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('argentina')"><span class="flag">🇦🇷</span><strong>Argentina</strong><span class="winner-pct" id="w-argentina">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('spania')"><span class="flag">🇪🇸</span><strong>Spania</strong><span class="winner-pct" id="w-spania">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('germania')"><span class="flag">🇩🇪</span><strong>Germania</strong><span class="winner-pct" id="w-germania">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('portugalia')"><span class="flag">🇵🇹</span><strong>Portugalia</strong><span class="winner-pct" id="w-portugalia">—</span></button>
-      <button class="winner-opt" onclick="voteWinner('altul')"><span class="flag">🌍</span><strong>Altul</strong><span class="winner-pct" id="w-altul">—</span></button>
-    </div>
+  <div class="s-title">CÂȘTIGĂTOAREA CM</div>
+  <div class="s-sub">Votul fanilor Ai Știri · <span id="winner-count">0</span> voturi</div>
+  <div class="winner-grid" id="winner-grid">
+    <button class="winner-btn" id="wb-brazilia" onclick="voteWinner('brazilia')"><span class="flag">🇧🇷</span><span class="wname">Brazilia</span><span class="wpct" id="wp-brazilia">-</span></button>
+    <button class="winner-btn" id="wb-franta" onclick="voteWinner('franta')"><span class="flag">🇫🇷</span><span class="wname">Franța</span><span class="wpct" id="wp-franta">-</span></button>
+    <button class="winner-btn" id="wb-anglia" onclick="voteWinner('anglia')"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="wname">Anglia</span><span class="wpct" id="wp-anglia">-</span></button>
+    <button class="winner-btn" id="wb-argentina" onclick="voteWinner('argentina')"><span class="flag">🇦🇷</span><span class="wname">Argentina</span><span class="wpct" id="wp-argentina">-</span></button>
+    <button class="winner-btn" id="wb-spania" onclick="voteWinner('spania')"><span class="flag">🇪🇸</span><span class="wname">Spania</span><span class="wpct" id="wp-spania">-</span></button>
+    <button class="winner-btn" id="wb-germania" onclick="voteWinner('germania')"><span class="flag">🇩🇪</span><span class="wname">Germania</span><span class="wpct" id="wp-germania">-</span></button>
+    <button class="winner-btn" id="wb-portugalia" onclick="voteWinner('portugalia')"><span class="flag">🇵🇹</span><span class="wname">Portugalia</span><span class="wpct" id="wp-portugalia">-</span></button>
+    <button class="winner-btn" id="wb-altul" onclick="voteWinner('altul')"><span class="flag">🌍</span><span class="wname">Altul</span><span class="wpct" id="wp-altul">-</span></button>
   </div>
 </div>
 
-</div><!-- /content -->
+</div>
 
 <script>
 const CF = 'https://ai-stiri-proxy.cstraista.workers.dev';
-const GEMINI_KEY = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
+const GK = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
+const WC_KW = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic|africa de sud|anglia|croatia|brazilia|maroc|messi|ronaldo|grupe|gol|stadion|arbitru|galben|transfer|lot|selectie/i;
 
-// ── TABS ──────────────────────────────────
+// ── TABS ──────────────────────────────
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   if(btn) btn.classList.add('on');
-  const page = document.getElementById('page-'+tab);
-  if(page) page.classList.add('on');
-  if(tab==='quiz') initQuiz();
+  document.getElementById('page-'+tab).classList.add('on');
   if(tab==='stiri') loadNews();
-  if(tab==='winner') loadWinner();
-  if(tab==='meciuri') loadVotes();
-  if(tab==='pronostic') loadScorePreds();
-  if(tab==='lider') updateMyScore();
+  if(tab==='quiz') initQuiz();
+  if(tab==='winner') renderWinner();
+  if(tab==='meciuri') renderVotes();
+  if(tab==='pronostic') renderScorePreds();
+  if(tab==='lider') document.getElementById('my-pts-display').textContent = getMyPts();
 }
 
-// ── VOTES ─────────────────────────────────
-function vote(matchId, result, btn) {
-  const key = 'mondial_vote_' + matchId;
-  const myKey = key + '_my';
-  if(localStorage.getItem(myKey)) return;
-  const stored = JSON.parse(localStorage.getItem(key) || '{"1":12,"x":5,"2":3}');
-  stored[result]++;
-  localStorage.setItem(key, JSON.stringify(stored));
-  localStorage.setItem(myKey, result);
-  updateVoteUI(matchId, stored, result);
-  // Puncte pentru participare
-  addPoints(5, 'Vot meci ' + matchId);
+// ── POINTS ────────────────────────────
+function getMyPts() { return parseInt(localStorage.getItem('m26_pts')||'0'); }
+function addPts(n) { localStorage.setItem('m26_pts', getMyPts()+n); }
+
+// ── VOTES ─────────────────────────────
+const DEF_VOTES = { m1:{'1':18,'x':7,'2':5}, m2:{'1':22,'x':8,'2':11}, m3:{'1':30,'x':6,'2':8} };
+
+function vote(mid, r) {
+  const k = 'm26_v_'+mid;
+  if(localStorage.getItem(k+'_my')) return;
+  const v = JSON.parse(localStorage.getItem(k) || JSON.stringify(DEF_VOTES[mid]));
+  v[r]++;
+  localStorage.setItem(k, JSON.stringify(v));
+  localStorage.setItem(k+'_my', r);
+  addPts(5);
+  renderVotes();
 }
 
-function updateVoteUI(matchId, votes, selected) {
-  const total = votes['1'] + votes['x'] + votes['2'];
-  ['1','x','2'].forEach(r => {
-    const el = document.getElementById(matchId+'-pct'+r);
-    if(el) el.textContent = total>0 ? Math.round(votes[r]/total*100)+'%' : '0%';
+function renderVotes() {
+  ['m1','m2','m3'].forEach(mid => {
+    const k = 'm26_v_'+mid;
+    const v = JSON.parse(localStorage.getItem(k) || JSON.stringify(DEF_VOTES[mid]));
+    const my = localStorage.getItem(k+'_my');
+    const total = v['1']+v['x']+v['2'];
+    ['1','x','2'].forEach(r => {
+      const el = document.getElementById('pct-'+mid+'-'+r);
+      if(el) el.textContent = total>0 ? Math.round(v[r]/total*100)+'%' : '-';
+      const btn = document.getElementById('btn-'+mid+'-'+r);
+      if(btn) btn.classList.toggle('voted', my===r);
+    });
   });
-  document.querySelectorAll(`[onclick*="vote('${matchId}"]`).forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll(`[onclick="vote('${matchId}','${selected}',this)"]`).forEach(b => b.classList.add('selected'));
 }
 
-function loadVotes() {
-  ['m1','m2','m3'].forEach(id => {
-    const key = 'mondial_vote_' + id;
-    const stored = JSON.parse(localStorage.getItem(key) || '{"1":12,"x":5,"2":3}');
-    const myVote = localStorage.getItem(key+'_my');
-    updateVoteUI(id, stored, myVote);
-  });
-}
-
-// ── SCORE PREDICTIONS ─────────────────────
-function submitScore(matchId) {
-  const myKey = 'mondial_score_' + matchId + '_my';
-  if(localStorage.getItem(myKey)) {
-    document.getElementById('s-'+matchId+'-result').textContent = '✅ Pronostic trimis deja!';
+// ── SCORE PRED ─────────────────────────
+function submitScore(mid) {
+  const k = 'm26_s_'+mid;
+  if(localStorage.getItem(k)) {
+    const s = JSON.parse(localStorage.getItem(k));
+    document.getElementById('r-'+mid).innerHTML = `<span style="color:var(--gold)">✅ Pronostic tău: ${s.h} — ${s.a}</span>`;
     return;
   }
-  const h = parseInt(document.getElementById('s-'+matchId+'-h').value) || 0;
-  const a = parseInt(document.getElementById('s-'+matchId+'-a').value) || 0;
-  localStorage.setItem(myKey, JSON.stringify({h,a}));
-  document.getElementById('s-'+matchId+'-result').innerHTML = `✅ Pronostic trimis: <strong style="color:var(--gold)">${h} - ${a}</strong> · +5 puncte`;
-  addPoints(5, 'Pronostic scor ' + matchId);
-  updateMyScore();
+  const h = parseInt(document.getElementById('s-'+mid+'-h').value)||0;
+  const a = parseInt(document.getElementById('s-'+mid+'-a').value)||0;
+  localStorage.setItem(k, JSON.stringify({h,a}));
+  document.getElementById('r-'+mid).innerHTML = `<span style="color:var(--gold)">✅ Salvat: ${h} — ${a} · +5 pct</span>`;
+  addPts(5);
 }
 
-function loadScorePreds() {
-  ['m1','m2','m3'].forEach(id => {
-    const pred = localStorage.getItem('mondial_score_' + id + '_my');
-    if(pred) {
-      const {h,a} = JSON.parse(pred);
-      const res = document.getElementById('s-'+id+'-result');
-      if(res) res.innerHTML = `✅ Pronosticul tău: <strong style="color:var(--gold)">${h} - ${a}</strong>`;
+function renderScorePreds() {
+  ['m1','m2','m3'].forEach(mid => {
+    const s = localStorage.getItem('m26_s_'+mid);
+    if(s) {
+      const {h,a} = JSON.parse(s);
+      const r = document.getElementById('r-'+mid);
+      if(r) r.innerHTML = `<span style="color:var(--gold)">✅ Pronosticul tău: ${h} — ${a}</span>`;
     }
   });
 }
 
-// ── POINTS SYSTEM ─────────────────────────
-function addPoints(pts, reason) {
-  const total = parseInt(localStorage.getItem('mondial_pts') || '0') + pts;
-  localStorage.setItem('mondial_pts', total);
-  const log = JSON.parse(localStorage.getItem('mondial_pts_log') || '[]');
-  log.push({pts, reason, ts: Date.now()});
-  localStorage.setItem('mondial_pts_log', JSON.stringify(log.slice(-20)));
+// ── WINNER ─────────────────────────────
+const TEAMS = ['brazilia','franta','anglia','argentina','spania','germania','portugalia','altul'];
+const DEF_W = {brazilia:38,franta:24,anglia:14,argentina:20,spania:9,germania:4,portugalia:3,altul:2};
+
+function voteWinner(team) {
+  if(localStorage.getItem('m26_winner_my')) return;
+  const v = JSON.parse(localStorage.getItem('m26_winner') || JSON.stringify(DEF_W));
+  v[team] = (v[team]||0)+1;
+  localStorage.setItem('m26_winner', JSON.stringify(v));
+  localStorage.setItem('m26_winner_my', team);
+  addPts(5);
+  renderWinner();
 }
 
-function updateMyScore() {
-  const pts = parseInt(localStorage.getItem('mondial_pts') || '0');
-  const el = document.getElementById('my-pts');
-  if(el) el.textContent = pts;
+function renderWinner() {
+  const v = JSON.parse(localStorage.getItem('m26_winner') || JSON.stringify(DEF_W));
+  const my = localStorage.getItem('m26_winner_my');
+  const total = TEAMS.reduce((s,t)=>s+(v[t]||0),0);
+  TEAMS.forEach(t => {
+    const pct = document.getElementById('wp-'+t);
+    if(pct) pct.textContent = total>0 ? Math.round((v[t]||0)/total*100)+'%' : '-';
+    const btn = document.getElementById('wb-'+t);
+    if(btn) btn.classList.toggle('voted', my===t);
+  });
+  const cnt = document.getElementById('winner-count');
+  if(cnt) cnt.textContent = total.toLocaleString();
 }
 
-// ── QUIZ ──────────────────────────────────
-const ALL_QUESTIONS = [
-  { q:"Câte echipe participă la CM 2026?", opts:["32","40","48","56"], a:2 },
-  { q:"Unde se joacă finala CM 2026?", opts:["Los Angeles","New York / New Jersey","Miami","Dallas"], a:1 },
-  { q:"Cine a câștigat CM 2022 din Qatar?", opts:["Franța","Croația","Argentina","Brazilia"], a:2 },
-  { q:"Câte meciuri se joacă la CM 2026?", opts:["64","80","96","104"], a:3 },
-  { q:"Pe ce dată începe CM 2026?", opts:["1 iunie","11 iunie","15 iunie","20 iunie"], a:1 },
-  { q:"Pe ce stadion se joacă meciul de deschidere?", opts:["MetLife","Rose Bowl","Azteca","AT&T"], a:2 },
-  { q:"Care echipă a câștigat cel mai multe CM?", opts:["Germania","Argentina","Italia","Brazilia"], a:3 },
-  { q:"Câte goluri a marcat Ronaldo în carieră (club+națională)?", opts:["800+","900+","700+","600+"], a:1 },
-  { q:"Cine este antrenorul Franței la CM 2026?", opts:["Deschamps","Zidane","Mbappe","Blanc"], a:0 },
-  { q:"Care echipă poartă tricouri galbene la CM 2026?", opts:["Columbia","Brazilia","SUA","Senegal"], a:1 },
-  { q:"Câte echipe se califică din fiecare grupă la CM 2026?", opts:["1","2","3","Depinde"], a:1 },
-  { q:"Unde a câștigat Argentina CM 2022?", opts:["Qatar","Rusia","Brazilia","Africa de Sud"], a:0 },
-  { q:"Câte ediții ale CM de fotbal au existat înainte de 2026?", opts:["21","22","23","24"], a:1 },
-  { q:"Care este mingea oficială a CM 2026?", opts:["Jabulani","Telstar","Trionda","Al Rihla"], a:2 },
+// ── QUIZ ───────────────────────────────
+const QS = [
+  {q:"Câte echipe participă la CM 2026?",opts:["32","40","48","56"],a:2},
+  {q:"Unde se joacă finala CM 2026?",opts:["Los Angeles","New York/New Jersey","Miami","Dallas"],a:1},
+  {q:"Cine a câștigat CM 2022?",opts:["Franța","Croația","Argentina","Brazilia"],a:2},
+  {q:"Câte meciuri la CM 2026?",opts:["64","80","96","104"],a:3},
+  {q:"Pe ce dată începe CM 2026?",opts:["1 iunie","11 iunie","15 iunie","20 iunie"],a:1},
+  {q:"Pe ce stadion se joacă meciul de deschidere?",opts:["MetLife","Rose Bowl","Azteca","AT&T"],a:2},
+  {q:"Ce echipă are cele mai multe titluri mondiale?",opts:["Germania","Argentina","Italia","Brazilia"],a:3},
+  {q:"Câte goluri a marcat Messi la CM-uri?",opts:["11","13","15","8"],a:1},
+  {q:"Cine organizează CM 2026?",opts:["SUA","SUA+Canada","SUA+Mexic+Canada","SUA+Mexic"],a:2},
+  {q:"Pe ce dată e finala CM 2026?",opts:["14 iulie","17 iulie","19 iulie","21 iulie"],a:2},
+  {q:"Care e capacitatea MetLife Stadium?",opts:["72.000","80.000","82.500","90.000"],a:2},
+  {q:"Câte grupe sunt la CM 2026?",opts:["8","10","12","16"],a:2},
+  {q:"Câte locuri se califică din fiecare grupă?",opts:["1","2","3","4"],a:1},
+  {q:"Care e mingea oficială a CM 2026?",opts:["Jabulani","Al Rihla","Trionda","Telstar"],a:2},
 ];
 
-function getDailyQuestions() {
-  const day = new Date().toISOString().split('T')[0];
-  const seed = day.split('-').reduce((a,b) => a+parseInt(b), 0);
-  const shuffled = [...ALL_QUESTIONS].sort((a,b) => (seed * (ALL_QUESTIONS.indexOf(a)+1)) % 7 - (seed * (ALL_QUESTIONS.indexOf(b)+1)) % 7);
-  return shuffled.slice(0, 8);
+function getDailyQs() {
+  const d = new Date().toISOString().split('T')[0];
+  const seed = d.replace(/-/g,'').split('').reduce((a,b)=>a+parseInt(b),0);
+  return [...QS].sort(()=>Math.sin(seed*QS.indexOf(QS.find(q=>q)))*10000%1-0.5).slice(0,8);
 }
 
-let questions = [], qIdx = 0, score = 0, answered = false;
+let qs=[], qi=0, sc=0, ans=false;
 
 function initQuiz() {
-  const todayKey = 'mondial_quiz_' + new Date().toISOString().split('T')[0];
-  const done = localStorage.getItem(todayKey);
-  questions = getDailyQuestions();
+  const dk = 'm26_quiz_'+new Date().toISOString().split('T')[0];
+  qs = getDailyQs();
+  const today = new Date().toLocaleDateString('ro-RO',{day:'numeric',month:'long'});
+  document.getElementById('quiz-sub').textContent = `Quiz ${today} · se reînnoiește zilnic`;
   
-  const sub = document.getElementById('quiz-date-sub');
-  const today = new Date().toLocaleDateString('ro-RO', {day:'numeric',month:'long'});
-  if(sub) sub.textContent = `Quiz zilnic ${today} · se reînnoiește mâine`;
-  
+  const done = localStorage.getItem(dk);
   if(done) {
-    const s = parseInt(done);
     document.getElementById('quiz-container').innerHTML = `
       <div class="quiz-card">
         <div class="quiz-result">
-          <div class="quiz-score-big">${s}/${questions.length}</div>
-          <div class="quiz-score-label">${s >= 6 ? '🏆 Expert în fotbal!' : s >= 4 ? '⚽ Bun microbist!' : '😅 Exersează!'}</div>
-          <div style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.4);">Ai completat quiz-ul de azi. Revino mâine pentru întrebări noi! 🌟</div>
+          <div class="quiz-score-big">${done}/${qs.length}</div>
+          <div class="quiz-score-label">${parseInt(done)>=6?'🏆 Expert total!':parseInt(done)>=4?'⚽ Bun microbist!':'😅 Mai antrenează!'}</div>
+          <div style="margin-top:12px;font-size:13px;color:var(--gray);">Revino mâine pentru întrebări noi!</div>
         </div>
       </div>`;
     return;
   }
-  
-  qIdx = 0; score = 0; answered = false;
-  renderQuestion();
+  qi=0; sc=0; ans=false;
+  renderQ();
 }
 
-function renderQuestion() {
-  const container = document.getElementById('quiz-container');
-  if(qIdx >= questions.length) {
-    const todayKey = 'mondial_quiz_' + new Date().toISOString().split('T')[0];
-    localStorage.setItem(todayKey, score);
-    addPoints(score * 5, 'Quiz zilnic');
-    updateMyScore();
-    const pct = Math.round(score/questions.length*100);
-    container.innerHTML = `
+function renderQ() {
+  const c = document.getElementById('quiz-container');
+  if(qi>=qs.length) {
+    const dk = 'm26_quiz_'+new Date().toISOString().split('T')[0];
+    localStorage.setItem(dk,sc);
+    addPts(sc*5);
+    document.getElementById('my-pts-display').textContent = getMyPts();
+    c.innerHTML = `
       <div class="quiz-card">
         <div class="quiz-result">
-          <div class="quiz-score-big">${score}/${questions.length}</div>
-          <div class="quiz-score-label">${pct>=80?'🏆 Expert!':pct>=60?'⚽ Bun!':'😅 Mai antrenează!'}</div>
-          <div style="margin-top:8px;font-size:13px;color:var(--gold);">+${score*5} puncte adăugate la clasament!</div>
-          <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.4);">Quiz-ul se reînnoiește mâine cu întrebări noi.</div>
+          <div class="quiz-score-big">${sc}/${qs.length}</div>
+          <div class="quiz-score-label">${sc>=6?'🏆 Expert!':sc>=4?'⚽ Bun!':'😅 Exersează!'}</div>
+          <div style="margin-top:8px;color:var(--gold);font-size:14px;font-weight:700;">+${sc*5} puncte</div>
         </div>
       </div>`;
     return;
   }
-  const q = questions[qIdx];
-  const progress = Math.round((qIdx/questions.length)*100);
-  container.innerHTML = `
+  const q = qs[qi];
+  const pct = Math.round(qi/qs.length*100);
+  c.innerHTML = `
     <div class="quiz-card">
-      <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${progress}%"></div></div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:10px;">${qIdx+1}/${questions.length} · ⭐ ${score} puncte</div>
+      <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
+      <div class="quiz-counter">${qi+1} / ${qs.length} · ⭐ ${sc} pct</div>
       <div class="quiz-q">${q.q}</div>
       <div class="quiz-opts">
-        ${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}
+        ${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="ans_q(${i})">${o}</button>`).join('')}
       </div>
     </div>`;
-  answered = false;
+  ans=false;
 }
 
-function answer(idx) {
-  if(answered) return;
-  answered = true;
-  const q = questions[qIdx];
-  document.querySelectorAll('.quiz-opt').forEach((btn,i)=>{
-    btn.disabled = true;
-    if(i===q.a) btn.classList.add('correct');
-    else if(i===idx && idx!==q.a) btn.classList.add('wrong');
+function ans_q(i) {
+  if(ans) return;
+  ans=true;
+  const q = qs[qi];
+  document.querySelectorAll('.quiz-opt').forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.a) b.classList.add('correct');
+    else if(j===i&&i!==q.a) b.classList.add('wrong');
   });
-  if(idx===q.a) score++;
-  setTimeout(()=>{ qIdx++; renderQuestion(); }, 1400);
+  if(i===q.a) sc++;
+  setTimeout(()=>{qi++;renderQ();},1300);
 }
 
-// ── WINNER POLL ───────────────────────────
-const TEAMS = ['brazilia','franta','anglia','argentina','spania','germania','portugalia','altul'];
-const DEF_WINNER = {brazilia:34,franta:22,anglia:12,argentina:18,spania:8,germania:3,portugalia:2,altul:1};
-
-function voteWinner(team) {
-  if(localStorage.getItem('mondial_winner_my')) return;
-  const stored = JSON.parse(localStorage.getItem('mondial_winner') || JSON.stringify(DEF_WINNER));
-  stored[team] = (stored[team]||0)+1;
-  localStorage.setItem('mondial_winner', JSON.stringify(stored));
-  localStorage.setItem('mondial_winner_my', team);
-  updateWinnerUI(stored, team);
-  addPoints(5, 'Vot câștigătoare');
-}
-
-function updateWinnerUI(votes, selected) {
-  const total = TEAMS.reduce((s,t)=>s+(votes[t]||0),0);
-  TEAMS.forEach(t=>{
-    const el = document.getElementById('w-'+t);
-    if(el) el.textContent = total>0 ? Math.round((votes[t]||0)/total*100)+'%' : '0%';
-    const btn = document.querySelector(`[onclick="voteWinner('${t}')"]`);
-    if(btn) btn.classList.toggle('selected', t===selected);
-  });
-  const lbl = document.getElementById('winner-total-label');
-  if(lbl) lbl.textContent = total.toLocaleString() + ' voturi';
-}
-
-function loadWinner() {
-  const stored = JSON.parse(localStorage.getItem('mondial_winner') || JSON.stringify(DEF_WINNER));
-  const myVote = localStorage.getItem('mondial_winner_my');
-  updateWinnerUI(stored, myVote);
-}
-
-// ── NEWS ──────────────────────────────────
-const NEWS_FEEDS = [
-  'https://www.gsp.ro/rss/',
-  'https://www.prosport.ro/feed/',
-  'https://www.digisport.ro/rss/',
-  'https://feeds.bbci.co.uk/sport/football/rss.xml',
-  'https://www.goal.com/feeds/en/news',
+// ── NEWS ───────────────────────────────
+const FEEDS = [
+  {url:'https://www.gsp.ro/rss/',name:'GSP',ro:true},
+  {url:'https://www.prosport.ro/feed/',name:'ProSport',ro:true},
+  {url:'https://www.digisport.ro/rss/',name:'DigiSport',ro:true},
+  {url:'https://feeds.bbci.co.uk/sport/football/rss.xml',name:'BBC Sport',ro:false},
+  {url:'https://www.goal.com/feeds/en/news',name:'Goal.com',ro:false},
+  {url:'https://www.skysports.com/rss/12040',name:'Sky Sports',ro:false},
 ];
-const WC_KEYWORDS = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic vs|anglia vs|brazilia vs|meci|grupe|gol|final/i;
 
 let newsLoaded = false;
+
 async function loadNews() {
   if(newsLoaded) return;
-  const container = document.getElementById('news-container');
-  container.innerHTML = '<div class="loading">⚽ Se încarcă știrile despre Mondial...</div>';
-  
+  const c = document.getElementById('news-container');
   let items = [];
-  for(const feed of NEWS_FEEDS) {
+
+  for(const feed of FEEDS) {
     try {
-      const res = await fetch(`${CF}/?url=${encodeURIComponent(feed)}`, {signal: AbortSignal.timeout(10000)});
-      if(!res.ok) continue;
-      const xml = await res.text();
-      const doc = new DOMParser().parseFromString(xml, 'text/xml');
-      const feedItems = [...doc.querySelectorAll('item')].slice(0, 15);
-      const src = new URL(feed).hostname.replace('www.','');
+      const r = await fetch(`${CF}/?url=${encodeURIComponent(feed.url)}`, {signal:AbortSignal.timeout(9000)});
+      if(!r.ok) continue;
+      const xml = await r.text();
+      const doc = new DOMParser().parseFromString(xml,'text/xml');
+      const feedItems = [...doc.querySelectorAll('item')].slice(0,15);
       feedItems.forEach(item => {
-        const title = item.querySelector('title')?.textContent || '';
-        const desc = (item.querySelector('description')?.textContent || '').replace(/<[^>]+>/g,'');
-        const link = item.querySelector('link')?.textContent || '#';
-        if(WC_KEYWORDS.test(title) || WC_KEYWORDS.test(desc)) {
-          items.push({title, desc: desc.substring(0,120), link, src, isEN: /bbc|goal/.test(src)});
+        const title = item.querySelector('title')?.textContent?.trim()||'';
+        const desc = (item.querySelector('description')?.textContent||'').replace(/<[^>]+>/g,'').trim();
+        const link = item.querySelector('link')?.textContent?.trim()||'#';
+        // Imagine din enclosure sau media:content
+        let img = item.querySelector('enclosure')?.getAttribute('url') ||
+                  item.querySelector('media\\:content, content')?.getAttribute('url') || null;
+        const pubDate = item.querySelector('pubDate')?.textContent || '';
+        if(WC_KW.test(title)||WC_KW.test(desc)) {
+          items.push({title,desc:desc.substring(0,150),link,img,src:feed.name,ro:feed.ro,pubDate});
         }
       });
     } catch(e) { continue; }
   }
-  
-  // Traducem cu AI știrile în engleză
-  const enItems = items.filter(i=>i.isEN).slice(0,4);
-  if(enItems.length > 0) {
+
+  // Traducem știrile EN cu Gemini
+  const enItems = items.filter(i=>!i.ro).slice(0,5);
+  if(enItems.length>0) {
     try {
-      const prompt = `Traduce aceste titluri de știri fotbal în română. Returnează JSON: [{"title":"...","desc":"..."}]\n${JSON.stringify(enItems.map(i=>({title:i.title,desc:i.desc})))}`;
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.2,maxOutputTokens:1000}})
+      const prompt = `Ești redactor de știri fotbal. Traduce în română naturală și concisă fiecare știre. Returnează DOAR JSON valid:
+[{"title":"titlu în română","desc":"rezumat 2-3 propoziții în română"}]
+
+Știri:
+${JSON.stringify(enItems.map(i=>({title:i.title,desc:i.desc})))}`;
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GK}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:1500}})
       });
       if(r.ok) {
         const d = await r.json();
-        const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-        const translated = JSON.parse(text.replace(/```json|```/g,'').trim());
-        translated.forEach((t,i)=>{if(enItems[i]){enItems[i].title=t.title;enItems[i].desc=t.desc;}});
+        const txt = d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+        const tr = JSON.parse(txt.replace(/```json|```/g,'').trim());
+        tr.forEach((t,i)=>{if(enItems[i]){enItems[i].title=t.title;enItems[i].desc=t.desc;enItems[i].translated=true;}});
       }
     } catch(e) {}
   }
 
   newsLoaded = true;
-  
+
+  // Fallback dacă nu găsim știri
   if(!items.length) {
-    container.innerHTML = `
-      <div class="news-card">
-        <div class="nc-meta"><div class="nc-dot"></div>GSP.ro · acum<span class="nc-badge">🏆 LIVE</span></div>
-        <div class="nc-title">CM 2026 a început! Mexic vs Africa de Sud — Meciul de deschidere</div>
-        <div class="nc-lead">Turneul cu 48 de echipe a debutat pe Estadio Azteca din Mexico City. Prima ediție din istorie în 3 țări.</div>
-        <a class="nc-link" href="https://www.gsp.ro" target="_blank">Citește la GSP →</a>
+    c.innerHTML = `
+      <div class="nc">
+        <div class="nc-img-placeholder">⚽</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-src">GSP.ro</span></div>
+          <div class="nc-title">CM 2026 a început! Mexic vs Africa de Sud deschide turneul</div>
+          <div class="nc-lead">Prima ediție cu 48 echipe s-a deschis pe Estadio Azteca, Mexico City. 104 meciuri în 39 de zile.</div>
+          <a class="nc-link" href="https://gsp.ro" target="_blank">Citește la GSP →</a>
+        </div>
+      </div>
+      <div class="nc">
+        <div class="nc-img-placeholder">🏆</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-src">BBC Sport</span><span class="nc-dot">·</span><span class="nc-translated">🔄 tradus</span></div>
+          <div class="nc-title">Favoritele CM 2026: Cine poate câștiga trofeul?</div>
+          <div class="nc-lead">Brazilia, Franța și Argentina pleacă cu cele mai mari șanse, dar Anglia și Spania nu trebuie ignorate.</div>
+          <a class="nc-link" href="https://bbc.com/sport/football" target="_blank">Citește la BBC Sport →</a>
+        </div>
       </div>`;
     return;
   }
-  
-  container.innerHTML = items.slice(0,10).map(item=>`
-    <div class="news-card">
-      <div class="nc-meta"><div class="nc-dot"></div>${item.src}${item.isEN?' · 🔄 tradus':''}<span class="nc-badge">🏆 CM 2026</span></div>
-      <div class="nc-title">${item.title}</div>
-      ${item.desc?`<div class="nc-lead">${item.desc}...</div>`:''}
-      <a class="nc-link" href="${item.link}" target="_blank">Citește complet →</a>
-    </div>`).join('');
+
+  // Sortăm: mai întâi ro, apoi EN traduse
+  items.sort((a,b)=>(!a.ro&&!b.ro?0:a.ro?-1:1));
+
+  c.innerHTML = items.slice(0,12).map(item => {
+    const timeAgo = item.pubDate ? getTimeAgo(new Date(item.pubDate)) : '';
+    return `
+      <div class="nc">
+        ${item.img ? `<img class="nc-img" src="${item.img}" loading="lazy" onerror="this.parentElement.querySelector('.nc-img-placeholder')&&this.style.display='none';this.remove()">` : `<div class="nc-img-placeholder">⚽</div>`}
+        <div class="nc-body">
+          <div class="nc-meta">
+            <span class="nc-src">${item.src}</span>
+            ${timeAgo?`<span class="nc-dot">·</span><span class="nc-time">${timeAgo}</span>`:''}
+            ${item.translated?'<span class="nc-translated">🔄 tradus</span>':''}
+          </div>
+          <div class="nc-title">${item.title}</div>
+          ${item.desc?`<div class="nc-lead">${item.desc}</div>`:''}
+          <a class="nc-link" href="${item.link}" target="_blank">Citește complet →</a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getTimeAgo(date) {
+  const m = Math.round((Date.now()-date)/60000);
+  if(m<60) return `acum ${m}m`;
+  if(m<1440) return `acum ${Math.round(m/60)}h`;
+  return `acum ${Math.round(m/1440)}z`;
 }
 
 // Init
 loadNews();
-loadVotes();
-loadWinner();
-updateMyScore();
+renderVotes();
+renderWinner();
+document.getElementById('my-pts-display').textContent = getMyPts();
 </script>
 </body>
 </html>
