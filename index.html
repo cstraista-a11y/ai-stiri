@@ -993,6 +993,13 @@ function setCat(cat, btn) {
   renderMainFeed();
 }
 
+function toggleSort() {
+  sortMode = sortMode === 'smart' ? 'chrono' : 'smart';
+  const btn = document.getElementById('sort-toggle');
+  if (btn) btn.textContent = sortMode === 'smart' ? '⚡ Smart' : '🕐 Cronologic';
+  renderMainFeed();
+}
+
 function setupCatButtons() {
   // Backup - pentru compatibilitate
 }
