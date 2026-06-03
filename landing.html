@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ai Știri — Știri personalizate pentru tine</title>
+<meta name="description" content="Aplicația de știri personalizate din Moldova. Surse verificate, traduse și adaptate pentru tine cu ajutorul AI.">
+<meta property="og:title" content="Ai Știri — Știri personalizate pentru tine">
+<meta property="og:description" content="Surse verificate din Moldova, România și internațional. Personalizate cu AI pentru tine.">
+<meta property="og:url" content="https://aistiri.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0D0D0D;
+  --blue: #0A2463;
+  --accent: #4FC3F7;
+  --white: #FAFAF8;
+  --gray: #6B7280;
+  --light: #F4F6F9;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,195,247,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -100px; left: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(10,36,99,0.6) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 48px;
+  position: relative;
+  z-index: 10;
+}
+
+.nav-logo {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.nav-logo em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.nav-cta {
+  background: var(--accent);
+  color: var(--black);
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79,195,247,0.4);
+}
+
+.hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  position: relative;
+  z-index: 5;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(79,195,247,0.12);
+  border: 1px solid rgba(79,195,247,0.3);
+  color: var(--accent);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 32px;
+  animation: fadeUp 0.6s ease both;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  color: white;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+
+.hero-title em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: rgba(255,255,255,0.6);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+  font-weight: 300;
+  animation: fadeUp 0.6s ease 0.2s both;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--black);
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(79,195,247,0.4);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+/* Phone mockup */
+.hero-phone {
+  margin-top: 64px;
+  position: relative;
+  animation: fadeUp 0.8s ease 0.4s both;
+}
+
+.phone {
+  width: 280px;
+  height: 580px;
+  background: #1a1a1a;
+  border-radius: 40px;
+  border: 6px solid #333;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  margin: 0 auto;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: #0D0D0D;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-header {
+  background: #0D0D0D;
+  padding: 16px 14px 10px;
+  border-bottom: 1px solid #222;
+}
+
+.phone-logo {
+  font-size: 18px;
+  font-weight: 900;
+  color: white;
+}
+
+.phone-logo em { color: var(--accent); font-style: normal; }
+
+.phone-cats {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.phone-cat {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.phone-cat.on { background: var(--accent); color: #0D0D0D; }
+.phone-cat.off { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+
+.phone-feed { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+.phone-card {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  flex-shrink: 0;
+}
+
+.phone-card-src {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.phone-card-src::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.phone-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #0D0D0D;
+  margin-bottom: 6px;
+}
+
+.phone-card-lead {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.phone-card-img {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #0A2463, #4FC3F7);
+}
+
+/* ── STATS ── */
+.stats {
+  background: var(--blue);
+  padding: 60px 48px;
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ── FEATURES ── */
+.features {
+  padding: 100px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 60px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--light);
+  border-radius: 20px;
+  padding: 32px;
+  transition: transform 0.2s;
+}
+
+.feature-card:hover { transform: translateY(-4px); }
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--black);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.feature-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+/* ── SOURCES ── */
+.sources {
+  background: var(--black);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.sources h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 900;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.sources p {
+  color: rgba(255,255,255,0.5);
+  font-size: 16px;
+  margin-bottom: 48px;
+}
+
+.sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.source-tag {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── CTA ── */
+.cta {
+  padding: 100px 24px;
+  text-align: center;
+  background: var(--light);
+}
+
+.cta h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+
+.cta h2 em { color: var(--accent); font-style: normal; }
+.cta p { color: var(--gray); font-size: 18px; margin-bottom: 40px; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-logo { font-size: 18px; font-weight: 700; color: white; }
+.footer-logo em { color: var(--accent); font-style: normal; }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { color: rgba(255,255,255,0.4); font-size: 14px; text-decoration: none; }
+.footer-links a:hover { color: white; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  nav { padding: 20px 24px; }
+  .stats { gap: 40px; padding: 40px 24px; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <nav>
+    <div class="nav-logo">Ai <em>Știri</em></div>
+    <a href="/app" class="nav-cta">Deschide aplicația →</a>
+  </nav>
+
+  <div class="hero-content">
+    <div class="hero-badge">🇲🇩 Făcut pentru Moldova</div>
+
+    <h1 class="hero-title">
+      Știrile care<br>
+      contează <em>pentru tine</em>
+    </h1>
+
+    <p class="hero-sub">
+      Surse verificate din Moldova, România și Europa. 
+      Traduse, rezumate și personalizate cu AI în funcție de interesele tale.
+    </p>
+
+    <div class="hero-btns">
+      <a href="/app" class="btn-primary">
+        📱 Încearcă gratuit
+      </a>
+      <a href="#features" class="btn-secondary">Află mai mult</a>
+    </div>
+
+    <!-- Phone mockup -->
+    <div class="hero-phone">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-logo">Ai <em>Știri</em></div>
+            <div class="phone-cats">
+              <div class="phone-cat on">Toate</div>
+              <div class="phone-cat off">Actualitate</div>
+              <div class="phone-cat off">Sport</div>
+              <div class="phone-cat off">Business</div>
+            </div>
+          </div>
+          <div class="phone-feed">
+            <div class="phone-card">
+              <div class="phone-card-img"></div>
+              <div class="phone-card-src">TV8.MD · acum 5m</div>
+              <div class="phone-card-title">Moldova avansează în negocierile de aderare la UE în 2026</div>
+            </div>
+            <div class="phone-card">
+              <div class="phone-card-src">NEWSMAKER · acum 23m</div>
+              <div class="phone-card-title">Alegeri locale: rezultatele preliminare din toate raioanele</div>
+              <div class="phone-card-lead">Comisia Electorală Centrală a publicat primele rezultate oficiale...</div>
+            </div>
+            <div class="phone-card">
+              <div class="phone-card-src">EURACTIV · acum 1h · 🔄 tradus</div>
+              <div class="phone-card-title">Parlamentul European votează noi măsuri de sprijin pentru Moldova</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">25+</div>
+    <div class="stat-label">Surse verificate</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Gratuit</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">AI</div>
+    <div class="stat-label">Rezumate inteligente</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">3min</div>
+    <div class="stat-label">Update live</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label">De ce Ai Știri</div>
+  <h2 class="section-title">Tot ce ai nevoie<br>dintr-o singură aplicație</h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Personalizare reală</div>
+      <div class="feature-desc">Completezi un scurt quiz și aplicația se adaptează imediat la vârsta, zona și interesele tale. Cu cât o folosești mai mult, cu atât devine mai precisă.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">AI care traduce și rezumă</div>
+      <div class="feature-desc">Știrile din rusă și engleză sunt traduse automat în română. Fiecare știre primește un rezumat de 3-4 propoziții — CE s-a întâmplat, UNDE, CÂND.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🇲🇩</div>
+      <div class="feature-title">Focusat pe Moldova</div>
+      <div class="feature-desc">Surse verificate de Centrul pentru Jurnalism Independent: TV8, ZdG, NewsMaker, Europa Liberă, IPN și altele. Fără dezinformare.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">Context european</div>
+      <div class="feature-desc">Știri de la Euractiv, Politico EU, RFE/RL și Reuters relevante pentru integrarea europeană a Moldovei — traduse și contextualizate.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Live la fiecare 3 minute</div>
+      <div class="feature-desc">Feed-ul se actualizează automat. Ești primul care află știrile importante — fără să reîmprospătezi manual.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">Instalabil pe telefon</div>
+      <div class="feature-desc">Funcționează ca o aplicație nativă pe iPhone și Android — direct din browser, fără App Store. Rapid, ușor, gratuit.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="sources">
+  <div class="section-label" style="color:var(--accent);">Surse de încredere</div>
+  <h2>Numai surse verificate</h2>
+  <p>Selectate de Centrul pentru Jurnalism Independent din Moldova</p>
+  <div class="sources-list">
+    <span class="source-tag">🇲🇩 TV8.md</span>
+    <span class="source-tag">🇲🇩 NewsMaker</span>
+    <span class="source-tag">🇲🇩 ZdG</span>
+    <span class="source-tag">🇲🇩 Europa Liberă</span>
+    <span class="source-tag">🇲🇩 IPN</span>
+    <span class="source-tag">🇲🇩 Deschide.md</span>
+    <span class="source-tag">🇷🇴 G4Media</span>
+    <span class="source-tag">🇷🇴 HotNews</span>
+    <span class="source-tag">🇷🇴 Digi24</span>
+    <span class="source-tag">🇷🇴 ProSport</span>
+    <span class="source-tag">🌍 Euractiv</span>
+    <span class="source-tag">🌍 Politico EU</span>
+    <span class="source-tag">🌍 RFE/RL</span>
+    <span class="source-tag">🌍 Reuters</span>
+    <span class="source-tag">🌍 DW</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="section-label">Începe acum</div>
+  <h2>Știrile tale,<br><em>personalizate</em></h2>
+  <p>Gratuit. Fără cont necesar. Direct pe telefon.</p>
+  <a href="/app" class="btn-primary" style="font-size:18px;padding:18px 48px;">
+    📱 Deschide Ai Știri →
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Ai <em>Știri</em></div>
+  <div class="footer-links">
+    <a href="/app">Aplicație</a>
+    <a href="/privacy">Confidențialitate</a>
+    <a href="mailto:contact@aistiri.com">Contact</a>
+  </div>
+  <div style="color:rgba(255,255,255,0.3);font-size:13px;">© 2026 Ai Știri</div>
+</footer>
+
+</body>
+</html>
