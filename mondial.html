@@ -148,7 +148,7 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
 
 <div class="header">
   <div class="header-top">
-    <a href="/app" class="back-btn">← Știri</a>
+    <a href="/" class="back-btn">← Știri</a>
     <div class="header-brand">⚽ MONDIAL 2026</div>
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   </div>
@@ -191,6 +191,7 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
       <button class="pred-btn" id="btn-m1-1" onclick="vote('m1','1')"><span class="pred-pct" id="pct-m1-1">-</span><span class="pred-team">🇲🇽 Mexic</span><span class="pred-sub">câștigă</span></button>
       <button class="pred-btn" id="btn-m1-x" onclick="vote('m1','x')"><span class="pred-pct" id="pct-m1-x">-</span><span class="pred-team">🤝 Egal</span><span class="pred-sub">&nbsp;</span></button>
       <button class="pred-btn" id="btn-m1-2" onclick="vote('m1','2')"><span class="pred-pct" id="pct-m1-2">-</span><span class="pred-team">🇿🇦 A.Sud</span><span class="pred-sub">câștigă</span></button>
+    <div id="total-m1" style="text-align:center;font-size:11px;color:var(--gray);margin-top:8px;"></div>
     </div>
   </div>
 
@@ -251,6 +252,7 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
       </div>
       <button class="score-submit" onclick="submitScore('m1')">Trimite pronosticul →</button>
       <div class="score-result" id="r-m1"></div>
+    <div id="total-m1" style="text-align:center;font-size:11px;color:var(--gray);margin-top:8px;"></div>
     </div>
   </div>
 
@@ -499,7 +501,7 @@ function getMyPts() { return parseInt(localStorage.getItem('m26_pts')||'0'); }
 function addPts(n) { localStorage.setItem('m26_pts', getMyPts()+n); }
 
 // ── VOTES ─────────────────────────────
-const DEF_VOTES = { m1:{'1':18,'x':7,'2':5}, m2:{'1':22,'x':8,'2':11}, m3:{'1':30,'x':6,'2':8} };
+const DEF_VOTES = { m1:{'1':0,'x':0,'2':0}, m2:{'1':0,'x':0,'2':0}, m3:{'1':0,'x':0,'2':0} };
 
 function vote(mid, r) {
   const k = 'm26_v_'+mid;
@@ -520,10 +522,13 @@ function renderVotes() {
     const total = v['1']+v['x']+v['2'];
     ['1','x','2'].forEach(r => {
       const el = document.getElementById('pct-'+mid+'-'+r);
-      if(el) el.textContent = total>0 ? Math.round(v[r]/total*100)+'%' : '-';
+      if(el) el.textContent = my ? (total>0 ? Math.round(v[r]/total*100)+'%' : '0%') : '?';
       const btn = document.getElementById('btn-'+mid+'-'+r);
       if(btn) btn.classList.toggle('voted', my===r);
     });
+    // Afișăm total voturi sub butoane
+    const totalEl = document.getElementById('total-'+mid);
+    if(totalEl) totalEl.textContent = total>0 ? total+' voturi' : 'Fii primul care votează!';
   });
 }
 
@@ -555,7 +560,7 @@ function renderScorePreds() {
 
 // ── WINNER ─────────────────────────────
 const TEAMS = ['brazilia','franta','anglia','argentina','spania','germania','portugalia','altul'];
-const DEF_W = {brazilia:38,franta:24,anglia:14,argentina:20,spania:9,germania:4,portugalia:3,altul:2};
+const DEF_W = {brazilia:0,franta:0,anglia:0,argentina:0,spania:0,germania:0,portugalia:0,altul:0};
 
 function voteWinner(team) {
   if(localStorage.getItem('m26_winner_my')) return;
@@ -688,14 +693,54 @@ const NEWS_CACHE_KEY = 'mondial_news_cache';
 const NEWS_CACHE_TTL = 15 * 60 * 1000;
 
 const BASE_NEWS = [
-  {title:"CM 2026: Mexic vs Africa de Sud — Meciul de deschidere pe Azteca", desc:"Cupa Mondială 2026 a debutat pe legendarul Estadio Azteca din Mexico City. Mexic și Africa de Sud deschid turneul în fața a 87.000 de spectatori.", emoji:"🏟️", src:"GSP.ro"},
-  {title:"Anglia vs Croația — Revanșa din 2018 se rejoacă la CM 2026", desc:"Anglia și Croația se întâlnesc din nou la un turneu mondial. Harry Kane vrea să marcheze primul gol din carieră la un CM.", emoji:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", src:"ProSport"},
-  {title:"Brazilia, favorită clară în Grupa E. Neymar și Vinicius la vârf", desc:"Selecao se prezintă cu cel mai valoros lot: Neymar, Vinicius Jr., Rodrygo și Raphinha formează un atac devastator.", emoji:"🇧🇷", src:"DigiSport"},
-  {title:"Messi la 38 de ani — ultimul CM din cariera sa legendară?", desc:"Argentina vine să apere trofeul câștigat în Qatar. Leo Messi, la ultimul sau turneu mondial, speră să scrie istoria cu a doua Cupă Mondială.", emoji:"🐐", src:"Eurosport"},
-  {title:"Franța — Mbappé liber după despărțirea de PSG, gata de glorie", desc:"Kylian Mbappé conduce Franța ca cel mai scump jucător din lume. Les Bleus speră să câștige al treilea titlu mondial.", emoji:"🇫🇷", src:"Goal.com"},
-  {title:"Germania revine puternică după Euro 2024 de acasă", desc:"Die Mannschaft cu Musiala, Wirtz și Havertz a câștigat Euro 2024 pe propriul teren. Acum vizează și Cupa Mondială.", emoji:"🇩🇪", src:"BBC Sport"},
-  {title:"CM 2026: Record absolut — 48 echipe, 12 grupe, 104 meciuri", desc:"Prima ediție cu format extins: 48 naționale împărțite în 12 grupe. Faza grupelor durează până pe 28 iunie, finala e pe 19 iulie.", emoji:"🌎", src:"GSP.ro"},
-  {title:"VAR cu AI și tehnologie ofsaid semi-automatizat la CM 2026", desc:"FIFA implementează cel mai avansat sistem arbitral din istorie. Ofsaidul e calculat automat în milisecunde cu precizie milimetrică.", emoji:"🤖", src:"DigiSport"},
+  {
+    title:"CM 2026: Mexic vs Africa de Sud — Meciul de deschidere pe legendarul Azteca",
+    desc:"Cupa Mondială 2026 a debutat pe Estadio Azteca din Mexico City, singurul stadion care a găzduit trei finale mondiale (1970, 1986, 2026). Mexic și Africa de Sud au deschis turneul în fața a 87.000 de spectatori într-o atmosferă electrizantă. Mexico City devine astfel primul oraș care găzduiește meciuri la patru ediții de Cupă Mondială.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Estadio_Azteca_2015.jpg/1280px-Estadio_Azteca_2015.jpg",
+    src:"GSP.ro", time:"acum 3m"
+  },
+  {
+    title:"Anglia vs Croația: Revanșa finalei Nations League și a semifinalei din 2018",
+    desc:"Anglia și Croația se înfruntă pe SoFi Stadium din Los Angeles într-un meci cu mare miză. Harry Kane speră să marcheze primul gol la un turneu final după ce a ratat penaltiul decisiv la Euro 2021. Croația, fără Luka Modrić în forma maximă, mizează pe organizare și experiență. Ambele echipe au nevoie de victorie pentru a-și asigura calificarea din grupă.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/SoFi_Stadium_2020.jpg/1280px-SoFi_Stadium_2020.jpg",
+    src:"ProSport", time:"acum 11m"
+  },
+  {
+    title:"Brazilia — Selecao vine cu cel mai valoros lot la CM 2026",
+    desc:"Brazilia se prezintă la CM 2026 cu un lot evaluat la peste 1.5 miliarde de euro. Neymar, Vinicius Jr., Rodrygo și Raphinha formează cel mai periculos atac al turneului. Antrenorul dornic să aducă al șaselea titlu mondial Braziliei mizeaza pe pressing agresiv și creativitate. Selecao n-a câștigat CM din 2002 și foamea de trofeu e uriașă.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/1280px-Flag_of_Brazil.svg.png",
+    src:"DigiSport", time:"acum 18m"
+  },
+  {
+    title:"Messi la 38 de ani: Ultimul dans la Cupa Mondială 2026",
+    desc:"Leo Messi participă la CM 2026 la vârsta de 38 de ani, apărând titlul cucerit cu Argentina în Qatar 2022. Toată lumea fotbalistică se întreabă dacă acesta va fi ultimul turneu mondial al celui mai bun fotbalist din toate timpurile. Messi a declarat că vrea să câștige din nou și să se retragă ca dublu campion mondial cu Argentina.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg/800px-Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg",
+    src:"Eurosport", time:"acum 25m"
+  },
+  {
+    title:"Mbappé la CM 2026: Franța mizează pe superstarul de la Real Madrid",
+    desc:"Kylian Mbappé, 27 de ani, vine la CM 2026 după primul sezon la Real Madrid în care a câștigat La Liga. Franța are cea mai periculoasă generație din istoria sa: Mbappé, Griezmann, Camavinga și Tchouaméni formează o echipă completă. Les Bleus speră la al treilea titlu mondial, după 1998 și 2018.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Flag_of_France.svg/1280px-Flag_of_France.svg.png",
+    src:"Goal.com", time:"acum 32m"
+  },
+  {
+    title:"Germania după Euro 2024: Die Mannschaft vrea și Cupa Mondială",
+    desc:"Germania a câștigat Euro 2024 pe teren propriu și vine la CM 2026 cu moral ridicat. Florian Wirtz și Jamal Musiala formează cel mai tânăr și mai exploziv mijloc al turneului. Antrenorul Julian Nagelsmann a revoluționat jocul german cu un pressing modern și atacuri rapide în tranziție.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1280px-Flag_of_Germany.svg.png",
+    src:"BBC Sport", time:"acum 40m"
+  },
+  {
+    title:"CM 2026: 48 echipe, 12 grupe, 104 meciuri — un turneu fără precedent",
+    desc:"CM 2026 stabilește recorduri absolute: 48 de naționale, 12 grupe, 104 meciuri în 39 de zile în trei țări. Fondul de premii depășește 1 miliard de dolari. Finala va avea loc pe 19 iulie la MetLife Stadium din New York/New Jersey, singurul stadion din lume care poate găzdui 82.500 de spectatori pentru un CM.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/MetLife_Stadium_September_2023.jpg/1280px-MetLife_Stadium_September_2023.jpg",
+    src:"GSP.ro", time:"acum 47m"
+  },
+  {
+    title:"Spania — Campeoanele Europei vin cu generația de aur la CM 2026",
+    desc:"Spania a câștigat Euro 2024 cu un fotbal spectaculos și vine la CM 2026 ca una din marile favorite. Pedri, Yamal (17 ani la debut) și Nico Williams formează o echipă tânară și explozivă. Luis de la Fuente continuă filozofia tiki-taka modernizată cu tranziții rapide și pressing sus.",
+    img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1280px-Flag_of_Spain.svg.png",
+    src:"DigiSport", time:"acum 55m"
+  },
 ];
 
 async function loadNews() {
@@ -713,12 +758,15 @@ async function loadNews() {
   // Afișăm știrile de bază imediat
   c.innerHTML = BASE_NEWS.map((n,i) => `
     <div class="nc">
-      <div class="nc-img-placeholder">${n.emoji}</div>
+      ${n.img 
+        ? `<img class="nc-img" src="${n.img}" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="nc-img-placeholder">${n.emoji||'⚽'}</div>`
+      }
       <div class="nc-body">
         <div class="nc-meta">
           <span class="nc-src">${n.src}</span>
           <span class="nc-dot">·</span>
-          <span class="nc-time">acum ${i*7+3}m</span>
+          <span class="nc-time">${n.time||'acum '+((i*7)+3)+'m'}</span>
         </div>
         <div class="nc-title">${n.title}</div>
         <div class="nc-lead">${n.desc}</div>
