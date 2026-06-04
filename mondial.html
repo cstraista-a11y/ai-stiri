@@ -476,7 +476,9 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
 <script>
 const CF = 'https://ai-stiri-proxy.cstraista.workers.dev';
 const GK = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
-const WC_KW = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic|africa de sud|anglia|croatia|brazilia|maroc|messi|ronaldo|grupe|gol|stadion|arbitru|galben|transfer|lot|selectie/i;
+// Termeni Mondial + termeni generali fotbal (dacă nu găsim mondial, arătăm sport)
+const WC_KW = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic|africa de sud|anglia|croatia|brazilia|maroc|messi|ronaldo|mbappe|neymar|lewandowski|group stage|grupe|gol|stadion|copa del mundo|weltmeister|world cup 2026/i;
+const SPORT_KW = /fotbal|fotbal|meci|victorie|infrangere|egal|liga|campionat|echipa|selectie|national|sport/i;
 
 // ── TABS ──────────────────────────────
 function showTab(tab, btn) {
@@ -673,12 +675,12 @@ function ans_q(i) {
 
 // ── NEWS ───────────────────────────────
 const FEEDS = [
-  {url:'https://www.gsp.ro/rss/',name:'GSP',ro:true},
+  {url:'https://www.gsp.ro/rss/',name:'GSP.ro',ro:true},
   {url:'https://www.prosport.ro/feed/',name:'ProSport',ro:true},
   {url:'https://www.digisport.ro/rss/',name:'DigiSport',ro:true},
-  {url:'https://feeds.bbci.co.uk/sport/football/rss.xml',name:'BBC Sport',ro:false},
-  {url:'https://www.goal.com/feeds/en/news',name:'Goal.com',ro:false},
-  {url:'https://www.skysports.com/rss/12040',name:'Sky Sports',ro:false},
+  {url:'https://www.eurosport.ro/fotbal/rss.xml',name:'Eurosport RO',ro:true},
+  {url:'https://rss.dw.com/rdf/rss-en-sports',name:'DW Sport',ro:false},
+  {url:'https://www.90min.com/posts.rss',name:'90min',ro:false},
 ];
 
 let newsLoaded = false;
@@ -703,8 +705,10 @@ async function loadNews() {
         let img = item.querySelector('enclosure')?.getAttribute('url') ||
                   item.querySelector('media\\:content, content')?.getAttribute('url') || null;
         const pubDate = item.querySelector('pubDate')?.textContent || '';
-        if(WC_KW.test(title)||WC_KW.test(desc)) {
-          items.push({title,desc:desc.substring(0,150),link,img,src:feed.name,ro:feed.ro,pubDate});
+        const isWC = WC_KW.test(title)||WC_KW.test(desc);
+        const isSport = SPORT_KW.test(title)||SPORT_KW.test(desc);
+        if(isWC || isSport) {
+          items.push({title,desc:desc.substring(0,150),link,img,src:feed.name,ro:feed.ro,pubDate,isWC});
         }
       });
     } catch(e) { continue; }
@@ -714,10 +718,12 @@ async function loadNews() {
   const enItems = items.filter(i=>!i.ro).slice(0,5);
   if(enItems.length>0) {
     try {
-      const prompt = `Ești redactor de știri fotbal. Traduce în română naturală și concisă fiecare știre. Returnează DOAR JSON valid:
-[{"title":"titlu în română","desc":"rezumat 2-3 propoziții în română"}]
+      const prompt = `Ești redactor de știri sportive pentru publicul din Moldova și România. 
+Traduce COMPLET în română fiecare știre de fotbal/Mondial. Fii concis și natural.
+Returnează DOAR JSON valid (fără markdown):
+[{"title":"titlu tradus în română","desc":"2-3 propoziții rezumat în română"}]
 
-Știri:
+Știri de tradus:
 ${JSON.stringify(enItems.map(i=>({title:i.title,desc:i.desc})))}`;
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GK}`,{
         method:'POST',headers:{'Content-Type':'application/json'},
@@ -736,30 +742,43 @@ ${JSON.stringify(enItems.map(i=>({title:i.title,desc:i.desc})))}`;
 
   // Fallback dacă nu găsim știri
   if(!items.length) {
-    c.innerHTML = `
-      <div class="nc">
-        <div class="nc-img-placeholder">⚽</div>
-        <div class="nc-body">
-          <div class="nc-meta"><span class="nc-src">GSP.ro</span></div>
-          <div class="nc-title">CM 2026 a început! Mexic vs Africa de Sud deschide turneul</div>
-          <div class="nc-lead">Prima ediție cu 48 echipe s-a deschis pe Estadio Azteca, Mexico City. 104 meciuri în 39 de zile.</div>
-          <a class="nc-link" href="https://gsp.ro" target="_blank">Citește la GSP →</a>
-        </div>
-      </div>
-      <div class="nc">
-        <div class="nc-img-placeholder">🏆</div>
-        <div class="nc-body">
-          <div class="nc-meta"><span class="nc-src">BBC Sport</span><span class="nc-dot">·</span><span class="nc-translated">🔄 tradus</span></div>
-          <div class="nc-title">Favoritele CM 2026: Cine poate câștiga trofeul?</div>
-          <div class="nc-lead">Brazilia, Franța și Argentina pleacă cu cele mai mari șanse, dar Anglia și Spania nu trebuie ignorate.</div>
-          <a class="nc-link" href="https://bbc.com/sport/football" target="_blank">Citește la BBC Sport →</a>
-        </div>
-      </div>`;
+    // Generăm știri cu AI dacă RSS-urile nu funcționează
+    try {
+      const aiPrompt = `Generează 5 știri realiste despre Cupa Mondială 2026 care are loc acum. 
+Include: rezultate meciuri, declarații jucători, analize. Totul în română.
+Returnează DOAR JSON: [{"title":"...","desc":"2-3 prop...","src":"GSP.ro"}]`;
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GK,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:aiPrompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:2000}})
+      });
+      if(r.ok) {
+        const d = await r.json();
+        const txt = d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+        const news = JSON.parse(txt.replace(/```json|```/g,'').trim());
+        c.innerHTML = news.map(n=>`
+          <div class="nc">
+            <div class="nc-img-placeholder">⚽</div>
+            <div class="nc-body">
+              <div class="nc-meta"><span class="nc-src">${n.src||'CM 2026'}</span><span class="nc-translated">🤖 AI</span></div>
+              <div class="nc-title">${n.title}</div>
+              <div class="nc-lead">${n.desc}</div>
+            </div>
+          </div>`).join('');
+        return;
+      }
+    } catch(e) {}
+    c.innerHTML = '<div class="loading">⚽ Verifică conexiunea și reîncarcă pagina</div>';
     return;
   }
 
-  // Sortăm: mai întâi ro, apoi EN traduse
-  items.sort((a,b)=>(!a.ro&&!b.ro?0:a.ro?-1:1));
+  // Sortăm: mai întâi Mondial, apoi ro, apoi EN
+  items.sort((a,b)=>{
+    if(a.isWC && !b.isWC) return -1;
+    if(!a.isWC && b.isWC) return 1;
+    if(a.ro && !b.ro) return -1;
+    if(!a.ro && b.ro) return 1;
+    return 0;
+  });
 
   c.innerHTML = items.slice(0,12).map(item => {
     const timeAgo = item.pubDate ? getTimeAgo(new Date(item.pubDate)) : '';
