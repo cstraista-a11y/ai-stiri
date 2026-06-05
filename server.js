@@ -337,6 +337,73 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     return;
   }
 
+  if (u.pathname === '/mondial-news') {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    // Cache 15 minute
+    const cacheKey = 'mondial_news';
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < 15 * 60 * 1000) {
+      res.writeHead(200);
+      res.end(JSON.stringify(cached.data));
+      return;
+    }
+
+    const WC_KW = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic|africa de sud|anglia|croatia|brazilia|maroc|messi|mbappe|ronaldo|neymar|grupe|gol/i;
+    
+    const FEEDS = [
+      'https://www.gsp.ro/rss/',
+      'https://www.prosport.ro/feed/',
+      'https://www.digisport.ro/rss/',
+      'https://www.sport.ro/rss/sport.xml',
+    ];
+
+    let items = [];
+    
+    for (const feedUrl of FEEDS) {
+      try {
+        const resp = await fetchJson(feedUrl);
+        // fetchJson returnează response — folosim text
+        const r = await fetch(feedUrl, { 
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AiStiri/1.0)' },
+          signal: AbortSignal.timeout(8000)
+        });
+        if (!r.ok) continue;
+        const xml = await r.text();
+        const src = new URL(feedUrl).hostname.replace('www.', '');
+        
+        // Parsăm XML simplu
+        const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+        itemMatches.slice(0, 20).forEach(item => {
+          const title = (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/) || [])[1] || '';
+          const desc = (item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) || item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
+          const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '#';
+          const img = (item.match(/url="([^"]*\.(jpg|jpeg|png|webp))"/) || [])[1] || null;
+          const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || '';
+          
+          const cleanDesc = desc.replace(/<[^>]+>/g, '').substring(0, 200);
+          const cleanTitle = title.replace(/<[^>]+>/g, '').trim();
+          
+          if (cleanTitle && (WC_KW.test(cleanTitle) || WC_KW.test(cleanDesc))) {
+            items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate });
+          }
+        });
+      } catch(e) {
+        console.log('  ⚠️ Feed error:', feedUrl, e.message);
+      }
+    }
+
+    // Sortăm după dată
+    items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    items = items.slice(0, 10);
+
+    cache.set(cacheKey, { data: items, ts: Date.now() });
+    res.writeHead(200);
+    res.end(JSON.stringify(items));
+    return;
+  }
+
   if (u.pathname === '/admin') {
     try {
       const buf = fs.readFileSync(path.join(__dirname, 'admin.html'));
