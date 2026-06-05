@@ -350,10 +350,51 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
       return;
     }
 
-    // Filtrăm STRICT doar articole cu "mondial" sau "world cup" sau "cm 2026" în TITLU
-    const WC_TITLE = /mondial|world cup|cm 2026|cupa mondial|fifa 2026/i;
-    // Secunde verificare: cuvinte cheie în descriere
-    const WC_DESC = /cupa mondiala|world cup 2026|fifa world cup|mexic vs|canada vs|sua vs|brazilia vs/i;
+    // Cuvinte cheie CM 2026 — titlu SAU descriere
+    const WC_KW = new RegExp([
+      // Turneu
+      'mondial','world cup','cm 2026','cupa mondiala','fifa 2026','north america 2026',
+      'canada mexico usa','grupo','grupe cm','fase de grupos',
+      // Echipe participante
+      'mexic','africa de sud','coreea de sud','cehia',
+      'anglia','croatia','ghana','slovacia',
+      'sua ','statele unite','panama','serbia',
+      'franta','arabia saudita','nigeria','chile',
+      'spania','brazilia','japonia','camerun',
+      'belgia','australia','austria','ivory coast',
+      'germania','columbia','turcia','georgia',
+      'portugalia','senegal','polonia','slovenia',
+      'argentina','canada','ecuador','algeria',
+      'olanda','iran','peru','tanzania',
+      'uruguay','qatar','ungaria','guineea',
+      'maroc','venezuela','indonezia',
+      // Staruri / jucători
+      'messi','mbappe','ronaldo','neymar','vinicius',
+      'lewandowski','modric','kane','salah','benzema',
+      'yamal','pedri','bellingham','rodri','wirtz','musiala',
+      'griezmann','giroud','dembele','rashford','saka',
+      'de bruyne','lukaku','courtois','ter stegen',
+      'di maria','alvarez','de paul','martinez',
+      'raphinha','rodrygo','casemiro','alisson',
+      'maignan','theo hernandez','camavinga','tchouameni',
+      // Antrenori
+      'scaloni','ancelotti','nagelsmann','southgate',
+      'deschamps','martinez','de la fuente','roberto martinez',
+      // Stadioane
+      'azteca','metlife','sofi stadium','at&t stadium',
+      'rose bowl','lumen field','arrowhead','lincoln financial',
+      'mercedes-benz stadium','nrg stadium','bc place',
+      'bmO field','estadio','stadium','arena',
+      // Termeni generali fotbal international
+      'grupe','optimi','sferturi','semifinala','finala',
+      'calificare','eliminare','hat-trick','penalty',
+      'var','ofsaid','carton rosu','carton galben',
+      'transferuri vara','lot national','convocari',
+      'fifa','conmebol','uefa','concacaf','caf','afc',
+      // Sponsori
+      'adidas','nike','coca-cola','hyundai','kia','visa',
+      'qatar airways','budweiser','hublot','wanda'
+    ].join('|'), 'i');
     
     // Surse cu secțiuni dedicate Mondial 2026
     const FEEDS = [
@@ -390,10 +431,7 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
           const cleanDesc = desc.replace(/<[^>]+>/g, '').substring(0, 200);
           const cleanTitle = title.replace(/<[^>]+>/g, '').trim();
           
-          // Acceptăm DOAR dacă titlul conține cuvinte cheie clare despre Mondial
-          const titleMatch = WC_TITLE.test(cleanTitle);
-          const descMatch = WC_DESC.test(cleanDesc);
-          if (cleanTitle && (titleMatch || descMatch)) {
+          if (cleanTitle && (WC_KW.test(cleanTitle) || WC_KW.test(cleanDesc))) {
             items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate });
           }
         });
