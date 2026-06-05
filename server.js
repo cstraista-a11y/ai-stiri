@@ -66,34 +66,16 @@ const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
 
 // ── TRADUCERE SERVER-SIDE ─────────────────────────────────
-async function geminiTranslate(prompt, retries = 2) {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      if (i > 0) await new Promise(r => setTimeout(r, 3000 * i)); // așteptăm 3s, 6s
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 3000 }
-          }),
-          signal: AbortSignal.timeout(25000)
-        }
-      );
-      if (res.status === 429) {
-        console.log(`  ⏳ Gemini 429 - retry ${i+1}/${retries}`);
-        continue;
-      }
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
-    } catch(e) {
-      console.log('  ⚠️ Gemini error:', e.message?.substring(0,40));
-    }
-  }
-  return null;
+// Traducere cu MyMemory API — gratuit, fără cont, 5000 cuvinte/zi
+async function translateText(text, from = 'en', to = 'ro') {
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0,500))}&langpair=${from}|${to}`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.responseStatus === 200) return data.responseData.translatedText;
+    return null;
+  } catch(e) { return null; }
 }
 
 async function translateArticles(articles) {
@@ -101,38 +83,31 @@ async function translateArticles(articles) {
   const enArticles = articles.filter(a => a.lang === 'en');
   if (!enArticles.length) return articles;
   
-  // Traducem în batch-uri de 5 pentru a evita token limit
-  const batchSize = 5;
-  for (let i = 0; i < enArticles.length; i += batchSize) {
-    const batch = enArticles.slice(i, i + batchSize);
-    const prompt = `Ești redactor sportiv român. Traduce COMPLET în română aceste știri despre CM 2026 / fotbal internațional.
-Returnează DOAR JSON valid fără markdown: [{"id":0,"title":"titlu tradus RO","desc":"rezumat 2-3 propoziții RO"}]
-
-Știri de tradus:
-${JSON.stringify(batch.map((a,j) => ({id:j, title:a.title, desc:a.desc})))}`;
-
-    const text = await geminiTranslate(prompt);
-    if (!text) continue;
-    
+  console.log(`  🔄 Se traduc ${enArticles.length} articole EN→RO via MyMemory...`);
+  
+  for (const article of enArticles) {
     try {
-      const translated = JSON.parse(text.replace(/```json|```/g, '').trim());
-      translated.forEach(t => {
-        if (batch[t.id]) {
-          batch[t.id].title = t.title;
-          batch[t.id].desc = t.desc;
-          batch[t.id].translated = true;
-          batch[t.id].lang = 'ro';
-        }
-      });
-      console.log(`  🔄 Tradus batch ${i/batchSize+1}: ${translated.length} articole`);
+      // Traducem titlul
+      const translatedTitle = await translateText(article.title);
+      if (translatedTitle) article.title = translatedTitle;
+      
+      // Traducem descrierea dacă există
+      if (article.desc) {
+        const translatedDesc = await translateText(article.desc);
+        if (translatedDesc) article.desc = translatedDesc;
+      }
+      
+      article.translated = true;
+      article.lang = 'ro';
+      
+      // Pauză mică între requesturi
+      await new Promise(r => setTimeout(r, 200));
     } catch(e) {
-      console.log('  ⚠️ Parse error:', e.message?.substring(0,40));
+      console.log('  ⚠️ Translation error for:', article.title?.substring(0,30));
     }
-    
-    // Pauză între batch-uri
-    if (i + batchSize < enArticles.length) await new Promise(r => setTimeout(r, 2000));
   }
   
+  console.log(`  ✅ Traduse ${enArticles.filter(a=>a.translated).length}/${enArticles.length} articole`);
   return articles;
 }
 
