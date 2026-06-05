@@ -91,14 +91,14 @@ async function summarizeArticles(articles) {
 Pentru fiecare știre despre Cupa Mondială 2026 sau fotbal internațional, scrie un rezumat INFORMATIV și COMPLET de 4-5 propoziții în română.
 
 Regulile tale:
-- Explică CE s-a întâmplat în detaliu
-- Menționează CINE este implicat (jucători, echipe, antrenori)
-- Adaugă CONTEXT: de ce e important pentru CM 2026
-- Dacă știrea e despre un jucător, menționează echipa și rolul lui la CM
-- Dacă știrea e despre o echipă, menționează grupa și șansele lor
-- Folosește cifre și date concrete când există
-- NU repeta titlul
-- Scrie natural, ca un articol de ziar sportiv
+- Scrie MINIM 4 propoziții complete
+- NU copia și NU repeta titlul — dezvoltă informația
+- Explică CE s-a întâmplat și DE CE e important
+- Adaugă CONTEXT despre CM 2026 sau jucătorul/echipa respectivă
+- Dacă știrea e vagă, completează cu informații relevante despre subiect
+- Menționează grupa, stadionul sau data meciului dacă e relevant
+- Folosește cifre concrete când există
+- Scrie ca un jurnalist sportiv experimentat, nu ca un robot
 
 Returnează DOAR JSON valid fără markdown: [{"id":0,"summary":"rezumat complet 4-5 propoziții"}]
 
@@ -440,7 +440,7 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     // Cache 15 minute
     const cacheKey = 'mondial_news';
     const cached = cache.get(cacheKey);
-    if (cached && Date.now() - cached.ts < 15 * 60 * 1000) {
+    if (cached && Date.now() - cached.ts < 30 * 60 * 1000) {
       res.writeHead(200);
       res.end(JSON.stringify(cached.data));
       return;
