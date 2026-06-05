@@ -66,7 +66,7 @@ const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
 
 // ── TRADUCERE SERVER-SIDE ─────────────────────────────────
-// Traducere cu MyMemory API — gratuit, fără cont, 5000 cuvinte/zi
+// Traducere cu MyMemory API
 async function translateText(text, from = 'en', to = 'ro') {
   try {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0,500))}&langpair=${from}|${to}`;
@@ -78,36 +78,77 @@ async function translateText(text, from = 'en', to = 'ro') {
   } catch(e) { return null; }
 }
 
+// Rezumare cu Gemini — un singur apel pentru toate articolele
+async function summarizeArticles(articles) {
+  try {
+    const toSummarize = articles.slice(0, 12).map((a, i) => ({
+      id: i,
+      title: a.title,
+      desc: a.desc || ''
+    }));
+
+    const prompt = `Ești redactor sportiv pentru cititorii din Moldova și România.
+Pentru fiecare știre despre CM 2026 / fotbal, scrie un rezumat complet de 3-4 propoziții în română.
+Rezumatul trebuie să explice: CE s-a întâmplat, CINE e implicat, DE CE contează.
+Nu repeta titlul. Scrie natural, ca un jurnalist.
+Returnează DOAR JSON valid: [{"id":0,"summary":"rezumat complet 3-4 propoziții"}]
+
+Știri:
+${JSON.stringify(toSummarize)}`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 3000 }
+        }),
+        signal: AbortSignal.timeout(30000)
+      }
+    );
+
+    if (!res.ok) {
+      console.log('  ⚠️ Gemini summarize:', res.status);
+      return articles;
+    }
+
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+    const summaries = JSON.parse(text.replace(/```json|```/g, '').trim());
+    summaries.forEach(s => {
+      if (articles[s.id]) articles[s.id].desc = s.summary;
+    });
+    console.log(`  ✅ Rezumate generate: ${summaries.length} articole`);
+  } catch(e) {
+    console.log('  ⚠️ Summarize error:', e.message?.substring(0, 50));
+  }
+  return articles;
+}
+
 async function translateArticles(articles) {
   if (!articles.length) return articles;
   const enArticles = articles.filter(a => a.lang === 'en');
-  if (!enArticles.length) return articles;
   
   console.log(`  🔄 Se traduc ${enArticles.length} articole EN→RO via MyMemory...`);
   
   for (const article of enArticles) {
     try {
-      // Traducem titlul
       const translatedTitle = await translateText(article.title);
       if (translatedTitle) article.title = translatedTitle;
-      
-      // Traducem descrierea dacă există
       if (article.desc) {
         const translatedDesc = await translateText(article.desc);
         if (translatedDesc) article.desc = translatedDesc;
       }
-      
       article.translated = true;
       article.lang = 'ro';
-      
-      // Pauză mică între requesturi
       await new Promise(r => setTimeout(r, 200));
     } catch(e) {
-      console.log('  ⚠️ Translation error for:', article.title?.substring(0,30));
+      console.log('  ⚠️ Translation error for:', article.title?.substring(0, 30));
     }
   }
-  
-  console.log(`  ✅ Traduse ${enArticles.filter(a=>a.translated).length}/${enArticles.length} articole`);
+  console.log(`  ✅ Traduse ${enArticles.filter(a => a.translated).length}/${enArticles.length} articole`);
   return articles;
 }
 
@@ -478,12 +519,13 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     items = items.slice(0, 15);
 
-    // Traducem articolele EN pe server (o singură dată, nu per utilizator)
+    // Traducem + rezumăm pe server (o singură dată, nu per utilizator)
     const translatedItems = await translateArticles(items);
+    const summarizedItems = await summarizeArticles(translatedItems);
     
-    cache.set(cacheKey, { data: translatedItems, ts: Date.now() });
+    cache.set(cacheKey, { data: summarizedItems, ts: Date.now() });
     res.writeHead(200);
-    res.end(JSON.stringify(translatedItems));
+    res.end(JSON.stringify(summarizedItems));
     return;
   }
 

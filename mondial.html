@@ -796,7 +796,7 @@ async function loadNews() {
               </div>
               <div class="nc-title">${n.title}</div>
               ${n.desc ? '<div class="nc-lead">'+n.desc+'</div>' : ''}
-              ${n.link && n.link !== '#' ? '<a class="nc-link" href="'+n.link+'" target="_blank">Citește complet →</a>' : ''}
+
             </div>
           </div>`).join('');
         localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({html: c.innerHTML, ts: Date.now()}));
