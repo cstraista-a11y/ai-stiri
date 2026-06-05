@@ -457,7 +457,7 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
           const img = (item.match(/url="([^"]*\.(jpg|jpeg|png|webp))"/) || [])[1] || null;
           const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || '';
           
-          const cleanDesc = desc.replace(/<[^>]+>/g, '').substring(0, 200);
+          const cleanDesc = desc.replace(/<[^>]+>/g, '').substring(0, 400);
           const cleanTitle = title.replace(/<[^>]+>/g, '').trim();
           
           if (cleanTitle && (WC_KW.test(cleanTitle) || WC_KW.test(cleanDesc))) {
