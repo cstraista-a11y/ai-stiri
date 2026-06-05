@@ -65,6 +65,57 @@ const FEEDS = [
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
 
+// ── TRADUCERE SERVER-SIDE ─────────────────────────────────
+async function translateArticles(articles) {
+  if (!articles.length) return articles;
+  const enArticles = articles.filter(a => a.lang === 'en').slice(0, 8);
+  if (!enArticles.length) return articles;
+  
+  try {
+    const prompt = `Ești redactor sportiv. Traduce COMPLET în română aceste știri de fotbal/CM 2026.
+Returnează DOAR JSON valid: [{"id":0,"title":"titlu RO","desc":"rezumat 2-3 propoziții RO"}]
+
+Știri:
+${JSON.stringify(enArticles.map((a,i) => ({id:i, title:a.title, desc:a.desc})))}`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+        }),
+        signal: AbortSignal.timeout(20000)
+      }
+    );
+    
+    if (!res.ok) {
+      console.log('  ⚠️ Gemini translation error:', res.status);
+      return articles;
+    }
+    
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+    const translated = JSON.parse(text.replace(/```json|```/g, '').trim());
+    
+    translated.forEach(t => {
+      if (enArticles[t.id]) {
+        enArticles[t.id].title = t.title;
+        enArticles[t.id].desc = t.desc;
+        enArticles[t.id].translated = true;
+      }
+    });
+    
+    console.log(`  🔄 Tradus: ${translated.length} articole EN→RO`);
+  } catch(e) {
+    console.log('  ⚠️ Translation error:', e.message?.substring(0,50));
+  }
+  
+  return articles;
+}
+
 // ── CACHE REZUMATE AI (15 minute) ─────────────────────────
 const GEMINI_KEY = 'AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk';
 const aiSummaryCache = new Map(); // id -> { title, summary, ts }
@@ -373,23 +424,29 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     const WC_KW_WORDS = new RegExp('\\b(' + WC_WORDS.join('|') + ')\\b', 'i');
     const WC_KW = { test: (s) => WC_KW_PHRASES.test(s) || WC_KW_WORDS.test(s) };
     
-    // Surse cu secțiuni dedicate Mondial 2026
     const FEEDS = [
-      'https://www.gsp.ro/rss/',
-      'https://www.prosport.ro/feed/',
-      'https://www.digisport.ro/rss/',
-      'https://www.sport.ro/rss/sport.xml',
-      'https://www.eurosport.ro/fotbal/rss.xml',
+      // România — sport (cele mai bune surse RO)
+      { url: 'https://www.gsp.ro/rss/', lang: 'ro' },
+      { url: 'https://www.prosport.ro/feed/', lang: 'ro' },
+      { url: 'https://www.digisport.ro/rss/', lang: 'ro' },
+      { url: 'https://www.sport.ro/rss/sport.xml', lang: 'ro' },
+      { url: 'https://www.orangesport.ro/rss/', lang: 'ro' },
+      // Internațional EN — fotbal mondial
+      { url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', lang: 'en' },
+      { url: 'https://www.goal.com/feeds/en/news', lang: 'en' },
+      { url: 'https://www.90min.com/posts.rss', lang: 'en' },
+      { url: 'https://www.espn.com/espn/rss/soccer/news', lang: 'en' },
+      { url: 'https://www.skysports.com/rss/12040', lang: 'en' },
+      { url: 'https://rss.dw.com/rdf/rss-en-sports', lang: 'en' },
     ];
 
     let items = [];
     
-    for (const feedUrl of FEEDS) {
+    for (const feed of FEEDS) {
+      const feedUrl = feed.url;
       try {
-        const resp = await fetchJson(feedUrl);
-        // fetchJson returnează response — folosim text
         const r = await fetch(feedUrl, { 
-          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AiStiri/1.0)' },
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AiStiri/1.0; +https://aistiri.com)' },
           signal: AbortSignal.timeout(8000)
         });
         if (!r.ok) continue;
@@ -398,7 +455,7 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
         
         // Parsăm XML simplu
         const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
-        itemMatches.slice(0, 20).forEach(item => {
+        itemMatches.slice(0, 50).forEach(item => {
           const title = (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/) || [])[1] || '';
           const desc = (item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) || item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
           const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '#';
@@ -409,21 +466,29 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
           const cleanTitle = title.replace(/<[^>]+>/g, '').trim();
           
           if (cleanTitle && (WC_KW.test(cleanTitle) || WC_KW.test(cleanDesc))) {
-            items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate });
+            items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate, lang: feed.lang });
           }
         });
       } catch(e) {
-        console.log('  ⚠️ Feed error:', feedUrl, e.message);
+        console.log('  ⚠️ Feed error:', feed.url, e.message?.substring(0,50));
       }
     }
 
-    // Sortăm după dată
+    // Păstrăm știrile din ultimele 48 de ore (2 zile)
+    const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+    items = items.filter(a => {
+      if (!a.pubDate) return true; // fără dată = includem
+      return new Date(a.pubDate).getTime() > cutoff;
+    });
     items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    items = items.slice(0, 10);
+    items = items.slice(0, 15);
 
-    cache.set(cacheKey, { data: items, ts: Date.now() });
+    // Traducem articolele EN pe server (o singură dată, nu per utilizator)
+    const translatedItems = await translateArticles(items);
+    
+    cache.set(cacheKey, { data: translatedItems, ts: Date.now() });
     res.writeHead(200);
-    res.end(JSON.stringify(items));
+    res.end(JSON.stringify(translatedItems));
     return;
   }
 
