@@ -84,16 +84,25 @@ async function summarizeArticles(articles) {
     const toSummarize = articles.slice(0, 12).map((a, i) => ({
       id: i,
       title: a.title,
-      desc: a.desc || ''
+      desc: a.desc || a.title // dacă nu există desc, folosim titlul
     }));
 
-    const prompt = `Ești redactor sportiv pentru cititorii din Moldova și România.
-Pentru fiecare știre despre CM 2026 / fotbal, scrie un rezumat complet de 3-4 propoziții în română.
-Rezumatul trebuie să explice: CE s-a întâmplat, CINE e implicat, DE CE contează.
-Nu repeta titlul. Scrie natural, ca un jurnalist.
-Returnează DOAR JSON valid: [{"id":0,"summary":"rezumat complet 3-4 propoziții"}]
+    const prompt = `Ești un redactor sportiv senior pentru cititorii din Moldova și România.
+Pentru fiecare știre despre Cupa Mondială 2026 sau fotbal internațional, scrie un rezumat INFORMATIV și COMPLET de 4-5 propoziții în română.
 
-Știri:
+Regulile tale:
+- Explică CE s-a întâmplat în detaliu
+- Menționează CINE este implicat (jucători, echipe, antrenori)
+- Adaugă CONTEXT: de ce e important pentru CM 2026
+- Dacă știrea e despre un jucător, menționează echipa și rolul lui la CM
+- Dacă știrea e despre o echipă, menționează grupa și șansele lor
+- Folosește cifre și date concrete când există
+- NU repeta titlul
+- Scrie natural, ca un articol de ziar sportiv
+
+Returnează DOAR JSON valid fără markdown: [{"id":0,"summary":"rezumat complet 4-5 propoziții"}]
+
+Știri de rezumat:
 ${JSON.stringify(toSummarize)}`;
 
     const res = await fetch(
