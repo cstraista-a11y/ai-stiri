@@ -350,13 +350,18 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
       return;
     }
 
-    const WC_KW = /mondial|world cup|cm 2026|cupa mondiala|fifa|mexic|africa de sud|anglia|croatia|brazilia|maroc|messi|mbappe|ronaldo|neymar|grupe|gol/i;
+    // Filtrăm STRICT doar articole cu "mondial" sau "world cup" sau "cm 2026" în TITLU
+    const WC_TITLE = /mondial|world cup|cm 2026|cupa mondial|fifa 2026/i;
+    // Secunde verificare: cuvinte cheie în descriere
+    const WC_DESC = /cupa mondiala|world cup 2026|fifa world cup|mexic vs|canada vs|sua vs|brazilia vs/i;
     
+    // Surse cu secțiuni dedicate Mondial 2026
     const FEEDS = [
       'https://www.gsp.ro/rss/',
       'https://www.prosport.ro/feed/',
       'https://www.digisport.ro/rss/',
       'https://www.sport.ro/rss/sport.xml',
+      'https://www.eurosport.ro/fotbal/rss.xml',
     ];
 
     let items = [];
@@ -385,7 +390,10 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
           const cleanDesc = desc.replace(/<[^>]+>/g, '').substring(0, 200);
           const cleanTitle = title.replace(/<[^>]+>/g, '').trim();
           
-          if (cleanTitle && (WC_KW.test(cleanTitle) || WC_KW.test(cleanDesc))) {
+          // Acceptăm DOAR dacă titlul conține cuvinte cheie clare despre Mondial
+          const titleMatch = WC_TITLE.test(cleanTitle);
+          const descMatch = WC_DESC.test(cleanDesc);
+          if (cleanTitle && (titleMatch || descMatch)) {
             items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate });
           }
         });
