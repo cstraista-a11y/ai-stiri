@@ -773,36 +773,45 @@ async function loadNews() {
       </div>
     </div>`).join('');
 
-  // Încercăm să luăm știri reale de pe server (fără CORS!)
-  setTimeout(async () => {
-    try {
-      const r = await fetch('/mondial-news', {signal: AbortSignal.timeout(10000)});
-      if(r.ok) {
-        const items = await r.json();
-        if(items.length > 0) {
-          c.innerHTML = items.map((n,i) => `
-            <div class="nc">
-              ${n.img ? `<img class="nc-img" src="${n.img}" loading="lazy" onerror="this.style.display='none'">` : '<div class="nc-img-placeholder">⚽</div>'}
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="nc-src">${n.src}</span>
-                  ${n.pubDate ? '<span class="nc-dot">·</span><span class="nc-time">'+getTimeAgo(new Date(n.pubDate))+'</span>' : ''}
-                </div>
-                <div class="nc-title">${n.title}</div>
-                ${n.desc ? '<div class="nc-lead">'+n.desc+'</div>' : ''}
-                <a class="nc-link" href="${n.link}" target="_blank">Citește complet →</a>
+  // Luăm știrile traduse de pe server (așteptăm să fie gata)
+  // Afișăm loading indicator
+  c.insertAdjacentHTML('beforeend', '<div id="nc-loading" style="text-align:center;padding:16px;color:var(--gray);font-size:13px;">🔄 Se încarcă știrile traduse...</div>');
+  
+  try {
+    // Server-ul face fetch+traducere, poate dura 10-30 secunde
+    const r = await fetch('/mondial-news', {signal: AbortSignal.timeout(35000)});
+    document.getElementById('nc-loading')?.remove();
+    
+    if(r.ok) {
+      const items = await r.json();
+      if(items.length > 0) {
+        c.innerHTML = items.map((n,i) => `
+          <div class="nc">
+            ${n.img ? `<img class="nc-img" src="${n.img}" loading="lazy" onerror="this.style.display='none'">` : '<div class="nc-img-placeholder">⚽</div>'}
+            <div class="nc-body">
+              <div class="nc-meta">
+                <span class="nc-src">${n.src}</span>
+                ${n.pubDate ? '<span class="nc-dot">·</span><span class="nc-time">'+getTimeAgo(new Date(n.pubDate))+'</span>' : ''}
+                ${n.translated ? '<span class="nc-translated">🔄 tradus</span>' : ''}
               </div>
-            </div>`).join('');
-          localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({html: c.innerHTML, ts: Date.now()}));
-          return; // știri reale găsite, gata
-        }
+              <div class="nc-title">${n.title}</div>
+              ${n.desc ? '<div class="nc-lead">'+n.desc+'</div>' : ''}
+              ${n.link && n.link !== '#' ? '<a class="nc-link" href="'+n.link+'" target="_blank">Citește complet →</a>' : ''}
+            </div>
+          </div>`).join('');
+        localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify({html: c.innerHTML, ts: Date.now()}));
+        return;
       }
-    } catch(e) { console.log('Server news unavailable, keeping base news'); }
-  }, 300);
+    }
+    document.getElementById('nc-loading')?.remove();
+  } catch(e) { 
+    document.getElementById('nc-loading')?.remove();
+    console.log('Server news timeout, keeping base news');
+  }
 
-  // AI în background pentru știri generate (dacă server eșuează)  
+  // AI în background dezactivat - serverul se ocupă de traducere
   setTimeout(async () => {
-    if(c.querySelector('.nc-link')) return; // știri reale deja afișate
+    if(true) return; // serverul traduce, nu browserul
     try {
       const today = new Date().toLocaleDateString('ro-RO',{day:'numeric',month:'long',year:'numeric'});
       const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GK, {

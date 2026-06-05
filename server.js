@@ -66,51 +66,71 @@ const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
 
 // ── TRADUCERE SERVER-SIDE ─────────────────────────────────
+async function geminiTranslate(prompt, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      if (i > 0) await new Promise(r => setTimeout(r, 3000 * i)); // așteptăm 3s, 6s
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 3000 }
+          }),
+          signal: AbortSignal.timeout(25000)
+        }
+      );
+      if (res.status === 429) {
+        console.log(`  ⏳ Gemini 429 - retry ${i+1}/${retries}`);
+        continue;
+      }
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } catch(e) {
+      console.log('  ⚠️ Gemini error:', e.message?.substring(0,40));
+    }
+  }
+  return null;
+}
+
 async function translateArticles(articles) {
   if (!articles.length) return articles;
-  const enArticles = articles.filter(a => a.lang === 'en').slice(0, 8);
+  const enArticles = articles.filter(a => a.lang === 'en');
   if (!enArticles.length) return articles;
   
-  try {
-    const prompt = `Ești redactor sportiv. Traduce COMPLET în română aceste știri de fotbal/CM 2026.
-Returnează DOAR JSON valid: [{"id":0,"title":"titlu RO","desc":"rezumat 2-3 propoziții RO"}]
+  // Traducem în batch-uri de 5 pentru a evita token limit
+  const batchSize = 5;
+  for (let i = 0; i < enArticles.length; i += batchSize) {
+    const batch = enArticles.slice(i, i + batchSize);
+    const prompt = `Ești redactor sportiv român. Traduce COMPLET în română aceste știri despre CM 2026 / fotbal internațional.
+Returnează DOAR JSON valid fără markdown: [{"id":0,"title":"titlu tradus RO","desc":"rezumat 2-3 propoziții RO"}]
 
-Știri:
-${JSON.stringify(enArticles.map((a,i) => ({id:i, title:a.title, desc:a.desc})))}`;
+Știri de tradus:
+${JSON.stringify(batch.map((a,j) => ({id:j, title:a.title, desc:a.desc})))}`;
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
-        }),
-        signal: AbortSignal.timeout(20000)
-      }
-    );
+    const text = await geminiTranslate(prompt);
+    if (!text) continue;
     
-    if (!res.ok) {
-      console.log('  ⚠️ Gemini translation error:', res.status);
-      return articles;
+    try {
+      const translated = JSON.parse(text.replace(/```json|```/g, '').trim());
+      translated.forEach(t => {
+        if (batch[t.id]) {
+          batch[t.id].title = t.title;
+          batch[t.id].desc = t.desc;
+          batch[t.id].translated = true;
+          batch[t.id].lang = 'ro';
+        }
+      });
+      console.log(`  🔄 Tradus batch ${i/batchSize+1}: ${translated.length} articole`);
+    } catch(e) {
+      console.log('  ⚠️ Parse error:', e.message?.substring(0,40));
     }
     
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-    const translated = JSON.parse(text.replace(/```json|```/g, '').trim());
-    
-    translated.forEach(t => {
-      if (enArticles[t.id]) {
-        enArticles[t.id].title = t.title;
-        enArticles[t.id].desc = t.desc;
-        enArticles[t.id].translated = true;
-      }
-    });
-    
-    console.log(`  🔄 Tradus: ${translated.length} articole EN→RO`);
-  } catch(e) {
-    console.log('  ⚠️ Translation error:', e.message?.substring(0,50));
+    // Pauză între batch-uri
+    if (i + batchSize < enArticles.length) await new Promise(r => setTimeout(r, 2000));
   }
   
   return articles;
