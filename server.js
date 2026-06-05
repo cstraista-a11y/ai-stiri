@@ -351,50 +351,27 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     }
 
     // Cuvinte cheie CM 2026 — titlu SAU descriere
-    const WC_KW = new RegExp([
-      // Turneu
-      'mondial','world cup','cm 2026','cupa mondiala','fifa 2026','north america 2026',
-      'canada mexico usa','grupo','grupe cm','fase de grupos',
-      // Echipe participante
-      'mexic','africa de sud','coreea de sud','cehia',
-      'anglia','croatia','ghana','slovacia',
-      'sua ','statele unite','panama','serbia',
-      'franta','arabia saudita','nigeria','chile',
-      'spania','brazilia','japonia','camerun',
-      'belgia','australia','austria','ivory coast',
-      'germania','columbia','turcia','georgia',
-      'portugalia','senegal','polonia','slovenia',
-      'argentina','canada','ecuador','algeria',
-      'olanda','iran','peru','tanzania',
-      'uruguay','qatar','ungaria','guineea',
-      'maroc','venezuela','indonezia',
-      // Staruri / jucători
-      'messi','mbappe','ronaldo','neymar','vinicius',
-      'lewandowski','modric','kane','salah','benzema',
-      'yamal','pedri','bellingham','rodri','wirtz','musiala',
-      'griezmann','giroud','dembele','rashford','saka',
-      'de bruyne','lukaku','courtois','ter stegen',
-      'di maria','alvarez','de paul','martinez',
-      'raphinha','rodrygo','casemiro','alisson',
-      'maignan','theo hernandez','camavinga','tchouameni',
-      // Antrenori
-      'scaloni','ancelotti','nagelsmann','southgate',
-      'deschamps','martinez','de la fuente','roberto martinez',
-      // Stadioane
-      'azteca','metlife','sofi stadium','at&t stadium',
-      'rose bowl','lumen field','arrowhead','lincoln financial',
-      'mercedes-benz stadium','nrg stadium','bc place',
-      'bmO field','estadio','stadium','arena',
-      // Termeni generali fotbal international
-      'grupe','optimi','sferturi','semifinala','finala',
-      'calificare','eliminare','hat-trick','penalty',
-      'var','ofsaid','carton rosu','carton galben',
-      'transferuri vara','lot national','convocari',
-      'fifa','conmebol','uefa','concacaf','caf','afc',
-      // Sponsori
-      'adidas','nike','coca-cola','hyundai','kia','visa',
-      'qatar airways','budweiser','hublot','wanda'
-    ].join('|'), 'i');
+    // Cuvinte cheie CM 2026 cu word boundaries pentru precizie
+    const WC_PHRASES = [
+      'mondial','world cup','cm 2026','cupa mondiala','fifa 2026',
+      'mexic vs','africa de sud','coreea de sud',
+      'anglia vs','croatia vs','brazilia vs','argentina vs',
+      'mbappe','neymar','vinicius jr','lewandowski','bellingham',
+      'yamal','pedri','wirtz','musiala','griezmann','rashford',
+      'raphinha','rodrygo','camavinga','tchouameni',
+      'estadio azteca','metlife stadium','sofi stadium',
+      'lot national','convocati','convocari','cupa mondiala',
+      'grupe cm','optimi mondiale','sferturi mondiale'
+    ];
+    // Cuvinte standalone (cu word boundaries)
+    const WC_WORDS = [
+      'messi','ronaldo','kane','modric','salah','benzema',
+      'scaloni','southgate','deschamps','nagelsmann','ancelotti',
+      'azteca','metlife','mundial','fifa','concacaf','conmebol'
+    ];
+    const WC_KW_PHRASES = new RegExp(WC_PHRASES.join('|'), 'i');
+    const WC_KW_WORDS = new RegExp('\\b(' + WC_WORDS.join('|') + ')\\b', 'i');
+    const WC_KW = { test: (s) => WC_KW_PHRASES.test(s) || WC_KW_WORDS.test(s) };
     
     // Surse cu secțiuni dedicate Mondial 2026
     const FEEDS = [
