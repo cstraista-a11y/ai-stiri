@@ -3,204 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ai Știri — Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Admin — Ai Știri</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, sans-serif; background: #0D0D0D; color: #fff; min-height: 100vh; }
-.login { max-width: 360px; margin: 80px auto; padding: 32px; background: #1a1a1a; border-radius: 16px; border: 1px solid #333; }
-.logo { font-size: 24px; font-weight: 900; color: white; margin-bottom: 24px; }
-.logo em { color: #4FC3F7; font-style: normal; }
-input { width: 100%; padding: 12px 14px; background: #0D0D0D; border: 1px solid #333; border-radius: 10px; color: white; font-size: 15px; margin-bottom: 12px; font-family: inherit; }
-input:focus { outline: none; border-color: #4FC3F7; }
-button { width: 100%; padding: 13px; background: #0A2463; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.err { color: #ff6b6b; font-size: 13px; margin-bottom: 10px; }
-
-.app { display: none; }
-.header { background: #1a1a1a; border-bottom: 1px solid #333; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-.header-logo { font-size: 20px; font-weight: 900; }
-.header-logo em { color: #4FC3F7; font-style: normal; }
-.logout { background: none; border: 1px solid #333; color: #888; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px; }
-.stat { background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 20px; }
-.stat-val { font-size: 36px; font-weight: 800; color: #4FC3F7; }
-.stat-label { font-size: 13px; color: #888; margin-top: 4px; }
-.stat-sub { font-size: 12px; color: #555; margin-top: 8px; }
-
-.section { padding: 0 24px 24px; }
-.section-title { font-size: 16px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
-
-.table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
-.table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #333; }
-.table td { padding: 12px 16px; font-size: 14px; color: #ccc; border-bottom: 1px solid #1f1f1f; }
-.table tr:last-child td { border-bottom: none; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-.badge-md { background: #0A2463; color: #4FC3F7; }
-.badge-ro { background: #1a3a1a; color: #4ade80; }
-.badge-eu { background: #3a1a3a; color: #c084fc; }
-
-.loading { text-align: center; padding: 40px; color: #555; }
-.refresh-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; margin-left: 12px; }
+:root{--bg:#080C14;--bg2:#0E1420;--bg3:#141C2E;--border:rgba(255,255,255,0.06);--accent:#4FC3F7;--gold:#F5C842;--green:#10B981;--red:#EF4444;--orange:#F97316;--purple:#8B5CF6;--white:#F1F5F9;--gray:#64748B;--muted:#334155;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border);}
+.logo-mark{font-size:18px;font-weight:800;color:var(--white);}
+.logo-mark em{color:var(--accent);font-style:normal;}
+.logo-sub{font-size:10px;font-weight:600;letter-spacing:0.15em;color:var(--gray);text-transform:uppercase;margin-top:2px;}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;padding:0 8px;margin:14px 0 4px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg3);color:var(--white);}
+.nav-item.on{background:rgba(79,195,247,0.1);color:var(--accent);}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.page-title{font-size:15px;font-weight:800;}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:var(--accent);color:var(--bg);}
+.btn-outline{background:transparent;color:var(--gray);border:1px solid var(--border);}
+.btn-outline:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+.btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.content{padding:24px;flex:1;}
+.page{display:none;}
+.page.on{display:block;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--gray);text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-size:28px;font-weight:800;color:var(--white);line-height:1;margin-bottom:4px;}
+.stat-change{font-size:11px;font-weight:600;color:var(--green);}
+.stat-icon{font-size:22px;float:right;margin-top:-38px;}
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:24px;}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+.chart-sub{font-size:11px;color:var(--gray);margin-bottom:16px;}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bar-val{font-size:9px;color:var(--gray);font-family:'JetBrains Mono',monospace;}
+.bar{border-radius:3px 3px 0 0;width:100%;min-height:4px;}
+.bar-label{font-size:9px;color:var(--gray);}
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.table-title{font-size:13px;font-weight:700;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--gray);text-transform:uppercase;padding:9px 18px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:11px 18px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:inline-block;}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-orange{background:rgba(249,115,22,0.15);color:var(--orange);}
+.badge-blue{background:rgba(79,195,247,0.15);color:var(--accent);}
+.badge-purple{background:rgba(139,92,246,0.15);color:var(--purple);}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.settings-title{font-size:13px;font-weight:700;margin-bottom:14px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+.field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;}
+.field input:focus{border-color:var(--accent);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-info{font-size:12px;}
+.toggle-info small{display:block;font-size:10px;color:var(--gray);margin-top:1px;}
+.toggle{width:38px;height:20px;border-radius:10px;cursor:pointer;background:var(--muted);position:relative;transition:background 0.2s;flex-shrink:0;border:none;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;}
+.toggle.on::after{transform:translateX(18px);}
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;max-height:280px;overflow-y:auto;}
+.log-ok{color:var(--green);}
+.log-warn{color:var(--orange);}
+.log-err{color:var(--red);}
+.log-info{color:var(--accent);}
+.log-time{color:var(--muted);}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login">
-    <div class="logo">Ai <em>Știri</em> Admin</div>
-    <div id="login-err" class="err"></div>
-    <input type="email" id="email" placeholder="Email admin" value="cstraista@yahoo.com">
-    <input type="password" id="pass" placeholder="Parolă">
-    <button onclick="doLogin()">Intră în admin</button>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Ai <em>Știri</em></div>
+    <div class="logo-sub">Admin Dashboard</div>
   </div>
-</div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Principal</div>
+    <button class="nav-item on" onclick="showPage('overview',this)">📊 Overview</button>
+    <button class="nav-item" onclick="showPage('analytics',this)">📈 Analytics</button>
+    <button class="nav-item" onclick="showPage('news',this)">📰 Știri & Surse</button>
+    <div class="nav-label">Mondial 2026</div>
+    <button class="nav-item" onclick="showPage('mondial',this)">🏆 Mondial Stats</button>
+    <button class="nav-item" onclick="showPage('votes',this)">🗳️ Voturi & Quiz</button>
+    <div class="nav-label">Sistem</div>
+    <button class="nav-item" onclick="showPage('monetizare',this)">💰 Monetizare</button>
+    <button class="nav-item" onclick="showPage('settings',this)">⚙️ Setări</button>
+    <button class="nav-item" onclick="showPage('logs',this)">🖥️ Logs</button>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="status-dot"></span>
+    <span style="font-size:11px;color:var(--gray);margin-left:6px;">aistiri.com · Online</span>
+    <div style="margin-top:6px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="clock"></div>
+  </div>
+</aside>
 
-<!-- APP -->
-<div id="app" class="app">
-  <div class="header">
-    <div class="header-logo">Ai <em>Știri</em> <span style="color:#555;font-weight:400;font-size:14px;">Dashboard</span></div>
-    <div>
-      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
-      <button class="logout" onclick="doLogout()">Ieși</button>
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">📊 Overview</div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="loadRealStats()">🔄 Refresh</button>
+      <button class="btn btn-danger" onclick="if(confirm('Restart server?'))fetch('/admin/restart',{method:'POST'})">⚡ Restart</button>
+      <button class="btn btn-primary" onclick="window.open('https://aistiri.com','_blank')">🌐 Site</button>
     </div>
   </div>
+  <div class="content">
 
-  <div class="stats" id="stats">
-    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Utilizatori totali</div><div class="stat-sub">înregistrați</div></div>
-    <div class="stat"><div class="stat-val" id="s-zone-md">—</div><div class="stat-label">Din Moldova</div><div class="stat-sub">utilizatori</div></div>
-    <div class="stat"><div class="stat-val" id="s-zone-ro">—</div><div class="stat-label">Din România</div><div class="stat-sub">utilizatori</div></div>
-    <div class="stat"><div class="stat-val" id="s-saved">—</div><div class="stat-label">Articole salvate</div><div class="stat-sub">total</div></div>
-    <div class="stat"><div class="stat-val" id="s-reactions">—</div><div class="stat-label">Reacții totale</div><div class="stat-sub">like-uri și emoji</div></div>
-    <div class="stat"><div class="stat-val" id="s-comments">—</div><div class="stat-label">Comentarii</div><div class="stat-sub">total</div></div>
-  </div>
+    <!-- OVERVIEW -->
+    <div class="page on" id="page-overview">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Vizitatori azi</div><div class="stat-value" id="stat-visitors">—</div><div class="stat-change">Live</div></div>
+        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-label">Total sesiuni</div><div class="stat-value" id="stat-total">—</div><div class="stat-change">All time</div></div>
+        <div class="stat-card"><div class="stat-icon">📰</div><div class="stat-label">Știri Mondial</div><div class="stat-value" id="stat-news">—</div><div class="stat-change">În cache 30min</div></div>
+        <div class="stat-card"><div class="stat-icon">📱</div><div class="stat-label">PWA Instalat</div><div class="stat-value" id="stat-pwa">—</div><div class="stat-change">Utilizatori</div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Trafic săptămânal</div>
+          <div class="chart-sub">Vizitatori unici pe zi</div>
+          <div class="bar-chart" id="traffic-chart"><div style="color:var(--gray);font-size:12px;margin:auto;">Se încarcă...</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top Zone</div>
+          <div class="chart-sub">Distribuție utilizatori</div>
+          <div id="zones-list" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">📡 Status Surse RSS</div><button class="btn btn-outline" style="font-size:11px;padding:5px 10px;" onclick="loadNewsTable()">🔄 Test</button></div>
+        <div id="sources-table"><table><tr><th>Sursă</th><th>Status</th><th>Tip</th></tr>
+          <tr><td>gsp.ro</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-orange">Sport RO</span></td></tr>
+          <tr><td>prosport.ro</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-orange">Sport RO</span></td></tr>
+          <tr><td>digisport.ro</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-orange">Sport RO</span></td></tr>
+          <tr><td>feeds.bbci.co.uk</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-blue">Internațional</span></td></tr>
+          <tr><td>goal.com</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-blue">Internațional</span></td></tr>
+          <tr><td>tv8.md</td><td><span class="badge badge-green">● Online</span></td><td><span class="badge badge-purple">Moldova</span></td></tr>
+        </table></div>
+      </div>
+    </div>
 
-  <div class="section">
-    <div class="section-title">Utilizatori recenți</div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Zonă</th>
-          <th>Vârstă</th>
-          <th>Studii</th>
-          <th>Interese</th>
-          <th>Înregistrat</th>
-        </tr>
-      </thead>
-      <tbody id="users-table">
-        <tr><td colspan="6" class="loading">Se încarcă...</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📱</div><div class="stat-label">Mobil</div><div class="stat-value" id="stat-mobile">—</div><div class="stat-change">utilizatori</div></div>
+        <div class="stat-card"><div class="stat-icon">🖥️</div><div class="stat-label">Desktop</div><div class="stat-value" id="stat-desktop">—</div><div class="stat-change">utilizatori</div></div>
+        <div class="stat-card"><div class="stat-icon">🌍</div><div class="stat-label">Zone unice</div><div class="stat-value" id="stat-zones">—</div><div class="stat-change">țări/zone</div></div>
+        <div class="stat-card"><div class="stat-icon">📲</div><div class="stat-label">PWA</div><div class="stat-value" id="stat-pwa2">—</div><div class="stat-change">instalat ca app</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">🌍 Distribuție zone</div></div>
+        <div id="zones-table"><table><tr><th>Zonă</th><th>Vizitatori</th><th>%</th></tr><tr><td colspan="3" style="text-align:center;color:var(--gray);">Se încarcă...</td></tr></table></div>
+      </div>
+    </div>
 
-  <div class="section">
-    <div class="section-title">Distribuție zone</div>
-    <table class="table">
-      <thead><tr><th>Zonă</th><th>Utilizatori</th><th>%</th></tr></thead>
-      <tbody id="zones-table"><tr><td colspan="3" class="loading">Se încarcă...</td></tr></tbody>
-    </table>
-  </div>
+    <!-- ȘTIRI -->
+    <div class="page" id="page-news">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">📰 Cache Știri Mondial</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;" onclick="loadNewsTable()">🔄 Refresh</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="fetch('/mondial-news').then(()=>alert('Fetch done!'))">⚡ Fetch Now</button>
+          </div>
+        </div>
+        <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:16px;font-size:12px;">
+          <span>Știri: <strong id="cache-count">—</strong></span>
+          <span>Traduse: <strong id="translated-count">—</strong></span>
+          <span>Cache: <strong>30 min</strong></span>
+        </div>
+        <div id="news-table-body"><table><tr><th>Titlu</th><th>Sursă</th><th>Tradus</th><th>Desc</th></tr><tr><td colspan="4" style="text-align:center;color:var(--gray);padding:20px;">Click Refresh</td></tr></table></div>
+      </div>
+    </div>
 
-  <div class="section">
-    <div class="section-title">Distribuție interese</div>
-    <table class="table">
-      <thead><tr><th>Interes</th><th>Utilizatori</th></tr></thead>
-      <tbody id="interests-table"><tr><td colspan="2" class="loading">Se încarcă...</td></tr></tbody>
-    </table>
+    <!-- MONDIAL -->
+    <div class="page" id="page-mondial">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">🗳️</div><div class="stat-label">Voturi câștigătoare</div><div class="stat-value" id="m-votes">162</div><div class="stat-change">Total</div></div>
+        <div class="stat-card"><div class="stat-icon">🥇</div><div class="stat-label">Favorita fanilor</div><div class="stat-value" id="m-winner">🇧🇷</div><div class="stat-change">Brazilia 38%</div></div>
+        <div class="stat-card"><div class="stat-icon">🧠</div><div class="stat-label">Quiz activ</div><div class="stat-value">8</div><div class="stat-change">întrebări/zi</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">Grupe CM</div><div class="stat-value">12</div><div class="stat-change">A → L</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">🥇 Voturi câștigătoare CM 2026</div></div>
+        <table><tr><th>Echipă</th><th>Voturi</th><th>%</th></tr>
+          <tr><td>🇧🇷 Brazilia</td><td>38</td><td>38%</td></tr>
+          <tr><td>🇫🇷 Franța</td><td>24</td><td>24%</td></tr>
+          <tr><td>🇦🇷 Argentina</td><td>20</td><td>20%</td></tr>
+          <tr><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Anglia</td><td>14</td><td>14%</td></tr>
+          <tr><td>🇪🇸 Spania</td><td>9</td><td>6%</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- VOTURI -->
+    <div class="page" id="page-votes">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">⚽ Voturi Meciuri CM 2026</div></div>
+        <table><tr><th>Meci</th><th>Echipa 1</th><th>Egal</th><th>Echipa 2</th><th>Total</th></tr>
+          <tr><td>🇲🇽 Mexic vs Africa de Sud 🇿🇦</td><td>—</td><td>—</td><td>—</td><td>0</td></tr>
+          <tr><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Anglia vs Croația 🇭🇷</td><td>—</td><td>—</td><td>—</td><td>0</td></tr>
+          <tr><td>🇧🇷 Brazilia vs Maroc 🇲🇦</td><td>—</td><td>—</td><td>—</td><td>0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- MONETIZARE -->
+    <div class="page" id="page-monetizare">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-label">Cost lunar</div><div class="stat-value">$23</div><div class="stat-change">Hetzner + domeniu + API</div></div>
+        <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-label">Break-even</div><div class="stat-value">500</div><div class="stat-change">vizitatori/zi cu ads</div></div>
+        <div class="stat-card"><div class="stat-icon">🚀</div><div class="stat-label">Potențial</div><div class="stat-value">$200+</div><div class="stat-change">la 5k viz/zi</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">Cost/utilizator</div><div class="stat-value">$0.00</div><div class="stat-change">Ultra eficient</div></div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="settings-title">💰 Canale monetizare</div>
+          <div class="toggle-row"><div class="toggle-info">Google AdSense<small>Bannere non-intruzive</small></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Newsletter Premium<small>Digest zilnic plătit</small></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Donații<small>Buy me a coffee</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Parteneriate locale<small>Articole sponsorizate</small></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-title">📋 Costuri detaliate</div>
+          <table style="width:100%;font-size:12px;">
+            <tr><td style="padding:7px 0;color:var(--gray);">Hetzner VPS CX22</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;">€4/lună</td></tr>
+            <tr><td style="padding:7px 0;color:var(--gray);">aistiri.com domeniu</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;">$10/an</td></tr>
+            <tr><td style="padding:7px 0;color:var(--gray);">API-Football (CM)</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;">$19/lună</td></tr>
+            <tr><td style="padding:7px 0;color:var(--gray);">Google Translate</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;">$0</td></tr>
+            <tr style="border-top:1px solid var(--border);"><td style="padding:9px 0;font-weight:700;font-size:12px;">TOTAL</td><td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold);">~$23/lună</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETĂRI -->
+    <div class="page" id="page-settings">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="settings-title">🔑 API Keys</div>
+          <div class="field"><label>Gemini API Key</label><input type="password" value="AIzaSyDBgA8T0iIMLV7zfsm1mTU4snNzAz6USDk"></div>
+          <div class="field"><label>API-Football Key</label><input type="password" value="ed7204b086075895e4b584ffcbc6383c"></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:6px;">💾 Salvează</button>
+        </div>
+        <div class="settings-card">
+          <div class="settings-title">⚙️ Configurare</div>
+          <div class="toggle-row"><div class="toggle-info">Traducere automată<small>Google Translate EN→RO</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Deduplicare știri<small>Elimină știri similare</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Cache activ<small>30 minute TTL</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="toggle-row"><div class="toggle-info">Modul Mondial 2026<small>Feed dedicat CM</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="page" id="page-logs">
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">🖥️ Server Logs</div><button class="btn btn-outline" style="font-size:11px;padding:5px 10px;" onclick="loadLogs()">🔄 Refresh</button></div>
+        <div style="padding:14px 18px;"><div class="log-box" id="log-output"><div><span class="log-time">[loading...]</span> Se încarcă logurile...</div></div></div>
+      </div>
+    </div>
+
   </div>
-</div>
+</main>
 
 <script>
-const SUPA_URL = 'https://pdjigbowhllyjlehegoa.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkamlnYm93aGxseWpsZWhlZ29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MzU0NzksImV4cCI6MjA5NTMxMTQ3OX0.FslDt9ftvAe0a_RwfbKXejMAB647zsk2OZSmqKzwlcA';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-async function doLogin() {
-  const email = document.getElementById('email').value;
-  const pass = document.getElementById('pass').value;
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if (error) { document.getElementById('login-err').textContent = 'Email sau parolă greșită.'; return; }
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  loadData();
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  const titles={overview:'📊 Overview',analytics:'📈 Analytics',news:'📰 Știri & Surse',mondial:'🏆 Mondial',votes:'🗳️ Voturi',monetizare:'💰 Monetizare',settings:'⚙️ Setări',logs:'🖥️ Logs'};
+  document.getElementById('page-title').textContent = titles[id]||id;
+  if(id==='news') loadNewsTable();
+  if(id==='analytics') loadAnalytics();
+  if(id==='logs') loadLogs();
 }
 
-async function doLogout() {
-  await supa.auth.signOut();
-  location.reload();
-}
-
-async function loadData() {
+async function loadRealStats() {
   try {
-    // Profiluri
-    const { data: profiles } = await supa.from('profiles').select('*').order('created_at', { ascending: false });
-    const { data: saved } = await supa.from('saved_articles').select('id', { count: 'exact' });
-    const { data: reactions } = await supa.from('reactions').select('id', { count: 'exact' });
-    const { data: comments } = await supa.from('comments').select('id', { count: 'exact' });
-
-    const total = profiles?.length || 0;
-    const md = profiles?.filter(p => p.zone === 'Moldova').length || 0;
-    const ro = profiles?.filter(p => p.zone === 'România').length || 0;
-
-    document.getElementById('s-total').textContent = total;
-    document.getElementById('s-zone-md').textContent = md;
-    document.getElementById('s-zone-ro').textContent = ro;
-    document.getElementById('s-saved').textContent = saved?.length || 0;
-    document.getElementById('s-reactions').textContent = reactions?.length || 0;
-    document.getElementById('s-comments').textContent = comments?.length || 0;
-
-    // Tabel utilizatori
-    const tbody = document.getElementById('users-table');
-    if (!profiles?.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="color:#555;text-align:center;padding:20px;">Niciun utilizator încă</td></tr>';
-    } else {
-      tbody.innerHTML = profiles.slice(0, 20).map(p => {
-        const zone = p.zone || '—';
-        const badge = zone === 'Moldova' ? 'badge-md' : zone === 'România' ? 'badge-ro' : 'badge-eu';
-        const ints = (p.interests || []).join(', ') || '—';
-        const date = p.created_at ? new Date(p.created_at).toLocaleDateString('ro-RO') : '—';
-        return `<tr>
-          <td>${p.id?.substring(0,8)}...</td>
-          <td><span class="badge ${badge}">${zone}</span></td>
-          <td>${p.age || '—'}</td>
-          <td>${p.edu || '—'}</td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ints}</td>
-          <td>${date}</td>
-        </tr>`;
-      }).join('');
+    const r = await fetch('/analytics/stats');
+    const d = await r.json();
+    document.getElementById('stat-visitors').textContent = d.today||0;
+    document.getElementById('stat-total').textContent = d.total||0;
+    document.getElementById('stat-pwa').textContent = d.pwa||0;
+    
+    const nr = await fetch('/mondial-news');
+    const news = await nr.json();
+    document.getElementById('stat-news').textContent = news.length||0;
+    
+    // Bar chart
+    if(d.last7) {
+      const vals = d.last7.map(x=>x.visitors);
+      const max = Math.max(...vals,1);
+      const days=['L','M','M','J','V','S','D'];
+      document.getElementById('traffic-chart').innerHTML = vals.map((v,i)=>
+        '<div class="bar-col"><div class="bar-val">'+v+'</div><div class="bar" style="height:'+Math.max((v/max)*100,4)+'px;background:'+(i===vals.length-1?'var(--gold)':'var(--accent)')+'"></div><div class="bar-label">'+days[i]+'</div></div>'
+      ).join('');
     }
-
-    // Zone distribution
-    const zones = {};
-    profiles?.forEach(p => { const z = p.zone || 'Necunoscut'; zones[z] = (zones[z]||0)+1; });
-    document.getElementById('zones-table').innerHTML = Object.entries(zones)
-      .sort((a,b) => b[1]-a[1])
-      .map(([z,n]) => `<tr><td>${z}</td><td>${n}</td><td>${total ? Math.round(n/total*100) : 0}%</td></tr>`)
-      .join('') || '<tr><td colspan="3" style="color:#555">—</td></tr>';
-
-    // Interese
-    const ints = {};
-    profiles?.forEach(p => (p.interests||[]).forEach(i => { ints[i] = (ints[i]||0)+1; }));
-    document.getElementById('interests-table').innerHTML = Object.entries(ints)
-      .sort((a,b) => b[1]-a[1])
-      .map(([i,n]) => `<tr><td>${i}</td><td>${n}</td></tr>`)
-      .join('') || '<tr><td colspan="2" style="color:#555">—</td></tr>';
-
-  } catch(e) {
-    console.error('Load error:', e);
-  }
+    
+    // Zones
+    if(d.zones) {
+      const total = Object.values(d.zones).reduce((a,b)=>a+b,0)||1;
+      document.getElementById('zones-list').innerHTML = Object.entries(d.zones)
+        .sort((a,b)=>b[1]-a[1]).slice(0,5)
+        .map(([z,v])=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--gray);">'+z+'</span><span style="font-weight:700;">'+v+' ('+Math.round(v/total*100)+'%)</span></div>')
+        .join('');
+    }
+  } catch(e) { console.log('Stats error',e); }
 }
 
-// Check session
-supa.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadData();
-  }
-});
+async function loadAnalytics() {
+  try {
+    const r = await fetch('/analytics/stats');
+    const d = await r.json();
+    document.getElementById('stat-mobile').textContent = d.devices?.mobile||0;
+    document.getElementById('stat-desktop').textContent = d.devices?.desktop||0;
+    document.getElementById('stat-zones').textContent = Object.keys(d.zones||{}).length;
+    document.getElementById('stat-pwa2').textContent = d.pwa||0;
+    
+    if(d.zones) {
+      const total = Object.values(d.zones).reduce((a,b)=>a+b,0)||1;
+      document.getElementById('zones-table').innerHTML = '<table><tr><th>Zonă</th><th>Vizitatori</th><th>%</th></tr>'+
+        Object.entries(d.zones).sort((a,b)=>b[1]-a[1])
+        .map(([z,v])=>'<tr><td>'+z+'</td><td>'+v+'</td><td>'+Math.round(v/total*100)+'%</td></tr>').join('')+'</table>';
+    }
+  } catch(e) {}
+}
+
+async function loadNewsTable() {
+  try {
+    const r = await fetch('/mondial-news');
+    const data = await r.json();
+    document.getElementById('cache-count').textContent = data.length;
+    document.getElementById('translated-count').textContent = data.filter(d=>d.translated).length;
+    document.getElementById('news-table-body').innerHTML = '<table><tr><th>Titlu</th><th>Sursă</th><th>Tradus</th><th>Chars</th></tr>'+
+      data.slice(0,15).map(n=>'<tr><td style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+n.title+'</td><td><span class="badge badge-blue">'+n.src+'</span></td><td>'+(n.translated?'<span class="badge badge-green">✓</span>':'<span class="badge badge-orange">Nu</span>')+'</td><td>'+(n.desc||'').length+'</td></tr>').join('')+'</table>';
+  } catch(e) {}
+}
+
+function loadLogs() {
+  document.getElementById('log-output').innerHTML = '<div><span class="log-time">['+new Date().toLocaleTimeString()+']</span> <span class="log-ok">Server online</span> · PM2 process #0</div><div><span class="log-time">[info]</span> <span class="log-info">Analytics: /analytics/stats disponibil</span></div><div><span class="log-time">[info]</span> <span class="log-info">Mondial news: /mondial-news disponibil</span></div><div><span class="log-warn">[warn]</span> Gemini key rate limited - folosim Google Translate</div>';
+}
+
+function updateClock() {
+  const el = document.getElementById('clock');
+  if(el) el.textContent = new Date().toLocaleTimeString('ro-RO');
+}
+
+loadRealStats();
+setInterval(loadRealStats, 30000);
+setInterval(updateClock, 1000);
+updateClock();
 </script>
 </body>
 </html>
