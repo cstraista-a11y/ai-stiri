@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ai Știri — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, sans-serif; background: #0D0D0D; color: #fff; min-height: 100vh; }
+.login { max-width: 360px; margin: 80px auto; padding: 32px; background: #1a1a1a; border-radius: 16px; border: 1px solid #333; }
+.logo { font-size: 24px; font-weight: 900; color: white; margin-bottom: 24px; }
+.logo em { color: #4FC3F7; font-style: normal; }
+input { width: 100%; padding: 12px 14px; background: #0D0D0D; border: 1px solid #333; border-radius: 10px; color: white; font-size: 15px; margin-bottom: 12px; font-family: inherit; }
+input:focus { outline: none; border-color: #4FC3F7; }
+button { width: 100%; padding: 13px; background: #0A2463; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.err { color: #ff6b6b; font-size: 13px; margin-bottom: 10px; }
+
+.app { display: none; }
+.header { background: #1a1a1a; border-bottom: 1px solid #333; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header-logo { font-size: 20px; font-weight: 900; }
+.header-logo em { color: #4FC3F7; font-style: normal; }
+.logout { background: none; border: 1px solid #333; color: #888; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px; }
+.stat { background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 20px; }
+.stat-val { font-size: 36px; font-weight: 800; color: #4FC3F7; }
+.stat-label { font-size: 13px; color: #888; margin-top: 4px; }
+.stat-sub { font-size: 12px; color: #555; margin-top: 8px; }
+
+.section { padding: 0 24px 24px; }
+.section-title { font-size: 16px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+
+.table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+.table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #333; }
+.table td { padding: 12px 16px; font-size: 14px; color: #ccc; border-bottom: 1px solid #1f1f1f; }
+.table tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-md { background: #0A2463; color: #4FC3F7; }
+.badge-ro { background: #1a3a1a; color: #4ade80; }
+.badge-eu { background: #3a1a3a; color: #c084fc; }
+
+.loading { text-align: center; padding: 40px; color: #555; }
+.refresh-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; margin-left: 12px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login">
+    <div class="logo">Ai <em>Știri</em> Admin</div>
+    <div id="login-err" class="err"></div>
+    <input type="email" id="email" placeholder="Email admin" value="cstraista@yahoo.com">
+    <input type="password" id="pass" placeholder="Parolă">
+    <button onclick="doLogin()">Intră în admin</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <div class="header">
+    <div class="header-logo">Ai <em>Știri</em> <span style="color:#555;font-weight:400;font-size:14px;">Dashboard</span></div>
+    <div>
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <button class="logout" onclick="doLogout()">Ieși</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Utilizatori totali</div><div class="stat-sub">înregistrați</div></div>
+    <div class="stat"><div class="stat-val" id="s-zone-md">—</div><div class="stat-label">Din Moldova</div><div class="stat-sub">utilizatori</div></div>
+    <div class="stat"><div class="stat-val" id="s-zone-ro">—</div><div class="stat-label">Din România</div><div class="stat-sub">utilizatori</div></div>
+    <div class="stat"><div class="stat-val" id="s-saved">—</div><div class="stat-label">Articole salvate</div><div class="stat-sub">total</div></div>
+    <div class="stat"><div class="stat-val" id="s-reactions">—</div><div class="stat-label">Reacții totale</div><div class="stat-sub">like-uri și emoji</div></div>
+    <div class="stat"><div class="stat-val" id="s-comments">—</div><div class="stat-label">Comentarii</div><div class="stat-sub">total</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Utilizatori recenți</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Zonă</th>
+          <th>Vârstă</th>
+          <th>Studii</th>
+          <th>Interese</th>
+          <th>Înregistrat</th>
+        </tr>
+      </thead>
+      <tbody id="users-table">
+        <tr><td colspan="6" class="loading">Se încarcă...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Distribuție zone</div>
+    <table class="table">
+      <thead><tr><th>Zonă</th><th>Utilizatori</th><th>%</th></tr></thead>
+      <tbody id="zones-table"><tr><td colspan="3" class="loading">Se încarcă...</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Distribuție interese</div>
+    <table class="table">
+      <thead><tr><th>Interes</th><th>Utilizatori</th></tr></thead>
+      <tbody id="interests-table"><tr><td colspan="2" class="loading">Se încarcă...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://pdjigbowhllyjlehegoa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkamlnYm93aGxseWpsZWhlZ29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MzU0NzksImV4cCI6MjA5NTMxMTQ3OX0.FslDt9ftvAe0a_RwfbKXejMAB647zsk2OZSmqKzwlcA';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+async function doLogin() {
+  const email = document.getElementById('email').value;
+  const pass = document.getElementById('pass').value;
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+  if (error) { document.getElementById('login-err').textContent = 'Email sau parolă greșită.'; return; }
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadData();
+}
+
+async function doLogout() {
+  await supa.auth.signOut();
+  location.reload();
+}
+
+async function loadData() {
+  try {
+    // Profiluri
+    const { data: profiles } = await supa.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data: saved } = await supa.from('saved_articles').select('id', { count: 'exact' });
+    const { data: reactions } = await supa.from('reactions').select('id', { count: 'exact' });
+    const { data: comments } = await supa.from('comments').select('id', { count: 'exact' });
+
+    const total = profiles?.length || 0;
+    const md = profiles?.filter(p => p.zone === 'Moldova').length || 0;
+    const ro = profiles?.filter(p => p.zone === 'România').length || 0;
+
+    document.getElementById('s-total').textContent = total;
+    document.getElementById('s-zone-md').textContent = md;
+    document.getElementById('s-zone-ro').textContent = ro;
+    document.getElementById('s-saved').textContent = saved?.length || 0;
+    document.getElementById('s-reactions').textContent = reactions?.length || 0;
+    document.getElementById('s-comments').textContent = comments?.length || 0;
+
+    // Tabel utilizatori
+    const tbody = document.getElementById('users-table');
+    if (!profiles?.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:#555;text-align:center;padding:20px;">Niciun utilizator încă</td></tr>';
+    } else {
+      tbody.innerHTML = profiles.slice(0, 20).map(p => {
+        const zone = p.zone || '—';
+        const badge = zone === 'Moldova' ? 'badge-md' : zone === 'România' ? 'badge-ro' : 'badge-eu';
+        const ints = (p.interests || []).join(', ') || '—';
+        const date = p.created_at ? new Date(p.created_at).toLocaleDateString('ro-RO') : '—';
+        return `<tr>
+          <td>${p.id?.substring(0,8)}...</td>
+          <td><span class="badge ${badge}">${zone}</span></td>
+          <td>${p.age || '—'}</td>
+          <td>${p.edu || '—'}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ints}</td>
+          <td>${date}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Zone distribution
+    const zones = {};
+    profiles?.forEach(p => { const z = p.zone || 'Necunoscut'; zones[z] = (zones[z]||0)+1; });
+    document.getElementById('zones-table').innerHTML = Object.entries(zones)
+      .sort((a,b) => b[1]-a[1])
+      .map(([z,n]) => `<tr><td>${z}</td><td>${n}</td><td>${total ? Math.round(n/total*100) : 0}%</td></tr>`)
+      .join('') || '<tr><td colspan="3" style="color:#555">—</td></tr>';
+
+    // Interese
+    const ints = {};
+    profiles?.forEach(p => (p.interests||[]).forEach(i => { ints[i] = (ints[i]||0)+1; }));
+    document.getElementById('interests-table').innerHTML = Object.entries(ints)
+      .sort((a,b) => b[1]-a[1])
+      .map(([i,n]) => `<tr><td>${i}</td><td>${n}</td></tr>`)
+      .join('') || '<tr><td colspan="2" style="color:#555">—</td></tr>';
+
+  } catch(e) {
+    console.error('Load error:', e);
+  }
+}
+
+// Check session
+supa.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+  }
+});
+</script>
+</body>
+</html>
