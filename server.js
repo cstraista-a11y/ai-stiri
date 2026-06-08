@@ -35,6 +35,8 @@ const FEEDS = [
   // Moldova — surse verificate CJI
   'https://newsmaker.md/feed/',
   'https://tv8.md/feed/',
+  'https://diez.md/feed/',
+  'https://mold-street.com/feed/',
   'https://www.zdg.md/feed',
   'https://moldova.europalibera.org/api/epiooi_yit',
   'https://moldova1.md/rss',
