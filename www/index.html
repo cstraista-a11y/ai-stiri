@@ -1980,5 +1980,34 @@ function showInstallBanner() {
   document.body.appendChild(banner);
 }
 </script>
+
+<script>
+// ── ANALYTICS ANONIM ──────────────────────────────────────
+function getOrCreateSid() {
+  let sid = localStorage.getItem('_sid');
+  if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('_sid', sid); }
+  return sid;
+}
+function sendAnalytics() {
+  try {
+    const profile = JSON.parse(localStorage.getItem('profile') || '{}');
+    const interests = (profile.interests || []).filter(i => i.on).map(i => i.id);
+    fetch('/analytics', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, keepalive: true,
+      body: JSON.stringify({
+        sid: getOrCreateSid(), ts: Date.now(),
+        zone: profile.zone || 'Unknown', age: profile.age || null,
+        interests, device: /Mobile|Android|iPhone/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+        lang: navigator.language || 'ro', cat: localStorage.getItem('_lastCat') || 'toate',
+        mondial: parseInt(localStorage.getItem('m26_pts') || '0'),
+        pwa: window.matchMedia('(display-mode: standalone)').matches,
+        ref: document.referrer ? new URL(document.referrer).hostname : 'direct'
+      })
+    }).catch(()=>{});
+  } catch(e) {}
+}
+window.addEventListener('load', () => setTimeout(sendAnalytics, 2000));
+setInterval(sendAnalytics, 5 * 60 * 1000);
+</script>
 </body>
 </html>

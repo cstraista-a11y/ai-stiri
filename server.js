@@ -61,6 +61,12 @@ const FEEDS = [
   'https://www.economist.com/latest/rss.xml',
 ];
 
+// ── ANALYTICS DATA ────────────────────────────────────────
+const analyticsData = { sessions: {}, daily: {}, total: 0 };
+setInterval(() => {
+  try { require('fs').writeFileSync(require('path').join(__dirname,'analytics.json'), JSON.stringify(analyticsData)); } catch(e) {}
+}, 5 * 60 * 1000);
+
 // ── CACHE RSS (5 minute) ──────────────────────────────────
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
@@ -421,6 +427,53 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
       res.setHeader('Content-Length', buf.length);
       res.writeHead(200); res.end(buf);
     } catch(e) { res.writeHead(404); res.end('Privacy page not found'); }
+    return;
+  }
+
+
+  // ── ANALYTICS ──────────────────────────────────────────
+  if (u.pathname === '/analytics' && req.method === 'POST') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        const today = new Date().toISOString().split('T')[0];
+        if (!analyticsData.sessions[data.sid]) {
+          analyticsData.sessions[data.sid] = { first: Date.now(), zone: data.zone, age: data.age, device: data.device, ref: data.ref, interests: data.interests, pwa: data.pwa };
+          analyticsData.total++;
+        }
+        analyticsData.sessions[data.sid].last = Date.now();
+        analyticsData.sessions[data.sid].cat = data.cat;
+        if (!analyticsData.daily[today]) analyticsData.daily[today] = { visitors: [], zones: {}, devices: {} };
+        const day = analyticsData.daily[today];
+        if (!day.visitors.includes(data.sid)) day.visitors.push(data.sid);
+        day.zones[data.zone] = (day.zones[data.zone] || 0) + 1;
+        day.devices[data.device] = (day.devices[data.device] || 0) + 1;
+        res.writeHead(200); res.end('{"ok":true}');
+      } catch(e) { res.writeHead(400); res.end('{}'); }
+    });
+    return;
+  }
+
+  if (u.pathname === '/analytics/stats') {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const today = new Date().toISOString().split('T')[0];
+    const day = analyticsData.daily[today] || {};
+    const last7 = Array.from({length:7}, (_, i) => {
+      const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      const dd = analyticsData.daily[d] || {};
+      return { date: d, visitors: (dd.visitors||[]).length };
+    }).reverse();
+    const zones = {}, devices = {};
+    Object.values(analyticsData.sessions).forEach(s => {
+      zones[s.zone] = (zones[s.zone]||0)+1;
+      devices[s.device] = (devices[s.device]||0)+1;
+    });
+    res.writeHead(200);
+    res.end(JSON.stringify({ total: analyticsData.total, today: (day.visitors||[]).length, last7, zones, devices, pwa: Object.values(analyticsData.sessions).filter(s=>s.pwa).length }));
     return;
   }
 
