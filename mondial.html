@@ -439,6 +439,16 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
 
 <!-- LEADERBOARD -->
 <div class="page" id="page-lider">
+  <!-- Popup nickname -->
+  <div id="nickname-prompt" style="display:none;background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:20px;margin-bottom:16px;text-align:center;">
+    <div style="font-size:22px;margin-bottom:6px;">🏆</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Numele tău de campion</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:14px;">Cum vrei să apari în clasament?</div>
+    <div style="display:flex;gap:8px;max-width:300px;margin:0 auto;">
+      <input id="nickname-input" type="text" maxlength="20" placeholder="Ex: Microbist123..." style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 12px;color:white;font-size:14px;outline:none;font-family:inherit;">
+      <button onclick="saveNickname()" style="background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Salvează</button>
+    </div>
+  </div>
   <div class="s-title">CLASAMENT FANI</div>
   <div class="s-sub">Top pronosticatori · Puncte acumulate din quiz + scoruri</div>
   <div class="info-box">
@@ -447,9 +457,9 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
   </div>
   <div class="lb-card">
     <div class="lb-header"><span>TOP FANI</span><span>PUNCTE</span></div>
-    <div class="lb-row"><div class="lb-rank" style="color:var(--gold)">🥇</div><div class="lb-name">Microbist Moldova</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
-    <div class="lb-row"><div class="lb-rank" style="color:#C0C0C0">🥈</div><div class="lb-name">Fan CM 2026</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
-    <div class="lb-row"><div class="lb-rank" style="color:#CD7F32">🥉</div><div class="lb-name">Suporter Mondial</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div class="lb-row"><div class="lb-rank" style="color:var(--gold)">🥇</div><div class="lb-name" id="lb-name-1">Locul 1</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div class="lb-row"><div class="lb-rank" style="color:#C0C0C0">🥈</div><div class="lb-name" id="lb-name-2">Locul 2</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
+    <div class="lb-row"><div class="lb-rank" style="color:#CD7F32">🥉</div><div class="lb-name" id="lb-name-3">Locul 3</div><div style="text-align:right"><div class="lb-pts">—</div><div class="lb-coef">participă acum</div></div></div>
     <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:13px;color:var(--gray);">Punctele tale:</span>
       <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:1px;" id="my-pts-display">0</span>
@@ -489,6 +499,7 @@ function showTab(tab, btn) {
   if(btn) btn.classList.add('on');
   document.getElementById('page-'+tab).classList.add('on');
   if(tab==='stiri') loadNews();
+  if(tab==='lider') initNickname();
   if(tab==='quiz') initQuiz();
   if(tab==='winner') renderWinner();
   if(tab==='meciuri') renderVotes();
@@ -850,6 +861,30 @@ function getTimeAgo(date) {
   if(m<60) return `acum ${m}m`;
   if(m<1440) return `acum ${Math.round(m/60)}h`;
   return `acum ${Math.round(m/1440)}z`;
+}
+
+// ── NICKNAME ──────────────────────────────────────────────
+function initNickname() {
+  const nick = localStorage.getItem('m26_nickname');
+  if (!nick) {
+    document.getElementById('nickname-prompt').style.display = 'block';
+  } else {
+    document.getElementById('nickname-prompt').style.display = 'none';
+    // Afișăm nickname-ul utilizatorului
+    const myRow = document.getElementById('lb-my-name');
+    if (myRow) myRow.textContent = nick;
+  }
+}
+
+function saveNickname() {
+  const input = document.getElementById('nickname-input');
+  const nick = input.value.trim();
+  if (!nick) { input.focus(); return; }
+  localStorage.setItem('m26_nickname', nick);
+  document.getElementById('nickname-prompt').style.display = 'none';
+  // Afișăm în secțiunea "Punctele tale"
+  const myRow = document.getElementById('lb-my-name');
+  if (myRow) myRow.textContent = nick;
 }
 
 // Init
