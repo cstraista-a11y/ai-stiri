@@ -887,6 +887,99 @@ function saveNickname() {
   if (myRow) myRow.textContent = nick;
 }
 
+// ── SISTEM VERIFICARE REZULTATE ──────────────────────────
+// Rezultatele reale ale meciurilor (se actualizează după meci)
+const MATCH_RESULTS = {
+  'm1': { home: 0, away: 0, status: 'NS' },
+  'm2': { home: 0, away: 0, status: 'NS' },
+  'm3': { home: 0, away: 0, status: 'NS' },
+};
+
+// Preluăm rezultatele reale de pe server
+async function fetchMatchResults() {
+  try {
+    const r = await fetch('/match-results');
+    const data = await r.json();
+    Object.keys(data).forEach(mid => {
+      if (MATCH_RESULTS[mid]) {
+        MATCH_RESULTS[mid] = { home: data[mid].home, away: data[mid].away, status: data[mid].status };
+      }
+    });
+    checkAllResults();
+  } catch(e) {}
+}
+fetchMatchResults();
+setInterval(fetchMatchResults, 30000);
+
+function calcPoints(prediction, result) {
+  if (result.status !== 'FT') return 0; // FT = Full Time
+  let pts = 0;
+  const ph = parseInt(prediction.home);
+  const pa = parseInt(prediction.away);
+  const rh = result.home;
+  const ra = result.away;
+  
+  // Câștigătoare corectă (+10)
+  const predWin = ph > pa ? 'home' : ph < pa ? 'away' : 'draw';
+  const realWin = rh > ra ? 'home' : rh < ra ? 'away' : 'draw';
+  if (predWin === realWin) pts += 10;
+  
+  // Diferență goluri corectă (+20)
+  if ((ph - pa) === (rh - ra)) pts += 20;
+  
+  // Scor exact (+30 bonus)
+  if (ph === rh && pa === ra) pts += 30;
+  
+  return pts;
+}
+
+function checkAllResults() {
+  let totalNewPts = 0;
+  const checked = JSON.parse(localStorage.getItem('m26_checked') || '{}');
+  
+  Object.entries(MATCH_RESULTS).forEach(([mid, result]) => {
+    if (result.status !== 'FT') return;
+    if (checked[mid]) return; // deja verificat
+    
+    const pred = localStorage.getItem('m26_score_' + mid);
+    if (!pred) return;
+    
+    const prediction = JSON.parse(pred);
+    const pts = calcPoints(prediction, result);
+    
+    if (pts > 0) {
+      totalNewPts += pts;
+      checked[mid] = { pts, result, prediction };
+      
+      // Notificăm utilizatorul
+      showPointsNotification(mid, pts, prediction, result);
+    } else if (result.status === 'FT') {
+      checked[mid] = { pts: 0, result, prediction };
+    }
+  });
+  
+  if (totalNewPts > 0) {
+    const current = parseInt(localStorage.getItem('m26_pts') || '0');
+    localStorage.setItem('m26_pts', current + totalNewPts);
+    localStorage.setItem('m26_checked', JSON.stringify(checked));
+  }
+  
+  return totalNewPts;
+}
+
+function showPointsNotification(mid, pts, pred, result) {
+  const matchNames = { m1: 'Mexic vs Africa de Sud', m2: 'Anglia vs Croația', m3: 'Brazilia vs Maroc' };
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#F5C842;color:#000;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:999;animation:slideIn 0.3s ease;text-align:center;';
+  banner.innerHTML = '🎉 ' + matchNames[mid] + '<br>Pronostic: ' + pred.home + '-' + pred.away + ' | Real: ' + result.home + '-' + result.away + '<br>+' + pts + ' puncte!';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 5000);
+}
+
+// Verificăm rezultatele la fiecare 30 secunde
+setInterval(checkAllResults, 30000);
+checkAllResults();
+
 // Init
 loadNews();
 renderVotes();

@@ -63,6 +63,13 @@ const FEEDS = [
   'https://www.economist.com/latest/rss.xml',
 ];
 
+// ── REZULTATE MECIURI CM 2026 ─────────────────────────────
+const matchResults = {
+  m1: { home: 0, away: 0, status: 'NS', homeTeam: 'Mexic', awayTeam: 'Africa de Sud' },
+  m2: { home: 0, away: 0, status: 'NS', homeTeam: 'Anglia', awayTeam: 'Croația' },
+  m3: { home: 0, away: 0, status: 'NS', homeTeam: 'Brazilia', awayTeam: 'Maroc' },
+};
+
 // ── ANALYTICS DATA ────────────────────────────────────────
 const analyticsData = { sessions: {}, daily: {}, total: 0 };
 setInterval(() => {
@@ -432,6 +439,33 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     return;
   }
 
+
+  // ── REZULTATE MECIURI ────────────────────────────────────
+  if (u.pathname === '/match-result' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { mid, home, away, status } = JSON.parse(body);
+        if (matchResults[mid]) {
+          matchResults[mid] = { ...matchResults[mid], home, away, status };
+          console.log('  ⚽ Rezultat actualizat:', mid, home + '-' + away, status);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({ ok: true, results: matchResults }));
+      } catch(e) { res.writeHead(400); res.end('{}'); }
+    });
+    return;
+  }
+
+  if (u.pathname === '/match-results') {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.writeHead(200);
+    res.end(JSON.stringify(matchResults));
+    return;
+  }
 
   // ── ANALYTICS ──────────────────────────────────────────
   if (u.pathname === '/analytics' && req.method === 'POST') {
