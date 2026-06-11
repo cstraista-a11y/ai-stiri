@@ -469,7 +469,7 @@ tr.q2 td{background:rgba(79,195,247,0.03);}
     <button class="winner-btn" id="wb-spania" onclick="voteWinner('spania')"><span class="flag">🇪🇸</span><span class="wname">Spania</span><span class="wpct" id="wp-spania">-</span></button>
     <button class="winner-btn" id="wb-germania" onclick="voteWinner('germania')"><span class="flag">🇩🇪</span><span class="wname">Germania</span><span class="wpct" id="wp-germania">-</span></button>
     <button class="winner-btn" id="wb-portugalia" onclick="voteWinner('portugalia')"><span class="flag">🇵🇹</span><span class="wname">Portugalia</span><span class="wpct" id="wp-portugalia">-</span></button>
-    <button class="winner-btn" id="wb-altul" onclick="voteWinner('altul')"><span class="flag">🌍</span><span class="wname">Altul</span><span class="wpct" id="wp-altul">-</span></button>
+
   </div>
 </div>
 
@@ -559,8 +559,8 @@ function renderScorePreds() {
 }
 
 // ── WINNER ─────────────────────────────
-const TEAMS = ['brazilia','franta','anglia','argentina','spania','germania','portugalia','altul'];
-const DEF_W = {brazilia:0,franta:0,anglia:0,argentina:0,spania:0,germania:0,portugalia:0,altul:0};
+const TEAMS = ['brazilia','franta','anglia','argentina','spania','germania','portugalia'];
+const DEF_W = {brazilia:0,franta:0,anglia:0,argentina:0,spania:0,germania:0,portugalia:0};
 
 function voteWinner(team) {
   if(localStorage.getItem('m26_winner_my')) return;
@@ -796,6 +796,7 @@ async function loadNews() {
               </div>
               <div class="nc-title">${n.title}</div>
               ${n.desc ? '<div class="nc-lead">'+n.desc+'</div>' : ''}
+              ${n.link ? '<a href="'+n.link+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:700;color:#0D0D0D;background:#F5C842;text-decoration:none;padding:7px 16px;border-radius:20px;">Citește știrea →</a>' : ''}
 
             </div>
           </div>`).join('');
