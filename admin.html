@@ -198,6 +198,36 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">Grupe CM</div><div class="stat-value">12</div><div class="stat-change">A → L</div></div>
       </div>
       <div class="table-card">
+        <div class="table-card" style="margin-bottom:14px;">
+          <div class="table-header"><div class="table-title">Actualizeaza Rezultate Meciuri</div></div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <span style="flex:1;color:var(--gray);">Mexic vs Africa de Sud</span>
+              <input id="r-m1-h" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <span>-</span>
+              <input id="r-m1-a" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <select id="r-m1-s" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;font-size:11px;"><option value="NS">NS</option><option value="1H">1H</option><option value="HT">HT</option><option value="2H">2H</option><option value="FT">FT</option></select>
+              <button class="btn btn-success" onclick="updateResult('m1')" style="font-size:11px;padding:5px 10px;">Salveaza</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <span style="flex:1;color:var(--gray);">Anglia vs Croatia</span>
+              <input id="r-m2-h" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <span>-</span>
+              <input id="r-m2-a" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <select id="r-m2-s" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;font-size:11px;"><option value="NS">NS</option><option value="1H">1H</option><option value="HT">HT</option><option value="2H">2H</option><option value="FT">FT</option></select>
+              <button class="btn btn-success" onclick="updateResult('m2')" style="font-size:11px;padding:5px 10px;">Salveaza</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+              <span style="flex:1;color:var(--gray);">Brazilia vs Maroc</span>
+              <input id="r-m3-h" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <span>-</span>
+              <input id="r-m3-a" type="number" min="0" max="20" value="0" style="width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;text-align:center;">
+              <select id="r-m3-s" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px;color:white;font-size:11px;"><option value="NS">NS</option><option value="1H">1H</option><option value="HT">HT</option><option value="2H">2H</option><option value="FT">FT</option></select>
+              <button class="btn btn-success" onclick="updateResult('m3')" style="font-size:11px;padding:5px 10px;">Salveaza</button>
+            </div>
+            <div id="result-msg" style="font-size:12px;color:var(--green);display:none;">Rezultat salvat!</div>
+          </div>
+        </div>
         <div class="table-header"><div class="table-title">🥇 Voturi câștigătoare CM 2026</div></div>
         <table><tr><th>Echipă</th><th>Voturi</th><th>%</th></tr>
           <tr><td>🇧🇷 Brazilia</td><td>38</td><td>38%</td></tr>
@@ -364,6 +394,16 @@ function updateClock() {
   if(el) el.textContent = new Date().toLocaleTimeString('ro-RO');
 }
 
+async function updateResult(mid) {
+  const h = document.getElementById('r-'+mid+'-h').value;
+  const a = document.getElementById('r-'+mid+'-a').value;
+  const status = document.getElementById('r-'+mid+'-s').value;
+  try {
+    const r = await fetch('/match-result', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mid,home:parseInt(h),away:parseInt(a),status})});
+    const d = await r.json();
+    if(d.ok){const m=document.getElementById('result-msg');if(m){m.style.display='block';setTimeout(()=>m.style.display='none',3000);}}
+  } catch(e) { alert('Eroare!'); }
+}
 loadRealStats();
 setInterval(loadRealStats, 30000);
 setInterval(updateClock, 1000);
