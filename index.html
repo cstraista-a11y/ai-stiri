@@ -843,6 +843,22 @@ const ALERT_TOPICS = [
 
 // ─── STATE ───────────────────────────────────────
 let allArts = [], pending = [];
+// Incarcam din cache instant la pornire
+try {
+  const cached = JSON.parse(localStorage.getItem("_arts_cache") || "null");
+  if (cached && cached.arts && Date.now() - cached.ts < 30 * 60 * 1000) {
+    allArts = cached.arts;
+    setTimeout(() => renderMainFeed(), 0);
+  }
+} catch(e) {}
+// Incarcam din cache instant la pornire
+try {
+  const cached = JSON.parse(localStorage.getItem("_arts_cache") || "null");
+  if (cached && cached.arts && Date.now() - cached.ts < 30 * 60 * 1000) {
+    allArts = cached.arts;
+    setTimeout(() => renderMainFeed(), 0);
+  }
+} catch(e) {}
 let favs = new Set(), likes = new Set(), dislikes = new Set();
 let reactions = {}, userReact = {}, comments = {}, openCmts = new Set(), openExp = new Set();
 let curCat = 'toate';
@@ -1058,6 +1074,8 @@ function toggleSrc(id) {
     fetchSrc(s).then(newArts => {
       newArts.forEach(a => { if (!allArts.find(x => x.url === a.url)) allArts.unshift(a); });
       allArts = allArts.slice(0, 150);
+      // Cache agresiv in localStorage
+      try { localStorage.setItem("_arts_cache", JSON.stringify({ts: Date.now(), arts: allArts.slice(0,50)})); } catch(e) {}
       renderMainFeed();
       // Traducem articolele noi dacă sunt EN/RU
       const toTranslate = newArts.filter(a => a.lang !== 'ro').slice(0, 3);

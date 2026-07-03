@@ -76,6 +76,20 @@ setInterval(() => {
   try { require('fs').writeFileSync(require('path').join(__dirname,'analytics.json'), JSON.stringify(analyticsData)); } catch(e) {}
 }, 5 * 60 * 1000);
 
+// ── PRE-WARM CACHE LA PORNIRE ────────────────────────────
+async function prewarmCache() {
+  console.log('  🔥 Pre-warming cache...');
+  try {
+    const http = require('http');
+    setTimeout(() => {
+      http.get('http://localhost:3000/mondial-news', () => {
+        console.log('  ✅ Cache mondial pre-warmed!');
+      }).on('error', () => {});
+    }, 3000); // asteapta 3s sa porneasca serverul
+  } catch(e) {}
+}
+prewarmCache();
+
 // ── CACHE RSS (5 minute) ──────────────────────────────────
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minute
@@ -451,6 +465,78 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     return;
   }
 
+
+  // ── NEWS GENERAL (cache server-side) ────────────────────
+  if (u.pathname === '/news') {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    const cached = cache.get('general_news');
+    if (cached && Date.now() - cached.ts < 5 * 60 * 1000) {
+      res.writeHead(200);
+      res.end(JSON.stringify(cached.data));
+      return;
+    }
+    
+    const FEEDS = [
+      'https://newsmaker.md/feed/',
+      'https://tv8.md/feed/',
+      'https://diez.md/feed/',
+      'https://www.zdg.md/feed',
+      'https://moldova1.md/rss',
+      'https://www.ipn.md/rss',
+      'https://www.publika.md/rss',
+      'https://deschide.md/feed/',
+      'https://www.g4media.ro/feed',
+      'https://www.hotnews.ro/rss',
+      'https://www.digi24.ro/rss',
+    ];
+    
+    let items = [];
+    await Promise.allSettled(FEEDS.map(async feedUrl => {
+      try {
+        const r = await fetch(feedUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AiStiri/1.0)' },
+          signal: AbortSignal.timeout(6000)
+        });
+        if (!r.ok) return;
+        const xml = await r.text();
+        const itemMatches = xml.match(/<item[\s\S]*?<\/item>/g) || [];
+        itemMatches.slice(0, 15).forEach(item => {
+          const title = (item.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) || item.match(/<title[^>]*>([^<]+)<\/title>/) || [])[1]?.trim();
+          const link = (item.match(/<link[^>]*>([^<]+)<\/link>/) || item.match(/<guid[^>]*>([^<]+)<\/guid>/) || [])[1]?.trim();
+          const desc = (item.match(/<description[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || item.match(/<description[^>]*>([^<]+)<\/description>/) || [])[1]?.trim();
+          const pubDate = (item.match(/<pubDate>([^<]+)<\/pubDate>/) || [])[1]?.trim();
+          const img = (item.match(/<media:thumbnail[^>]+url="([^"]+)"/) || item.match(/<enclosure[^>]+url="([^"]+)"/) || [])[1];
+          const src = feedUrl.replace(/https?:\/\/(?:www\.)?/, '').split('/')[0];
+          const cleanTitle = title?.replace(/<[^>]+>/g, '').substring(0, 200);
+          const cleanDesc = desc?.replace(/<[^>]+>/g, '').substring(0, 400);
+          if (cleanTitle && cleanTitle.length > 10) {
+            items.push({ title: cleanTitle, desc: cleanDesc, link, img, src, pubDate });
+          }
+        });
+      } catch(e) {}
+    }));
+    
+    // Deduplicare si sortare
+    function simil(a, b) {
+      const wa = new Set(a.toLowerCase().split(/\s+/).filter(w=>w.length>4));
+      const wb = new Set(b.toLowerCase().split(/\s+/).filter(w=>w.length>4));
+      const inter = [...wa].filter(w=>wb.has(w)).length;
+      return inter / Math.max(wa.size, wb.size, 1);
+    }
+    items.sort((a,b) => new Date(b.pubDate||0) - new Date(a.pubDate||0));
+    const deduped = [];
+    for (const item of items) {
+      if (!deduped.some(e => simil(item.title, e.title) > 0.5)) deduped.push(item);
+    }
+    items = deduped.slice(0, 30);
+    
+    cache.set('general_news', { data: items, ts: Date.now() });
+    res.writeHead(200);
+    res.end(JSON.stringify(items));
+    return;
+  }
 
   // ── REZULTATE MECIURI ────────────────────────────────────
   if (u.pathname === '/match-result' && req.method === 'POST') {
