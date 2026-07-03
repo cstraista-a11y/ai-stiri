@@ -321,7 +321,7 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
 
-  const u = new URL(req.url, `http://localhost:${PORT}`);
+  let u; try { u = new URL(req.url, `http://localhost:${PORT}`); } catch(e) { res.writeHead(400); res.end(""); return; }
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${u.pathname}`);
 
   if (u.pathname === '/' || u.pathname === '/index.html') {
