@@ -611,6 +611,12 @@ ${JSON.stringify(articles.map(a => ({ id: a.id, title: a.title, text: (a.summary
     return;
   }
 
+  if (u.pathname === '/app') {
+    const buf = require('fs').readFileSync(require('path').join(__dirname, 'index.html'));
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.writeHead(200); res.end(buf);
+    return;
+  }
   if (u.pathname === '/mondial') {
     try {
       const buf = fs.readFileSync(path.join(__dirname, 'mondial.html'));
