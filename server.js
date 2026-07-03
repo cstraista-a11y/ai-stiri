@@ -322,6 +322,18 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (u.pathname === '/sitemap.xml') {
+    res.setHeader('Content-Type', 'application/xml');
+    res.writeHead(200);
+    res.end(require('fs').readFileSync('./sitemap.xml'));
+    return;
+  }
+  if (u.pathname === '/robots.txt') {
+    res.setHeader('Content-Type', 'text/plain');
+    res.writeHead(200);
+    res.end(require('fs').readFileSync('./robots.txt'));
+    return;
+  }
   if (u.pathname === '/ping') {
     res.setHeader('Content-Type', 'application/json');
     res.writeHead(200); res.end(JSON.stringify({ ok: true, time: new Date().toISOString(), feeds: FEEDS.length }));
